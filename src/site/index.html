@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>F1 Championship Table</title>
+  <!-- Tailwind CSS -->
+  <link href="https://cdn.tailwindcss.com" rel="stylesheet">
+  <!-- Tabulator (interactive table library) -->
+  <link href="https://unpkg.com/tabulator-tables@5.6.4/dist/css/tabulator.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --f1-red: #e10600;
+    }
+    body {
+      font-family: 'Titillium Web', system-ui, sans-serif;
+      background: #0d0d0d;
+      color: #f1f1f1;
+    }
+    header {
+      background: linear-gradient(90deg, #0d0d0d 0%, var(--f1-red) 100%);
+    }
+    /* Tabulator custom theming */
+    .tabulator .tabulator-header {
+      background: #1a1a1a;
+      color: #f1f1f1;
+      font-weight: 700;
+    }
+    .tabulator .tabulator-row {
+      background: #0d0d0d;
+      border-bottom: 1px solid #222;
+    }
+    .tabulator .tabulator-row.tabulator-selectable:hover {
+      background: #111;
+    }
+    .tabulator .tabulator-row:nth-child(even) {
+      background: #141414;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+  <header class="py-6 px-4">
+    <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight">2025 Formula 1 Standings</h1>
+    <p class="text-sm opacity-80 mt-2">Scroll, search, and sort the table below. Data sourced from publicly available results.</p>
+  </header>
+
+  <main class="flex-grow p-4">
+    <div id="f1-table" class="tabulator w-full"></div>
+    <noscript>
+      <p class="mt-4 text-red-400">Enable JavaScript to view the interactive table.</p>
+    </noscript>
+  </main>
+
+  <footer class="text-center py-4 text-xs opacity-60">
+    Unofficial Formula 1 statistics for educational purposes. No affiliation with Formula 1 or the FIA.
+  </footer>
+
+  <!-- CSV parser & Tabulator scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <script src="https://unpkg.com/tabulator-tables@5.6.4/dist/js/tabulator.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Adjust this path to match where you place your CSV file
+      fetch("C:\\Users\\timot\\OneDrive\\Documents\\GitHub\\f1_points\\src\\site\\driver_points_2025_current.csv")
+        .then(resp => resp.text())
+        .then(csvText => {
+          // Parse CSV -> JSON
+          const parsed = Papa.parse(csvText, {header: true, skipEmptyLines: true});
+          const data = parsed.data;
+          const columns = parsed.meta.fields.map(field => ({
+            title: field.replace(/_/g, ' ').toUpperCase(),
+            field: field,
+            headerSort: true,
+            responsive: 0,
+          }));
+
+          // Render Tabulator table
+          new Tabulator('#f1-table', {
+            data,
+            columns,
+            layout: 'fitDataStretch',
+            responsiveLayout: 'collapse',
+            movableColumns: true,
+            initialSort: [{column: columns[0].field, dir: 'asc'}],
+          });
+        })
+        .catch(err => {
+          document.getElementById('f1-table').innerHTML =
+            '<p class="text-red-500">Failed to load table: ' + err.message + '</p>';
+        });
+    });
+  </script>
+</body>
+</html>
