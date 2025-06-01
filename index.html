@@ -96,7 +96,7 @@
   <script src="https://cdn.jsdelivr.net/npm/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      fetch('driver_points_2025_current.csv')
+      fetch('driver_points_2025_most_recent.csv')
         .then(resp => resp.text())
         .then(csvText => {
           const parsed = Papa.parse(csvText, {header: true, skipEmptyLines: true});
