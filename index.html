@@ -7,7 +7,7 @@
   <!-- Tailwind CSS -->
   <link href="https://cdn.tailwindcss.com" rel="stylesheet">
   <!-- Tabulator (interactive table library) -->
-  <link href="https://unpkg.com/tabulator-tables@5.6.4/dist/css/tabulator.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/tabulator-tables@6.3.1/dist/css/tabulator.min.css" rel="stylesheet">
   <style>
     :root {
       --f1-red: #e10600;
@@ -57,11 +57,10 @@
 
   <!-- CSV parser & Tabulator scripts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <script src="https://unpkg.com/tabulator-tables@5.6.4/dist/js/tabulator.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // Adjust this path to match where you place your CSV file
-      fetch("driver_points_2025_current.csv")
+      fetch('driver_points_2025_current.csv')
         .then(resp => resp.text())
         .then(csvText => {
           // Parse CSV -> JSON
