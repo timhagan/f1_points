@@ -3,59 +3,95 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>F1 Championship Table</title>
-  <!-- Tailwind CSS -->
-  <link href="https://cdn.tailwindcss.com" rel="stylesheet">
-  <!-- Tabulator (interactive table library) -->
-  <link href="https://cdn.jsdelivr.net/npm/tabulator-tables@6.3.1/dist/css/tabulator.min.css" rel="stylesheet">
+  <title>2025 F1 Standings</title>
+
+  <!-- Fonts & Tailwind -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=EB+Garamond:wght@500&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.tailwindcss.com" rel="stylesheet"/>
+
+  <!-- Tabulator -->
+  <link href="https://cdn.jsdelivr.net/npm/tabulator-tables@6.3.1/dist/css/tabulator.min.css" rel="stylesheet"/>
+
   <style>
     :root {
-      --f1-red: #e10600;
+      /* Modern NYT/FiveThirtyEight‐inspired neutrals with an F1 red accent */
+      --accent-red: #c60000;
+      --neutral-100: #f9f9f9;
+      --neutral-900: #111111;
     }
     body {
-      font-family: 'Titillium Web', system-ui, sans-serif;
-      background: #0d0d0d;
-      color: #f1f1f1;
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: var(--neutral-900);
+      line-height: 1.6;
     }
     header {
-      background: linear-gradient(90deg, #0d0d0d 0%, var(--f1-red) 100%);
+      position: relative;
+      padding: 2rem 1rem;
+      border-bottom: 1px solid #e5e5e5;
     }
-    /* Tabulator custom theming */
+    /* Historic racing programme accent stripe */
+    header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 72px;
+      height: 4px;
+      background: var(--accent-red);
+    }
+    h1 {
+      font-family: 'EB Garamond', serif;
+      font-size: 2.25rem; /* text‑3xl */
+      font-weight: 500;
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+    }
+
+    /* ─── Tabulator minimalist skin ─────────────────────────────── */
     .tabulator .tabulator-header {
-      background: #1a1a1a;
-      color: #f1f1f1;
-      font-weight: 700;
+      background: #f5f5f5;
+      color: var(--neutral-900);
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent-red);
     }
     .tabulator .tabulator-row {
-      background: #0d0d0d;
-      border-bottom: 1px solid #222;
-    }
-    .tabulator .tabulator-row.tabulator-selectable:hover {
-      background: #111;
+      background: #ffffff;
+      border-bottom: 1px solid #eeeeee;
     }
     .tabulator .tabulator-row:nth-child(even) {
-      background: #141414;
+      background: var(--neutral-100);
+    }
+    .tabulator .tabulator-row.tabulator-selectable:hover {
+      background: #eaeaea;
+    }
+
+    footer {
+      font-size: 0.75rem; /* text‑xs */
+      color: #666;
+      padding: 2rem 1rem;
+      border-top: 1px solid #e5e5e5;
     }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
-  <header class="py-6 px-4">
-    <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight">2025 Formula 1 Standings</h1>
-    <p class="text-sm opacity-80 mt-2">Scroll, search, and sort the table below. Data sourced from publicly available results.</p>
+  <header>
+    <h1>2025 Formula 1 Standings</h1>
+    <p class="text-sm mt-2 max-w-prose">Interactive driver‑points table updated after every Grand Prix. <span class="italic">Unofficial; for analysis and historical reference only.</span></p>
   </header>
 
-  <main class="flex-grow p-4">
+  <main class="flex-grow p-4 mx-auto w-full max-w-5xl">
     <div id="f1-table" class="tabulator w-full"></div>
     <noscript>
-      <p class="mt-4 text-red-400">Enable JavaScript to view the interactive table.</p>
+      <p class="mt-4 text-red-600">Enable JavaScript to view the interactive table.</p>
     </noscript>
   </main>
 
-  <footer class="text-center py-4 text-xs opacity-60">
-    Unofficial Formula 1 statistics for educational purposes. No affiliation with Formula 1 or the FIA.
+  <footer class="text-center">
+    © 2025 F1 Enthusiast | Inspired by classic race programmes & modern data‑journalism design. Not affiliated with Formula 1 or the FIA.
   </footer>
 
-  <!-- CSV parser & Tabulator scripts -->
+  <!-- Scripts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
   <script>
@@ -63,7 +99,6 @@
       fetch('driver_points_2025_current.csv')
         .then(resp => resp.text())
         .then(csvText => {
-          // Parse CSV -> JSON
           const parsed = Papa.parse(csvText, {header: true, skipEmptyLines: true});
           const data = parsed.data;
           const columns = parsed.meta.fields.map(field => ({
@@ -73,7 +108,6 @@
             responsive: 0,
           }));
 
-          // Render Tabulator table
           new Tabulator('#f1-table', {
             data,
             columns,
@@ -85,7 +119,7 @@
         })
         .catch(err => {
           document.getElementById('f1-table').innerHTML =
-            '<p class="text-red-500">Failed to load table: ' + err.message + '</p>';
+            '<p class="text-red-600">Failed to load table: ' + err.message + '</p>';
         });
     });
   </script>
