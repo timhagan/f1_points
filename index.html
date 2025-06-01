@@ -1,36 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>2025 F1 Standings</title>
 
   <!-- Fonts & Tailwind -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=EB+Garamond:wght@500&display=swap" rel="stylesheet"/>
-  <link href="https://cdn.tailwindcss.com" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=EB+Garamond:wght@500&display=swap" rel="stylesheet" />
+  <link href="https://cdn.tailwindcss.com" rel="stylesheet" />
 
   <!-- Tabulator -->
-  <link href="https://cdn.jsdelivr.net/npm/tabulator-tables@6.3.1/dist/css/tabulator.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/tabulator-tables@6.3.1/dist/css/tabulator.min.css" rel="stylesheet" />
 
   <style>
     :root {
+      /* minimalist palette + F1 accent */
       --accent-red: #c60000;
       --neutral-100: #f9f9f9;
       --neutral-900: #111111;
     }
+
+    /* Base typography */
     body {
-      font-family: 'Inter', system-ui, sans-serif;
+      font-family: "Inter", system-ui, sans-serif;
       background: #ffffff;
       color: var(--neutral-900);
       line-height: 1.6;
     }
+
     header {
       position: relative;
       padding: 2rem 1rem 1.5rem;
       border-bottom: 1px solid #e5e5e5;
     }
     header::before {
-      content: '';
+      content: "";
       position: absolute;
       top: 0;
       left: 0;
@@ -39,11 +43,25 @@
       background: var(--accent-red);
     }
     h1 {
-      font-family: 'EB Garamond', serif;
+      font-family: "EB Garamond", serif;
       font-size: 2.25rem;
       font-weight: 500;
       letter-spacing: -0.5px;
       line-height: 1.2;
+    }
+
+    /* Tab navigation styling */
+    #table-tabs .tab {
+      border-bottom: 2px solid transparent;
+      transition: border-color 0.15s;
+    }
+    #table-tabs .tab.active-tab {
+      border-color: var(--neutral-900);
+    }
+
+    /* Ensure hidden tables stay hidden even after Tabulator injects inline styles */
+    .tab-content.hidden {
+      display: none !important;
     }
 
     /* ─── Tabulator minimalist skin ─────────────────────────────── */
@@ -72,15 +90,19 @@
     }
   </style>
 </head>
+
 <body class="min-h-screen flex flex-col">
   <header>
     <h1>2025 Formula 1 Standings</h1>
-    <p class="text-sm mt-2 max-w-prose">Driver & Constructor tables updated after every Grand Prix. <span class="italic">Unofficial; for analysis and historical reference only.</span></p>
+    <p class="text-sm mt-2 max-w-prose">
+      Driver &amp; Constructor tables updated after every Grand Prix.
+      <span class="italic">Unofficial; for analysis and historical reference only.</span>
+    </p>
 
     <!-- Tabs navigation -->
     <nav id="table-tabs" class="flex space-x-6 mt-6 text-sm font-semibold uppercase tracking-wide">
-      <button data-target="driver" class="tab px-1 pb-2 border-b-2 border-transparent hover:text-gray-900 focus:outline-none active-tab">Drivers</button>
-      <button data-target="constructor" class="tab px-1 pb-2 border-b-2 border-transparent hover:text-gray-900 focus:outline-none">Constructors</button>
+      <button data-target="driver" class="tab active-tab px-1 pb-2 focus:outline-none">Drivers</button>
+      <button data-target="constructor" class="tab px-1 pb-2 focus:outline-none">Constructors</button>
     </nav>
   </header>
 
@@ -96,65 +118,65 @@
   </main>
 
   <footer class="text-center">
-    © 2025 F1 Enthusiast | Inspired by classic race programmes & modern data‑journalism design. Not affiliated with Formula 1 or the FIA.
+    © 2025 F1 Enthusiast | Inspired by classic race programmes &amp; modern data‑journalism design. Not affiliated with Formula 1 or the FIA.
   </footer>
 
   <!-- Scripts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener("DOMContentLoaded", () => {
       /* Utility to build a Tabulator table from a CSV file */
       function buildTable(csvPath, targetId) {
         fetch(csvPath)
-          .then(resp => resp.text())
-          .then(csv => {
-            const parsed = Papa.parse(csv, {header: true, skipEmptyLines: true});
+          .then((resp) => resp.text())
+          .then((csv) => {
+            const parsed = Papa.parse(csv, { header: true, skipEmptyLines: true });
             const data = parsed.data;
-            const columns = parsed.meta.fields.map(field => ({
-              title: field.replace(/_/g, ' ').toUpperCase(),
+            const columns = parsed.meta.fields.map((field) => ({
+              title: field.replace(/_/g, " ").toUpperCase(),
               field: field,
               headerSort: true,
               responsive: 0,
             }));
 
-            new Tabulator('#' + targetId, {
+            new Tabulator("#" + targetId, {
               data,
               columns,
-              layout: 'fitDataStretch',
-              responsiveLayout: 'collapse',
+              layout: "fitDataStretch",
+              responsiveLayout: "collapse",
               movableColumns: true,
-              initialSort: [{column: columns[0].field, dir: 'asc'}],
+              initialSort: [{ column: columns[0].field, dir: "asc" }],
             });
           })
-          .catch(err => {
+          .catch((err) => {
             document.getElementById(targetId).innerHTML =
-              '<p class="text-red-600">Failed to load ' + targetId + ': ' + err.message + '</p>';
+              '<p class="text-red-600">Failed to load ' + targetId + ': ' + err.message + "</p>";
           });
       }
 
       /* Build both tables */
-      buildTable('driver_points_2025_most_recent.csv', 'driver-table');
-      buildTable('constructor_points_2025_most_recent.csv', 'constructor-table');
+      buildTable("driver_points_2025_most_recent.csv", "driver-table");
+      buildTable("constructor_points_2025_most_recent.csv", "constructor-table");
 
       /* Tab toggling */
-      const tabButtons = document.querySelectorAll('#table-tabs .tab');
-      const tabContents = document.querySelectorAll('.tab-content');
+      const tabButtons = document.querySelectorAll("#table-tabs .tab");
+      const tabContents = document.querySelectorAll(".tab-content");
 
-      tabButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-          const target = btn.getAttribute('data-target');
+      tabButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const target = btn.dataset.target + "-table";
 
-          // Switch active button styling
-          tabButtons.forEach(b => b.classList.remove('active-tab', 'border-b-2', 'border-neutral-900'));
-          btn.classList.add('active-tab', 'border-b-2', 'border-neutral-900');
+          // update button status
+          tabButtons.forEach((b) => b.classList.remove("active-tab"));
+          btn.classList.add("active-tab");
 
-          // Show target content, hide others
-          tabContents.forEach(content => {
-            if (content.id === target + '-table') {
-              content.classList.remove('hidden');
+          // show/hide tables
+          tabContents.forEach((div) => {
+            if (div.id === target) {
+              div.classList.remove("hidden");
             } else {
-              content.classList.add('hidden');
+              div.classList.add("hidden");
             }
           });
         });
