@@ -54,11 +54,13 @@ def get_most_recent_session_df(sessions, session_type="Race", today=datetime.dat
 
     # Get the most recent session from the past sessions
     if not past_sessions.empty:
-        most_recent_session_df = past_sessions.loc[past_sessions['SessionDateUtc'].idxmax()]
+        # Select the most recent row as a DataFrame (not Series)
+        most_recent_idx = past_sessions['SessionDateUtc'].idxmax()
+        most_recent_session_df = past_sessions.loc[[most_recent_idx]]
         print(f"Most recent {session_type} session:")
         print(most_recent_session_df)
     else:
-        print(f"No {session_type} sessions found before today.")
+        print(f"No {session_type} sessions for year {year} found before today.")
 
     return most_recent_session_df
 
