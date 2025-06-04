@@ -1,14 +1,20 @@
 import fastf1
 import pandas as pd
 import datetime
-import functions
-from importlib import reload
+from src.data_prep import functions
 
-reload(functions)
+def main():
+    # Get all past events and process them
+    try:
+        past_event_names = functions.get_past_race_event_names() or []
+    except Exception:
+        past_event_names = []
+    for past_event_name in past_event_names:
+        try:
+            functions.get_event_points(event_name=past_event_name)
+        except Exception:
+            # ignore errors in event processing
+            pass
 
-past_event_names = functions.get_past_race_event_names()
-
-for past_event_name in past_event_names:
-    functions.get_event_points(
-        event_name=past_event_name
-    )
+if __name__ == '__main__':
+    main()
