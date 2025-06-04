@@ -382,7 +382,7 @@ def get_event_points(event_name=None, year=datetime.datetime.now(datetime.timezo
     import fastf1
     import pandas as pd
     import datetime
-    import functions
+    from src.data_prep import functions
     from importlib import reload
 
     reload(functions)
