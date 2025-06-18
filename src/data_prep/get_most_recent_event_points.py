@@ -1,3 +1,7 @@
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+
 import fastf1
 import pandas as pd
 import datetime
@@ -11,8 +15,8 @@ def main():
         return_dfs=True
     )
     # Write the outputs
-    drivers_points.to_csv(f'../f1_points/driver_points_{year}_most_recent.csv', index=False)
-    constructors_points.to_csv(f'../f1_points/constructor_points_{year}_most_recent.csv', index=False)
+    drivers_points.to_csv(f'data/driver_points_{year}_most_recent.csv', index=False)
+    constructors_points.to_csv(f'data/constructor_points_{year}_most_recent.csv', index=False)
 
 if __name__ == '__main__':
     main()

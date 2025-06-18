@@ -2,7 +2,7 @@ import fastf1
 import datetime
 import pandas as pd
 
-fastf1.Cache.enable_cache('C:\\Users\\timot\\OneDrive\\Documents\\GitHub\\f1_points\\.cache\\event_schedule')
+fastf1.Cache.enable_cache('..\\f1_points\\.cache\\event_schedule')
 
 year                    = datetime.date.today().year
 event_schedule          = fastf1.get_event_schedule(year)
@@ -50,4 +50,4 @@ event_schedule_melted = event_schedule_melted.rename(
 event_schedule_melted = event_schedule_melted.sort_values(['RoundNumber', 'SessionDate'])
 event_schedule_melted = event_schedule_melted.dropna(subset=['SessionName'])
 
-event_schedule_melted.to_csv(f'C:\\Users\\timot\\OneDrive\\Documents\\GitHub\\f1_points\\.data\\sessions_{year}.csv', index=False)
+event_schedule_melted.to_csv(f'data/sessions_{year}.csv', index=False)

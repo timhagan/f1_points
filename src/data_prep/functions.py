@@ -11,10 +11,10 @@ def get_past_race_event_names(today=datetime.datetime.now(datetime.timezone.utc)
     Returns:
         pd.Series: Series containing all past event names.
     """
-    fastf1.Cache.enable_cache(f'C:\\Users\\timot\\OneDrive\\Documents\\GitHub\\f1_points\\.cache\\event_points')
+    fastf1.Cache.enable_cache(f'..\\f1_points\\.cache\\event_points')
 
     # Get all events from the cache
-    sessions_df = pd.read_csv(f"C:\\Users\\timot\\OneDrive\\Documents\\GitHub\\f1_points\\.data\\sessions_{today.year}.csv")
+    sessions_df = pd.read_csv(f"..\\f1_points\\.data\\sessions_{today.year}.csv")
     races_df    = sessions_df[sessions_df['SessionName'] == 'Race'].copy()
 
     # Convert EventDate to EventDateUtc
@@ -231,7 +231,7 @@ def calculate_final_driver_points(session_results, event_format):
             session_results["TotalRaceQualifyingPoints"] +
             session_results["TotalRacePoints"])
     else:
-        raise ValueError(f"Session type '{session_type}' is not supported for point calculation in session provided.")
+        raise ValueError(f"Event format '{event_format}' is not supported for point calculation in session provided.")
     return session_results
 
 def slim_driver_points_df(session_results, event_format):
@@ -266,7 +266,7 @@ def slim_driver_points_df(session_results, event_format):
                                 'PlacesGainedRacePoints',
                                 'TeammateRacePoints']].copy()
     else:
-        raise ValueError(f"Session type '{session_type}' is not supported for point calculation in session provided.")
+        raise ValueError(f"Event format '{event_format}' is not supported for point calculation in session provided.")
 
 def calculate_constructor_finishing_points(session_results, session_type):
     """Calculate the constructor finishing points based on the session type. If one car finishes the race, the constructor gets 2 points. If both cars finish the race, the constructor gets 5 points."""
@@ -390,9 +390,9 @@ def get_event_points(event_name=None, year=datetime.datetime.now(datetime.timezo
     today = datetime.datetime.now(datetime.timezone.utc)
     year  = today.year
 
-    fastf1.Cache.enable_cache(f'C:\\Users\\timot\\OneDrive\\Documents\\GitHub\\f1_points\\.cache\\event_points')
+    fastf1.Cache.enable_cache(f'..\\f1_points\\.cache\\event_points')
 
-    sessions_df           = pd.read_csv(f"C:\\Users\\timot\\OneDrive\\Documents\\GitHub\\f1_points\\.data\\sessions_{year}.csv")
+    sessions_df           = pd.read_csv(f"..\\f1_points\\.data\\sessions_{year}.csv")
 
     selected_session_df   = functions.get_session_df(sessions_df, event_name=event_name)
 
@@ -436,8 +436,8 @@ def get_event_points(event_name=None, year=datetime.datetime.now(datetime.timezo
     driver_points_df_slim.loc[:,"EventName"]      = SELECTED_EVENT_NAME
     constructor_points_df_slim.loc[:,"EventName"] = SELECTED_EVENT_NAME
 
-    driver_points_df_slim.to_csv(f"C:\\Users\\timot\\OneDrive\\Documents\\GitHub\\f1_points\\.data\\driver_points_{year}_{SELECTED_EVENT_NAME}.csv", index=False)
-    constructor_points_df_slim.to_csv(f"C:\\Users\\timot\\OneDrive\\Documents\\GitHub\\f1_points\\.data\\constructor_points_{year}_{SELECTED_EVENT_NAME}.csv", index=False)
+    driver_points_df_slim.to_csv(f"..\\f1_points\\.data\\driver_points_{year}_{SELECTED_EVENT_NAME}.csv", index=False)
+    constructor_points_df_slim.to_csv(f"..\\f1_points\\.data\\constructor_points_{year}_{SELECTED_EVENT_NAME}.csv", index=False)
 
     if return_dfs:
         return driver_points_df_slim, constructor_points_df_slim
