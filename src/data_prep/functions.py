@@ -1,6 +1,7 @@
 import fastf1
 import pandas as pd
 import datetime
+import os
 
 
 def get_past_race_event_names(today=datetime.datetime.now(datetime.timezone.utc)):
@@ -9,12 +10,14 @@ def get_past_race_event_names(today=datetime.datetime.now(datetime.timezone.utc)
     Args:
         today (datetime): The current date and time. Default is the current UTC time.
     Returns:
-        pd.Series: Series containing all past event names.
-    """
-    fastf1.Cache.enable_cache(f'..\\f1_points\\.cache\\event_points')
+        pd.Series: Series containing all past event names.    """
+    # Set cache path relative to project root
+    cache_path = os.path.join(os.path.dirname(__file__), '..', '..', '.cache', 'event_points')
+    fastf1.Cache.enable_cache(cache_path)
 
     # Get all events from the cache
-    sessions_df = pd.read_csv(f"..\\f1_points\\.data\\sessions_{today.year}.csv")
+    sessions_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', f'sessions_{today.year}.csv')
+    sessions_df = pd.read_csv(sessions_path)
     races_df    = sessions_df[sessions_df['SessionName'] == 'Race'].copy()
 
     # Convert EventDate to EventDateUtc
@@ -190,7 +193,8 @@ def merge_points_dataframes(dictionary_of_dfs, merge_key='DriverId'):
             merged_points_df = merged_points_df.merge(session_df, on=merge_key, how='outer')
 
     # Fill NaN values with 0 for drivers who didn't participate in all sessions
-    merged_points_df = merged_points_df.fillna(0)
+    if merged_points_df is not None:
+        merged_points_df = merged_points_df.fillna(0)
     return merged_points_df
 
 def calculate_final_driver_points(session_results, event_format):
@@ -385,14 +389,16 @@ def get_event_points(event_name=None, year=datetime.datetime.now(datetime.timezo
     from src.data_prep import functions
     from importlib import reload
 
-    reload(functions)
-
+    reload(functions)    
     today = datetime.datetime.now(datetime.timezone.utc)
     year  = today.year
 
-    fastf1.Cache.enable_cache(f'..\\f1_points\\.cache\\event_points')
+    # Set cache path relative to project root
+    cache_path = os.path.join(os.path.dirname(__file__), '..', '..', '.cache', 'event_points')
+    fastf1.Cache.enable_cache(cache_path)
 
-    sessions_df           = pd.read_csv(f"..\\f1_points\\.data\\sessions_{year}.csv")
+    sessions_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', f'sessions_{year}.csv')
+    sessions_df = pd.read_csv(sessions_path)
 
     selected_session_df   = functions.get_session_df(sessions_df, event_name=event_name)
 
@@ -405,7 +411,7 @@ def get_event_points(event_name=None, year=datetime.datetime.now(datetime.timezo
 
     for session_type in session_types:
         f1_session      = fastf1.get_session(year, SELECTED_EVENT_NAME, session_type) 
-        f1_session.load(laps=False, telemetry=False, weather=False, messages=False, livedata=None) 
+        f1_session.load(laps=False, telemetry=False, weather=False, messages=False) 
         
         event_results             = f1_session.results
         session_dfs[session_type] = event_results

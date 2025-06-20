@@ -1,8 +1,11 @@
 import fastf1
 import datetime
 import pandas as pd
+import os
 
-fastf1.Cache.enable_cache('..\\f1_points\\.cache\\event_schedule')
+# Set cache path relative to project root
+cache_path = os.path.join(os.path.dirname(__file__), '..', '..', '.cache', 'event_schedule')
+fastf1.Cache.enable_cache(cache_path)
 
 year                    = datetime.date.today().year
 event_schedule          = fastf1.get_event_schedule(year)
@@ -50,4 +53,6 @@ event_schedule_melted = event_schedule_melted.rename(
 event_schedule_melted = event_schedule_melted.sort_values(['RoundNumber', 'SessionDate'])
 event_schedule_melted = event_schedule_melted.dropna(subset=['SessionName'])
 
-event_schedule_melted.to_csv(f'data/sessions_{year}.csv', index=False)
+# Save to data directory relative to project root
+output_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', f'sessions_{year}.csv')
+event_schedule_melted.to_csv(output_path, index=False)
