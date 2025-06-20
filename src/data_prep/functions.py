@@ -3,7 +3,6 @@ import pandas as pd
 import datetime
 import os
 
-
 def get_past_race_event_names(today=datetime.datetime.now(datetime.timezone.utc)):
     """
     Get all past event names from the FastF1 cache.

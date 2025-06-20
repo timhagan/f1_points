@@ -2,8 +2,6 @@ import fastf1
 import datetime
 import pandas as pd
 import os
-
-# Set cache path relative to project root
 cache_path = os.path.join(os.path.dirname(__file__), '..', '..', '.cache', 'event_schedule')
 fastf1.Cache.enable_cache(cache_path)
 
