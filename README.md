@@ -89,7 +89,7 @@ Reporting Issues
 - Found incorrect points? Open an issue with race details
 - Site not loading? Include browser and error info
 - Missing race data? Let us know which Grand Prix
-- 
+
 Code Contributions
 1. Fork the repository
 2. Create a feature branch (git checkout -b feature/amazing-feature)
