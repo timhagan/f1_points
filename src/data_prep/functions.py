@@ -433,17 +433,16 @@ def get_event_points(event_name=None, year=datetime.datetime.now(datetime.timezo
     merged_driver_points        = functions.merge_points_dataframes(driver_points_dfs, merge_key="DriverId")
     merged_constructor_points   = functions.merge_points_dataframes(constructor_points_dfs, merge_key="TeamId")
 
-    driver_points_df = functions.calculate_final_driver_points(merged_driver_points, SELECTED_EVENT_FORMAT)
-
+    driver_points_df            = functions.calculate_final_driver_points(merged_driver_points, SELECTED_EVENT_FORMAT)
     driver_points_df_slim       = functions.slim_driver_points_df(driver_points_df, event_format=SELECTED_EVENT_FORMAT)
     constructor_points_df_slim  = functions.slim_constructor_points_df(merged_constructor_points, event_format=SELECTED_EVENT_FORMAT)
 
     driver_points_df_slim.loc[:,"EventName"]      = SELECTED_EVENT_NAME
     constructor_points_df_slim.loc[:,"EventName"] = SELECTED_EVENT_NAME
 
-    driver_output_path = os.path.join(os.path.dirname(__file__), '..', '..', '.data', f'driver_points_{year}_{SELECTED_EVENT_NAME}.csv')
-    constructor_output_path = os.path.join(os.path.dirname(__file__), '..', '..', '.data', f'constructor_points_{year}_{SELECTED_EVENT_NAME}.csv')
-    
+    driver_output_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', f'driver_points_{year}_{SELECTED_EVENT_NAME}.csv')
+    constructor_output_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', f'constructor_points_{year}_{SELECTED_EVENT_NAME}.csv')
+
     driver_points_df_slim.to_csv(driver_output_path, index=False)
     constructor_points_df_slim.to_csv(constructor_output_path, index=False)
 

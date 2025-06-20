@@ -1,0 +1,11 @@
+TeamId,TotalConstructorPoints,TotalConstructorRacePoints,ConstructorRacePoints,TotalRacePoints,PlacesGainedRacePoints,ConstructorRaceFinishingPoints,EventName
+alpine,9.0,9.0,4.0,0.0,4.0,5,Japanese Grand Prix
+aston_martin,6.0,6.0,1.0,0.0,1.0,5,Japanese Grand Prix
+ferrari,24.0,24.0,19.0,18.0,1.0,5,Japanese Grand Prix
+haas,6.0,6.0,1.0,1.0,0.0,5,Japanese Grand Prix
+mclaren,38.0,38.0,33.0,33.0,0.0,5,Japanese Grand Prix
+mercedes,23.0,23.0,18.0,18.0,0.0,5,Japanese Grand Prix
+rb,9.0,9.0,4.0,4.0,0.0,5,Japanese Grand Prix
+red_bull,32.0,32.0,27.0,25.0,2.0,5,Japanese Grand Prix
+sauber,5.0,5.0,0.0,0.0,0.0,5,Japanese Grand Prix
+williams,8.0,8.0,3.0,2.0,1.0,5,Japanese Grand Prix

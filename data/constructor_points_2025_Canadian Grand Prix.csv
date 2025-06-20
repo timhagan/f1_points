@@ -1,0 +1,11 @@
+TeamId,TotalConstructorPoints,TotalConstructorRacePoints,ConstructorRacePoints,TotalRacePoints,PlacesGainedRacePoints,ConstructorRaceFinishingPoints,EventName
+alpine,10.0,10.0,5.0,0.0,5.0,5,Canadian Grand Prix
+aston_martin,11.0,11.0,6.0,6.0,0.0,5,Canadian Grand Prix
+ferrari,26.0,26.0,21.0,18.0,3.0,5,Canadian Grand Prix
+haas,14.0,14.0,9.0,2.0,7.0,5,Canadian Grand Prix
+mclaren,14.0,14.0,12.0,12.0,0.0,2,Canadian Grand Prix
+mercedes,46.0,46.0,41.0,40.0,1.0,5,Canadian Grand Prix
+rb,2.0,2.0,0.0,0.0,0.0,2,Canadian Grand Prix
+red_bull,29.0,29.0,24.0,18.0,6.0,5,Canadian Grand Prix
+sauber,13.0,13.0,8.0,4.0,4.0,5,Canadian Grand Prix
+williams,9.0,9.0,7.0,1.0,6.0,2,Canadian Grand Prix
