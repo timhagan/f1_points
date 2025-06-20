@@ -119,8 +119,7 @@ Areas for Improvement
 # 📄 License
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-🏎️ Acknowledgments
-Formula 1 for providing official timing data
-The F1 community for inspiration and feedback
-GitHub Actions for reliable automation platform
-🏁 Keep up with every lap, every point, every championship battle!
+# 🏎️ Acknowledgments
+[Fast_F1](https://github.com/theOehrly/Fast-F1), [jolpica-f1](https://github.com/jolpica/jolpica-f1/tree/main), and Formula 1 for providing official timing data
+
+🏁 Keep up with your fantasy team by following every lap, every point, every championship battle!
