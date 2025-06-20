@@ -1,0 +1,48 @@
+name: Test F1 Data Pipeline
+
+on:
+  workflow_dispatch:  # Manual trigger only for testing
+
+jobs:
+  test-pipeline:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Create cache directories
+      run: |
+        mkdir -p .cache/event_points
+        mkdir -p .cache/event_schedule
+        
+    - name: Create data directory
+      run: mkdir -p data
+      
+    - name: Test get event schedule
+      run: |
+        echo "Testing event schedule script..."
+        python src/data_prep/get_event_schedule.py
+        ls -la data/sessions_*.csv
+        
+    - name: Test get most recent event points
+      run: |
+        echo "Testing most recent event points script..."
+        python src/data_prep/get_most_recent_event_points.py
+        ls -la data/*_most_recent.csv
+        
+    - name: Test combine event points
+      run: |
+        echo "Testing combine event points script..."
+        python src/data_prep/combine_event_points.py
+        ls -la data/*_current.csv
