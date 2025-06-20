@@ -1,6 +1,7 @@
-import fastf1
-import pandas as pd
-import datetime
+import os
+import sys
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, project_root)
 from src.data_prep import functions
 
 def main():
