@@ -441,8 +441,11 @@ def get_event_points(event_name=None, year=datetime.datetime.now(datetime.timezo
     driver_points_df_slim.loc[:,"EventName"]      = SELECTED_EVENT_NAME
     constructor_points_df_slim.loc[:,"EventName"] = SELECTED_EVENT_NAME
 
-    driver_points_df_slim.to_csv(f"..\\f1_points\\.data\\driver_points_{year}_{SELECTED_EVENT_NAME}.csv", index=False)
-    constructor_points_df_slim.to_csv(f"..\\f1_points\\.data\\constructor_points_{year}_{SELECTED_EVENT_NAME}.csv", index=False)
+    driver_output_path = os.path.join(os.path.dirname(__file__), '..', '..', '.data', f'driver_points_{year}_{SELECTED_EVENT_NAME}.csv')
+    constructor_output_path = os.path.join(os.path.dirname(__file__), '..', '..', '.data', f'constructor_points_{year}_{SELECTED_EVENT_NAME}.csv')
+    
+    driver_points_df_slim.to_csv(driver_output_path, index=False)
+    constructor_points_df_slim.to_csv(constructor_output_path, index=False)
 
     if return_dfs:
         return driver_points_df_slim, constructor_points_df_slim
