@@ -14,10 +14,11 @@ def main():
     # Prepare accumulators
     driver_points_df = pd.DataFrame()
     constructor_points_df = pd.DataFrame()
-    year = datetime.datetime.now().year
+    YEAR = datetime.datetime.now().year
     
     for past_event_name in past_event_names:
-        driver_csv_path = os.path.join(os.path.dirname(__file__), '..', '..', '.data', f'driver_points_{year}_{past_event_name}.csv')
+        SELECTED_EVENT_ROUND = functions.get_round_number_from_event_name(past_event_name, year=YEAR)
+        driver_csv_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', f'driver_points_{YEAR}_{SELECTED_EVENT_ROUND}_{past_event_name}.csv')
         print(f"🔍 Looking for driver file: {driver_csv_path}")
         try:
             driver_points_df_slim = pd.read_csv(driver_csv_path)
@@ -29,8 +30,8 @@ def main():
         except FileNotFoundError:
             print(f"❌ Driver file not found: {driver_csv_path}")
             continue
-            
-        constructor_csv_path = os.path.join(os.path.dirname(__file__), '..', '..', '.data', f'constructor_points_{year}_{past_event_name}.csv')
+
+        constructor_csv_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', f'constructor_points_{YEAR}_{SELECTED_EVENT_ROUND}_{past_event_name}.csv')
         print(f"🔍 Looking for constructor file: {constructor_csv_path}")
         try:
             constructor_points_df_slim = pd.read_csv(constructor_csv_path)
@@ -50,9 +51,9 @@ def main():
     print(f"📊 Final constructor DataFrame has {len(constructor_points_df)} records")
     
     # Save to data directory relative to project root
-    driver_output_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', f'driver_points_{year}_current.csv')
-    constructor_output_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', f'constructor_points_{year}_current.csv')
-    
+    driver_output_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', f'driver_points_{YEAR}_current.csv')
+    constructor_output_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', f'constructor_points_{YEAR}_current.csv')
+
     driver_points_df.to_csv(driver_output_path, index=False)
     constructor_points_df.to_csv(constructor_output_path, index=False)
     
