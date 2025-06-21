@@ -31,6 +31,28 @@ def get_past_race_event_names(today=datetime.datetime.now(datetime.timezone.utc)
 
     return races_df['EventName'].unique()
 
+def get_round_number_from_event_name(event_name, year=datetime.datetime.now(datetime.timezone.utc).year):
+    """
+    Extract the round number from the event name.
+    Args:
+        event_name (str): The name of the event.
+    Returns:
+        int: The round number extracted from the event name.
+    """
+    # Get all events from the cache
+    sessions_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', f'sessions_{year}.csv')
+    sessions_df = pd.read_csv(sessions_path)
+    races_df    = sessions_df[sessions_df['SessionName'] == 'Race'].copy()
+
+    # Get the round number from the event name
+    round_number = races_df[races_df['EventName'] == event_name]['RoundNumber']
+
+    # If not, return None or raise an error
+    if not round_number.empty:
+        return round_number.values[0]
+    else:
+        raise ValueError(f"Could not extract round number from event name: {event_name}")
+
 
 def get_most_recent_session_df(sessions, session_type="Race", today=datetime.datetime.now(datetime.timezone.utc), year=datetime.datetime.now(datetime.timezone.utc).year):
     """
@@ -403,6 +425,7 @@ def get_event_points(event_name=None, year=datetime.datetime.now(datetime.timezo
 
     SELECTED_EVENT_NAME   = selected_session_df['EventName'].values[0]
     SELECTED_EVENT_FORMAT = selected_session_df['EventFormat'].values[0]
+    SELECTED_EVENT_ROUND  = selected_session_df['RoundNumber'].values[0]
 
     session_types = functions.get_session_types_list(SELECTED_EVENT_FORMAT)
 
@@ -440,8 +463,8 @@ def get_event_points(event_name=None, year=datetime.datetime.now(datetime.timezo
     driver_points_df_slim.loc[:,"EventName"]      = SELECTED_EVENT_NAME
     constructor_points_df_slim.loc[:,"EventName"] = SELECTED_EVENT_NAME
 
-    driver_output_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', f'driver_points_{year}_{SELECTED_EVENT_NAME}.csv')
-    constructor_output_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', f'constructor_points_{year}_{SELECTED_EVENT_NAME}.csv')
+    driver_output_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', f'driver_points_{year}_{SELECTED_EVENT_ROUND}_{SELECTED_EVENT_NAME}.csv')
+    constructor_output_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', f'constructor_points_{year}_{SELECTED_EVENT_ROUND}_{SELECTED_EVENT_NAME}.csv')
 
     driver_points_df_slim.to_csv(driver_output_path, index=False)
     constructor_points_df_slim.to_csv(constructor_output_path, index=False)
