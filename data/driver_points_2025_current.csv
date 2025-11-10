@@ -1,401 +1,422 @@
 DriverId,TotalDriverPoints,TotalRaceQualifyingPoints,PolePoints,TeammateQualiPoints,TotalRacePoints,RacePoints,PlacesGainedRacePoints,TeammateRacePoints,EventName,TotalSprintRacePoints,SprintPoints,PlacesGainedSprintPoints,TeammateSprintPoints
-albon,22.0,5.0,0,5.0,17.0,10.0,2.0,5.0,Australian Grand Prix,,,,
-alonso,5.0,5.0,0,5.0,0.0,0.0,0.0,0.0,Australian Grand Prix,,,,
-antonelli,36.0,0.0,0,0.0,36.0,12.0,24.0,0.0,Australian Grand Prix,,,,
-bearman,12.0,0.0,0,0.0,12.0,0.0,12.0,0.0,Australian Grand Prix,,,,
-bortoleto,5.0,5.0,0,5.0,0.0,0.0,0.0,0.0,Australian Grand Prix,,,,
-doohan,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Australian Grand Prix,,,,
-gasly,10.0,5.0,0,5.0,5.0,0.0,0.0,5.0,Australian Grand Prix,,,,
-hadjar,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Australian Grand Prix,,,,
-hamilton,1.0,0.0,0,0.0,1.0,1.0,0.0,0.0,Australian Grand Prix,,,,
-hulkenberg,31.0,0.0,0,0.0,31.0,6.0,20.0,5.0,Australian Grand Prix,,,,
-lawson,6.0,0.0,0,0.0,6.0,0.0,6.0,0.0,Australian Grand Prix,,,,
-leclerc,14.0,5.0,0,5.0,9.0,4.0,0.0,5.0,Australian Grand Prix,,,,
-max_verstappen,30.0,5.0,0,5.0,25.0,18.0,2.0,5.0,Australian Grand Prix,,,,
-norris,45.0,15.0,10,5.0,30.0,25.0,0.0,5.0,Australian Grand Prix,,,,
-ocon,22.0,5.0,0,5.0,17.0,0.0,12.0,5.0,Australian Grand Prix,,,,
-piastri,2.0,0.0,0,0.0,2.0,2.0,0.0,0.0,Australian Grand Prix,,,,
-russell,27.0,5.0,0,5.0,22.0,15.0,2.0,5.0,Australian Grand Prix,,,,
-sainz,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Australian Grand Prix,,,,
-stroll,27.0,0.0,0,0.0,27.0,8.0,14.0,5.0,Australian Grand Prix,,,,
-tsunoda,10.0,5.0,0,5.0,5.0,0.0,0.0,5.0,Australian Grand Prix,,,,
-albon,27.0,5.0,0,5.0,17.0,6.0,6.0,5.0,Chinese Grand Prix,5.0,0.0,0.0,5.0
-alonso,6.0,5.0,0,5.0,0.0,0.0,0.0,0.0,Chinese Grand Prix,1.0,0.0,1.0,0.0
-antonelli,14.0,0.0,0,0.0,12.0,8.0,4.0,0.0,Chinese Grand Prix,2.0,2.0,0.0,0.0
-bearman,27.0,0.0,0,0.0,22.0,4.0,18.0,0.0,Chinese Grand Prix,5.0,0.0,0.0,5.0
-bortoleto,20.0,0.0,0,0.0,15.0,0.0,10.0,5.0,Chinese Grand Prix,5.0,0.0,0.0,5.0
-doohan,15.0,0.0,0,0.0,15.0,0.0,10.0,5.0,Chinese Grand Prix,0.0,0.0,0.0,0.0
-gasly,15.0,5.0,0,5.0,0.0,0.0,0.0,0.0,Chinese Grand Prix,10.0,0.0,5.0,5.0
-hadjar,12.0,5.0,0,5.0,5.0,0.0,0.0,5.0,Chinese Grand Prix,2.0,0.0,2.0,0.0
-hamilton,18.0,5.0,0,5.0,0.0,0.0,0.0,0.0,Chinese Grand Prix,13.0,8.0,0.0,5.0
-hulkenberg,6.0,5.0,0,5.0,0.0,0.0,0.0,0.0,Chinese Grand Prix,1.0,0.0,1.0,0.0
-lawson,21.0,0.0,0,0.0,16.0,0.0,16.0,0.0,Chinese Grand Prix,5.0,0.0,5.0,0.0
-leclerc,9.0,0.0,0,0.0,5.0,0.0,0.0,5.0,Chinese Grand Prix,4.0,4.0,0.0,0.0
-max_verstappen,33.0,5.0,0,5.0,17.0,12.0,0.0,5.0,Chinese Grand Prix,11.0,6.0,0.0,5.0
-norris,21.0,0.0,0,0.0,20.0,18.0,2.0,0.0,Chinese Grand Prix,1.0,1.0,0.0,0.0
-ocon,34.0,5.0,0,5.0,27.0,10.0,12.0,5.0,Chinese Grand Prix,2.0,0.0,2.0,0.0
-piastri,58.0,15.0,10,5.0,30.0,25.0,0.0,5.0,Chinese Grand Prix,13.0,7.0,1.0,5.0
-russell,36.0,5.0,0,5.0,20.0,15.0,0.0,5.0,Chinese Grand Prix,11.0,5.0,1.0,5.0
-sainz,11.0,0.0,0,0.0,11.0,1.0,10.0,0.0,Chinese Grand Prix,0.0,0.0,0.0,0.0
-stroll,23.0,0.0,0,0.0,17.0,2.0,10.0,5.0,Chinese Grand Prix,6.0,0.0,1.0,5.0
-tsunoda,10.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Chinese Grand Prix,10.0,3.0,2.0,5.0
-albon,12.0,5.0,0,5.0,7.0,2.0,0.0,5.0,Japanese Grand Prix,,,,
-alonso,12.0,5.0,0,5.0,7.0,0.0,2.0,5.0,Japanese Grand Prix,,,,
-antonelli,8.0,0.0,0,0.0,8.0,8.0,0.0,0.0,Japanese Grand Prix,,,,
-bearman,11.0,5.0,0,5.0,6.0,1.0,0.0,5.0,Japanese Grand Prix,,,,
-bortoleto,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Japanese Grand Prix,,,,
-doohan,8.0,0.0,0,0.0,8.0,0.0,8.0,0.0,Japanese Grand Prix,,,,
-gasly,10.0,5.0,0,5.0,5.0,0.0,0.0,5.0,Japanese Grand Prix,,,,
-hadjar,14.0,5.0,0,5.0,9.0,4.0,0.0,5.0,Japanese Grand Prix,,,,
-hamilton,8.0,0.0,0,0.0,8.0,6.0,2.0,0.0,Japanese Grand Prix,,,,
-hulkenberg,10.0,5.0,0,5.0,5.0,0.0,0.0,5.0,Japanese Grand Prix,,,,
-lawson,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Japanese Grand Prix,,,,
-leclerc,22.0,5.0,0,5.0,17.0,12.0,0.0,5.0,Japanese Grand Prix,,,,
-max_verstappen,45.0,15.0,10,5.0,30.0,25.0,0.0,5.0,Japanese Grand Prix,,,,
-norris,28.0,5.0,0,5.0,23.0,18.0,0.0,5.0,Japanese Grand Prix,,,,
-ocon,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Japanese Grand Prix,,,,
-piastri,15.0,0.0,0,0.0,15.0,15.0,0.0,0.0,Japanese Grand Prix,,,,
-russell,20.0,5.0,0,5.0,15.0,10.0,0.0,5.0,Japanese Grand Prix,,,,
-sainz,2.0,0.0,0,0.0,2.0,0.0,2.0,0.0,Japanese Grand Prix,,,,
-stroll,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Japanese Grand Prix,,,,
-tsunoda,4.0,0.0,0,0.0,4.0,0.0,4.0,0.0,Japanese Grand Prix,,,,
-albon,11.0,0.0,0,0.0,11.0,0.0,6.0,5.0,Bahrain Grand Prix,,,,
-alonso,10.0,5.0,0,5.0,5.0,0.0,0.0,5.0,Bahrain Grand Prix,,,,
-antonelli,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Bahrain Grand Prix,,,,
-bearman,21.0,0.0,0,0.0,21.0,1.0,20.0,0.0,Bahrain Grand Prix,,,,
-bortoleto,5.0,0.0,0,0.0,5.0,0.0,0.0,5.0,Bahrain Grand Prix,,,,
-doohan,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Bahrain Grand Prix,,,,
-gasly,16.0,5.0,0,5.0,11.0,6.0,0.0,5.0,Bahrain Grand Prix,,,,
-hadjar,10.0,5.0,0,5.0,5.0,0.0,0.0,5.0,Bahrain Grand Prix,,,,
-hamilton,18.0,0.0,0,0.0,18.0,10.0,8.0,0.0,Bahrain Grand Prix,,,,
-hulkenberg,5.0,5.0,0,5.0,0.0,0.0,0.0,0.0,Bahrain Grand Prix,,,,
-lawson,2.0,0.0,0,0.0,2.0,0.0,2.0,0.0,Bahrain Grand Prix,,,,
-leclerc,22.0,5.0,0,5.0,17.0,12.0,0.0,5.0,Bahrain Grand Prix,,,,
-max_verstappen,20.0,5.0,0,5.0,15.0,8.0,2.0,5.0,Bahrain Grand Prix,,,,
-norris,21.0,0.0,0,0.0,21.0,15.0,6.0,0.0,Bahrain Grand Prix,,,,
-ocon,26.0,5.0,0,5.0,21.0,4.0,12.0,5.0,Bahrain Grand Prix,,,,
-piastri,45.0,15.0,10,5.0,30.0,25.0,0.0,5.0,Bahrain Grand Prix,,,,
-russell,30.0,5.0,0,5.0,25.0,18.0,2.0,5.0,Bahrain Grand Prix,,,,
-sainz,5.0,5.0,0,5.0,0.0,0.0,0.0,0.0,Bahrain Grand Prix,,,,
-stroll,4.0,0.0,0,0.0,4.0,0.0,4.0,0.0,Bahrain Grand Prix,,,,
-tsunoda,4.0,0.0,0,0.0,4.0,2.0,2.0,0.0,Bahrain Grand Prix,,,,
-albon,6.0,0.0,0,0.0,6.0,2.0,4.0,0.0,Saudi Arabian Grand Prix,,,,
-alonso,14.0,5.0,0,5.0,9.0,0.0,4.0,5.0,Saudi Arabian Grand Prix,,,,
-antonelli,8.0,0.0,0,0.0,8.0,8.0,0.0,0.0,Saudi Arabian Grand Prix,,,,
-bearman,14.0,5.0,0,5.0,9.0,0.0,4.0,5.0,Saudi Arabian Grand Prix,,,,
-bortoleto,4.0,0.0,0,0.0,4.0,0.0,4.0,0.0,Saudi Arabian Grand Prix,,,,
-doohan,5.0,0.0,0,0.0,5.0,0.0,0.0,5.0,Saudi Arabian Grand Prix,,,,
-gasly,5.0,5.0,0,5.0,0.0,0.0,0.0,0.0,Saudi Arabian Grand Prix,,,,
-hadjar,14.0,0.0,0,0.0,14.0,1.0,8.0,5.0,Saudi Arabian Grand Prix,,,,
-hamilton,6.0,0.0,0,0.0,6.0,6.0,0.0,0.0,Saudi Arabian Grand Prix,,,,
-hulkenberg,16.0,5.0,0,5.0,11.0,0.0,6.0,5.0,Saudi Arabian Grand Prix,,,,
-lawson,5.0,5.0,0,5.0,0.0,0.0,0.0,0.0,Saudi Arabian Grand Prix,,,,
-leclerc,27.0,5.0,0,5.0,22.0,15.0,2.0,5.0,Saudi Arabian Grand Prix,,,,
-max_verstappen,38.0,15.0,10,5.0,23.0,18.0,0.0,5.0,Saudi Arabian Grand Prix,,,,
-norris,24.0,0.0,0,0.0,24.0,12.0,12.0,0.0,Saudi Arabian Grand Prix,,,,
-ocon,10.0,0.0,0,0.0,10.0,0.0,10.0,0.0,Saudi Arabian Grand Prix,,,,
-piastri,37.0,5.0,0,5.0,32.0,25.0,2.0,5.0,Saudi Arabian Grand Prix,,,,
-russell,20.0,5.0,0,5.0,15.0,10.0,0.0,5.0,Saudi Arabian Grand Prix,,,,
-sainz,14.0,5.0,0,5.0,9.0,4.0,0.0,5.0,Saudi Arabian Grand Prix,,,,
-stroll,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Saudi Arabian Grand Prix,,,,
-tsunoda,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Saudi Arabian Grand Prix,,,,
-albon,24.0,0.0,0,0.0,19.0,10.0,4.0,5.0,Miami Grand Prix,5.0,0.0,0.0,5.0
-alonso,14.0,5.0,0,5.0,9.0,0.0,4.0,5.0,Miami Grand Prix,0.0,0.0,0.0,0.0
-antonelli,15.0,5.0,0,5.0,8.0,8.0,0.0,0.0,Miami Grand Prix,2.0,2.0,0.0,0.0
-bearman,5.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Miami Grand Prix,5.0,0.0,5.0,0.0
-bortoleto,8.0,5.0,0,5.0,0.0,0.0,0.0,0.0,Miami Grand Prix,3.0,0.0,3.0,0.0
-doohan,6.0,5.0,0,5.0,0.0,0.0,0.0,0.0,Miami Grand Prix,1.0,0.0,1.0,0.0
-gasly,30.0,0.0,0,0.0,19.0,0.0,14.0,5.0,Miami Grand Prix,11.0,1.0,5.0,5.0
-hadjar,15.0,5.0,0,5.0,5.0,0.0,0.0,5.0,Miami Grand Prix,5.0,0.0,0.0,5.0
-hamilton,27.0,0.0,0,0.0,12.0,4.0,8.0,0.0,Miami Grand Prix,15.0,6.0,4.0,5.0
-hulkenberg,16.0,0.0,0,0.0,9.0,0.0,4.0,5.0,Miami Grand Prix,7.0,0.0,2.0,5.0
-lawson,1.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Miami Grand Prix,1.0,0.0,1.0,0.0
-leclerc,18.0,5.0,0,5.0,13.0,6.0,2.0,5.0,Miami Grand Prix,0.0,0.0,0.0,0.0
-max_verstappen,32.0,15.0,10,5.0,17.0,12.0,0.0,5.0,Miami Grand Prix,0.0,0.0,0.0,0.0
-norris,38.0,5.0,0,5.0,18.0,18.0,0.0,0.0,Miami Grand Prix,15.0,8.0,2.0,5.0
-ocon,15.0,5.0,0,5.0,5.0,0.0,0.0,5.0,Miami Grand Prix,5.0,0.0,0.0,5.0
-piastri,43.0,0.0,0,0.0,36.0,25.0,6.0,5.0,Miami Grand Prix,7.0,7.0,0.0,0.0
-russell,35.0,0.0,0,0.0,24.0,15.0,4.0,5.0,Miami Grand Prix,11.0,5.0,1.0,5.0
-sainz,7.0,5.0,0,5.0,2.0,2.0,0.0,0.0,Miami Grand Prix,0.0,0.0,0.0,0.0
-stroll,24.0,0.0,0,0.0,4.0,0.0,4.0,0.0,Miami Grand Prix,20.0,4.0,11.0,5.0
-tsunoda,23.0,0.0,0,0.0,1.0,1.0,0.0,0.0,Miami Grand Prix,22.0,3.0,14.0,5.0
-albon,19.0,0.0,0,0.0,19.0,10.0,4.0,5.0,Emilia Romagna Grand Prix,,,,
-alonso,10.0,5.0,0,5.0,5.0,0.0,0.0,5.0,Emilia Romagna Grand Prix,,,,
-antonelli,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Emilia Romagna Grand Prix,,,,
-bearman,9.0,0.0,0,0.0,9.0,0.0,4.0,5.0,Emilia Romagna Grand Prix,,,,
-bortoleto,5.0,5.0,0,5.0,0.0,0.0,0.0,0.0,Emilia Romagna Grand Prix,,,,
-colapinto,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Emilia Romagna Grand Prix,,,,
-gasly,10.0,5.0,0,5.0,5.0,0.0,0.0,5.0,Emilia Romagna Grand Prix,,,,
-hadjar,12.0,5.0,0,5.0,7.0,2.0,0.0,5.0,Emilia Romagna Grand Prix,,,,
-hamilton,33.0,0.0,0,0.0,33.0,12.0,16.0,5.0,Emilia Romagna Grand Prix,,,,
-hulkenberg,15.0,0.0,0,0.0,15.0,0.0,10.0,5.0,Emilia Romagna Grand Prix,,,,
-lawson,2.0,0.0,0,0.0,2.0,0.0,2.0,0.0,Emilia Romagna Grand Prix,,,,
-leclerc,23.0,5.0,0,5.0,18.0,8.0,10.0,0.0,Emilia Romagna Grand Prix,,,,
-max_verstappen,37.0,5.0,0,5.0,32.0,25.0,2.0,5.0,Emilia Romagna Grand Prix,,,,
-norris,27.0,0.0,0,0.0,27.0,18.0,4.0,5.0,Emilia Romagna Grand Prix,,,,
-ocon,5.0,5.0,0,5.0,0.0,0.0,0.0,0.0,Emilia Romagna Grand Prix,,,,
-piastri,30.0,15.0,10,5.0,15.0,15.0,0.0,0.0,Emilia Romagna Grand Prix,,,,
-russell,16.0,5.0,0,5.0,11.0,6.0,0.0,5.0,Emilia Romagna Grand Prix,,,,
-sainz,9.0,5.0,0,5.0,4.0,4.0,0.0,0.0,Emilia Romagna Grand Prix,,,,
-stroll,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Emilia Romagna Grand Prix,,,,
-tsunoda,21.0,0.0,0,0.0,21.0,1.0,20.0,0.0,Emilia Romagna Grand Prix,,,,
-albon,14.0,5.0,0,5.0,9.0,2.0,2.0,5.0,Monaco Grand Prix,,,,
-alonso,5.0,5.0,0,5.0,0.0,0.0,0.0,0.0,Monaco Grand Prix,,,,
-antonelli,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Monaco Grand Prix,,,,
-bearman,16.0,0.0,0,0.0,16.0,0.0,16.0,0.0,Monaco Grand Prix,,,,
-bortoleto,9.0,0.0,0,0.0,9.0,0.0,4.0,5.0,Monaco Grand Prix,,,,
-colapinto,15.0,0.0,0,0.0,15.0,0.0,10.0,5.0,Monaco Grand Prix,,,,
-gasly,5.0,5.0,0,5.0,0.0,0.0,0.0,0.0,Monaco Grand Prix,,,,
-hadjar,18.0,5.0,0,5.0,13.0,8.0,0.0,5.0,Monaco Grand Prix,,,,
-hamilton,14.0,0.0,0,0.0,14.0,10.0,4.0,0.0,Monaco Grand Prix,,,,
-hulkenberg,5.0,5.0,0,5.0,0.0,0.0,0.0,0.0,Monaco Grand Prix,,,,
-lawson,6.0,0.0,0,0.0,6.0,4.0,2.0,0.0,Monaco Grand Prix,,,,
-leclerc,28.0,5.0,0,5.0,23.0,18.0,0.0,5.0,Monaco Grand Prix,,,,
-max_verstappen,22.0,5.0,0,5.0,17.0,12.0,0.0,5.0,Monaco Grand Prix,,,,
-norris,45.0,15.0,10,5.0,30.0,25.0,0.0,5.0,Monaco Grand Prix,,,,
-ocon,18.0,5.0,0,5.0,13.0,6.0,2.0,5.0,Monaco Grand Prix,,,,
-piastri,15.0,0.0,0,0.0,15.0,15.0,0.0,0.0,Monaco Grand Prix,,,,
-russell,16.0,5.0,0,5.0,11.0,0.0,6.0,5.0,Monaco Grand Prix,,,,
-sainz,3.0,0.0,0,0.0,3.0,1.0,2.0,0.0,Monaco Grand Prix,,,,
-stroll,13.0,0.0,0,0.0,13.0,0.0,8.0,5.0,Monaco Grand Prix,,,,
-tsunoda,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Monaco Grand Prix,,,,
-albon,5.0,5.0,0,5.0,0.0,0.0,0.0,0.0,Spanish Grand Prix,,,,
-alonso,4.0,0.0,0,0.0,4.0,2.0,2.0,0.0,Spanish Grand Prix,,,,
-antonelli,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Spanish Grand Prix,,,,
-bearman,5.0,5.0,0,5.0,0.0,0.0,0.0,0.0,Spanish Grand Prix,,,,
-bortoleto,5.0,5.0,0,5.0,0.0,0.0,0.0,0.0,Spanish Grand Prix,,,,
-colapinto,6.0,0.0,0,0.0,6.0,0.0,6.0,0.0,Spanish Grand Prix,,,,
-gasly,14.0,5.0,0,5.0,9.0,4.0,0.0,5.0,Spanish Grand Prix,,,,
-hadjar,20.0,5.0,0,5.0,15.0,6.0,4.0,5.0,Spanish Grand Prix,,,,
-hamilton,13.0,5.0,0,5.0,8.0,8.0,0.0,0.0,Spanish Grand Prix,,,,
-hulkenberg,35.0,0.0,0,0.0,35.0,10.0,20.0,5.0,Spanish Grand Prix,,,,
-lawson,4.0,0.0,0,0.0,4.0,0.0,4.0,0.0,Spanish Grand Prix,,,,
-leclerc,28.0,0.0,0,0.0,28.0,15.0,8.0,5.0,Spanish Grand Prix,,,,
-max_verstappen,11.0,5.0,0,5.0,6.0,1.0,0.0,5.0,Spanish Grand Prix,,,,
-norris,18.0,0.0,0,0.0,18.0,18.0,0.0,0.0,Spanish Grand Prix,,,,
-ocon,5.0,0.0,0,0.0,5.0,0.0,0.0,5.0,Spanish Grand Prix,,,,
-piastri,45.0,15.0,10,5.0,30.0,25.0,0.0,5.0,Spanish Grand Prix,,,,
-russell,22.0,5.0,0,5.0,17.0,12.0,0.0,5.0,Spanish Grand Prix,,,,
-sainz,11.0,0.0,0,0.0,11.0,0.0,6.0,5.0,Spanish Grand Prix,,,,
-stroll,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Spanish Grand Prix,,,,
-tsunoda,12.0,0.0,0,0.0,12.0,0.0,12.0,0.0,Spanish Grand Prix,,,,
-albon,5.0,5.0,0,5.0,0.0,0.0,0.0,0.0,Canadian Grand Prix,,,,
-alonso,16.0,5.0,0,5.0,11.0,6.0,0.0,5.0,Canadian Grand Prix,,,,
-antonelli,17.0,0.0,0,0.0,17.0,15.0,2.0,0.0,Canadian Grand Prix,,,,
-bearman,9.0,5.0,0,5.0,4.0,0.0,4.0,0.0,Canadian Grand Prix,,,,
-bortoleto,2.0,0.0,0,0.0,2.0,0.0,2.0,0.0,Canadian Grand Prix,,,,
-colapinto,10.0,5.0,0,5.0,5.0,0.0,0.0,5.0,Canadian Grand Prix,,,,
-gasly,10.0,0.0,0,0.0,10.0,0.0,10.0,0.0,Canadian Grand Prix,,,,
-hadjar,10.0,5.0,0,5.0,5.0,0.0,0.0,5.0,Canadian Grand Prix,,,,
-hamilton,13.0,5.0,0,5.0,8.0,8.0,0.0,0.0,Canadian Grand Prix,,,,
-hulkenberg,20.0,5.0,0,5.0,15.0,4.0,6.0,5.0,Canadian Grand Prix,,,,
-lawson,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Canadian Grand Prix,,,,
-leclerc,21.0,0.0,0,0.0,21.0,10.0,6.0,5.0,Canadian Grand Prix,,,,
-max_verstappen,28.0,5.0,0,5.0,23.0,18.0,0.0,5.0,Canadian Grand Prix,,,,
-norris,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Canadian Grand Prix,,,,
-ocon,17.0,0.0,0,0.0,17.0,2.0,10.0,5.0,Canadian Grand Prix,,,,
-piastri,22.0,5.0,0,5.0,17.0,12.0,0.0,5.0,Canadian Grand Prix,,,,
-russell,45.0,15.0,10,5.0,30.0,25.0,0.0,5.0,Canadian Grand Prix,,,,
-sainz,18.0,0.0,0,0.0,18.0,1.0,12.0,5.0,Canadian Grand Prix,,,,
-stroll,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Canadian Grand Prix,,,,
-tsunoda,12.0,0.0,0,0.0,12.0,0.0,12.0,0.0,Canadian Grand Prix,,,,
-albon,10.0,5.0,0,5.0,5.0,0.0,0.0,5.0,Austrian Grand Prix,,,,
-alonso,24.0,5.0,0,5.0,19.0,6.0,8.0,5.0,Austrian Grand Prix,,,,
-antonelli,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Austrian Grand Prix,,,,
-bearman,13.0,5.0,0,5.0,8.0,0.0,8.0,0.0,Austrian Grand Prix,,,,
-bortoleto,14.0,5.0,0,5.0,9.0,4.0,0.0,5.0,Austrian Grand Prix,,,,
-colapinto,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Austrian Grand Prix,,,,
-gasly,10.0,5.0,0,5.0,5.0,0.0,0.0,5.0,Austrian Grand Prix,,,,
-hadjar,2.0,0.0,0,0.0,2.0,0.0,2.0,0.0,Austrian Grand Prix,,,,
-hamilton,12.0,0.0,0,0.0,12.0,12.0,0.0,0.0,Austrian Grand Prix,,,,
-hulkenberg,24.0,0.0,0,0.0,24.0,2.0,22.0,0.0,Austrian Grand Prix,,,,
-lawson,18.0,5.0,0,5.0,13.0,8.0,0.0,5.0,Austrian Grand Prix,,,,
-leclerc,25.0,5.0,0,5.0,20.0,15.0,0.0,5.0,Austrian Grand Prix,,,,
-max_verstappen,5.0,5.0,0,5.0,0.0,0.0,0.0,0.0,Austrian Grand Prix,,,,
-norris,45.0,15.0,10,5.0,30.0,25.0,0.0,5.0,Austrian Grand Prix,,,,
-ocon,20.0,0.0,0,0.0,20.0,1.0,14.0,5.0,Austrian Grand Prix,,,,
-piastri,20.0,0.0,0,0.0,20.0,18.0,2.0,0.0,Austrian Grand Prix,,,,
-russell,20.0,5.0,0,5.0,15.0,10.0,0.0,5.0,Austrian Grand Prix,,,,
-sainz,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Austrian Grand Prix,,,,
-stroll,4.0,0.0,0,0.0,4.0,0.0,4.0,0.0,Austrian Grand Prix,,,,
-tsunoda,9.0,0.0,0,0.0,9.0,0.0,4.0,5.0,Austrian Grand Prix,,,,
-albon,19.0,0.0,0,0.0,19.0,4.0,10.0,5.0,British Grand Prix,,,,
-alonso,7.0,5.0,0,5.0,2.0,2.0,0.0,0.0,British Grand Prix,,,,
-antonelli,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,British Grand Prix,,,,
-bearman,19.0,0.0,0,0.0,19.0,0.0,14.0,5.0,British Grand Prix,,,,
-bortoleto,5.0,5.0,0,5.0,0.0,0.0,0.0,0.0,British Grand Prix,,,,
-colapinto,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,British Grand Prix,,,,
-gasly,22.0,5.0,0,5.0,17.0,8.0,4.0,5.0,British Grand Prix,,,,
-hadjar,10.0,5.0,0,5.0,5.0,0.0,0.0,5.0,British Grand Prix,,,,
-hamilton,24.0,5.0,0,5.0,19.0,12.0,2.0,5.0,British Grand Prix,,,,
-hulkenberg,52.0,0.0,0,0.0,52.0,15.0,32.0,5.0,British Grand Prix,,,,
-lawson,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,British Grand Prix,,,,
-leclerc,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,British Grand Prix,,,,
-max_verstappen,30.0,15.0,10,5.0,15.0,10.0,0.0,5.0,British Grand Prix,,,,
-norris,34.0,0.0,0,0.0,34.0,25.0,4.0,5.0,British Grand Prix,,,,
-ocon,7.0,5.0,0,5.0,2.0,0.0,2.0,0.0,British Grand Prix,,,,
-piastri,23.0,5.0,0,5.0,18.0,18.0,0.0,0.0,British Grand Prix,,,,
-russell,11.0,5.0,0,5.0,6.0,1.0,0.0,5.0,British Grand Prix,,,,
-sainz,5.0,5.0,0,5.0,0.0,0.0,0.0,0.0,British Grand Prix,,,,
-stroll,31.0,0.0,0,0.0,31.0,6.0,20.0,5.0,British Grand Prix,,,,
-tsunoda,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,British Grand Prix,,,,
-albon,18.0,5.0,0,5.0,13.0,8.0,0.0,5.0,Belgian Grand Prix,0.0,0.0,0.0,0.0
-alonso,6.0,0.0,0,0.0,6.0,0.0,6.0,0.0,Belgian Grand Prix,0.0,0.0,0.0,0.0
-antonelli,8.0,0.0,0,0.0,6.0,0.0,6.0,0.0,Belgian Grand Prix,2.0,0.0,2.0,0.0
-bearman,9.0,0.0,0,0.0,7.0,0.0,2.0,5.0,Belgian Grand Prix,2.0,2.0,0.0,0.0
-bortoleto,20.0,5.0,0,5.0,9.0,2.0,2.0,5.0,Belgian Grand Prix,6.0,0.0,1.0,5.0
-colapinto,6.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Belgian Grand Prix,6.0,0.0,1.0,5.0
-gasly,17.0,5.0,0,5.0,12.0,1.0,6.0,5.0,Belgian Grand Prix,0.0,0.0,0.0,0.0
-hadjar,12.0,5.0,0,5.0,0.0,0.0,0.0,0.0,Belgian Grand Prix,7.0,1.0,1.0,5.0
-hamilton,31.0,0.0,0,0.0,28.0,6.0,22.0,0.0,Belgian Grand Prix,3.0,0.0,3.0,0.0
-hulkenberg,4.0,0.0,0,0.0,4.0,0.0,4.0,0.0,Belgian Grand Prix,0.0,0.0,0.0,0.0
-lawson,12.0,0.0,0,0.0,11.0,4.0,2.0,5.0,Belgian Grand Prix,1.0,0.0,1.0,0.0
-leclerc,35.0,5.0,0,5.0,20.0,15.0,0.0,5.0,Belgian Grand Prix,10.0,5.0,0.0,5.0
-max_verstappen,36.0,5.0,0,5.0,17.0,12.0,0.0,5.0,Belgian Grand Prix,14.0,8.0,1.0,5.0
-norris,39.0,15.0,10,5.0,18.0,18.0,0.0,0.0,Belgian Grand Prix,6.0,6.0,0.0,0.0
-ocon,14.0,5.0,0,5.0,0.0,0.0,0.0,0.0,Belgian Grand Prix,9.0,4.0,0.0,5.0
-piastri,44.0,0.0,0,0.0,32.0,25.0,2.0,5.0,Belgian Grand Prix,12.0,7.0,0.0,5.0
-russell,28.0,5.0,0,5.0,17.0,10.0,2.0,5.0,Belgian Grand Prix,6.0,0.0,1.0,5.0
-sainz,8.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Belgian Grand Prix,8.0,3.0,0.0,5.0
-stroll,21.0,5.0,0,5.0,9.0,0.0,4.0,5.0,Belgian Grand Prix,7.0,0.0,2.0,5.0
-tsunoda,1.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Belgian Grand Prix,1.0,0.0,1.0,0.0
-albon,8.0,0.0,0,0.0,8.0,0.0,8.0,0.0,Hungarian Grand Prix,,,,
-alonso,20.0,5.0,0,5.0,15.0,10.0,0.0,5.0,Hungarian Grand Prix,,,,
-antonelli,11.0,0.0,0,0.0,11.0,1.0,10.0,0.0,Hungarian Grand Prix,,,,
-bearman,5.0,5.0,0,5.0,0.0,0.0,0.0,0.0,Hungarian Grand Prix,,,,
-bortoleto,20.0,5.0,0,5.0,15.0,8.0,2.0,5.0,Hungarian Grand Prix,,,,
-colapinto,10.0,5.0,0,5.0,5.0,0.0,0.0,5.0,Hungarian Grand Prix,,,,
-gasly,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Hungarian Grand Prix,,,,
-hadjar,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Hungarian Grand Prix,,,,
-hamilton,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Hungarian Grand Prix,,,,
-hulkenberg,10.0,0.0,0,0.0,10.0,0.0,10.0,0.0,Hungarian Grand Prix,,,,
-lawson,16.0,5.0,0,5.0,11.0,4.0,2.0,5.0,Hungarian Grand Prix,,,,
-leclerc,32.0,15.0,10,5.0,17.0,12.0,0.0,5.0,Hungarian Grand Prix,,,,
-max_verstappen,12.0,5.0,0,5.0,7.0,2.0,0.0,5.0,Hungarian Grand Prix,,,,
-norris,34.0,0.0,0,0.0,34.0,25.0,4.0,5.0,Hungarian Grand Prix,,,,
-ocon,7.0,0.0,0,0.0,7.0,0.0,2.0,5.0,Hungarian Grand Prix,,,,
-piastri,23.0,5.0,0,5.0,18.0,18.0,0.0,0.0,Hungarian Grand Prix,,,,
-russell,27.0,5.0,0,5.0,22.0,15.0,2.0,5.0,Hungarian Grand Prix,,,,
-sainz,10.0,5.0,0,5.0,5.0,0.0,0.0,5.0,Hungarian Grand Prix,,,,
-stroll,6.0,0.0,0,0.0,6.0,6.0,0.0,0.0,Hungarian Grand Prix,,,,
-tsunoda,6.0,0.0,0,0.0,6.0,0.0,6.0,0.0,Hungarian Grand Prix,,,,
-albon,35.0,0.0,0,0.0,35.0,10.0,20.0,5.0,Dutch Grand Prix,,,,
-alonso,13.0,5.0,0,5.0,8.0,4.0,4.0,0.0,Dutch Grand Prix,,,,
-antonelli,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Dutch Grand Prix,,,,
-bearman,41.0,0.0,0,0.0,41.0,8.0,28.0,5.0,Dutch Grand Prix,,,,
-bortoleto,5.0,5.0,0,5.0,0.0,0.0,0.0,0.0,Dutch Grand Prix,,,,
-colapinto,15.0,0.0,0,0.0,15.0,0.0,10.0,5.0,Dutch Grand Prix,,,,
-gasly,5.0,5.0,0,5.0,0.0,0.0,0.0,0.0,Dutch Grand Prix,,,,
-hadjar,27.0,5.0,0,5.0,22.0,15.0,2.0,5.0,Dutch Grand Prix,,,,
-hamilton,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Dutch Grand Prix,,,,
-hulkenberg,11.0,0.0,0,0.0,11.0,0.0,6.0,5.0,Dutch Grand Prix,,,,
-lawson,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Dutch Grand Prix,,,,
-leclerc,10.0,5.0,0,5.0,5.0,0.0,0.0,5.0,Dutch Grand Prix,,,,
-max_verstappen,30.0,5.0,0,5.0,25.0,18.0,2.0,5.0,Dutch Grand Prix,,,,
-norris,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Dutch Grand Prix,,,,
-ocon,22.0,5.0,0,5.0,17.0,1.0,16.0,0.0,Dutch Grand Prix,,,,
-piastri,45.0,15.0,10,5.0,30.0,25.0,0.0,5.0,Dutch Grand Prix,,,,
-russell,24.0,5.0,0,5.0,19.0,12.0,2.0,5.0,Dutch Grand Prix,,,,
-sainz,5.0,5.0,0,5.0,0.0,0.0,0.0,0.0,Dutch Grand Prix,,,,
-stroll,35.0,0.0,0,0.0,35.0,6.0,24.0,5.0,Dutch Grand Prix,,,,
-tsunoda,8.0,0.0,0,0.0,8.0,2.0,6.0,0.0,Dutch Grand Prix,,,,
-albon,25.0,0.0,0,0.0,25.0,6.0,14.0,5.0,Italian Grand Prix,,,,
-alonso,5.0,5.0,0,5.0,0.0,0.0,0.0,0.0,Italian Grand Prix,,,,
-antonelli,2.0,0.0,0,0.0,2.0,2.0,0.0,0.0,Italian Grand Prix,,,,
-bearman,10.0,5.0,0,5.0,5.0,0.0,0.0,5.0,Italian Grand Prix,,,,
-bortoleto,14.0,5.0,0,5.0,9.0,4.0,0.0,5.0,Italian Grand Prix,,,,
-colapinto,5.0,5.0,0,5.0,0.0,0.0,0.0,0.0,Italian Grand Prix,,,,
-gasly,13.0,0.0,0,0.0,13.0,0.0,8.0,5.0,Italian Grand Prix,,,,
-hadjar,24.0,0.0,0,0.0,24.0,1.0,18.0,5.0,Italian Grand Prix,,,,
-hamilton,16.0,0.0,0,0.0,16.0,8.0,8.0,0.0,Italian Grand Prix,,,,
-hulkenberg,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Italian Grand Prix,,,,
-lawson,13.0,5.0,0,5.0,8.0,0.0,8.0,0.0,Italian Grand Prix,,,,
-leclerc,22.0,5.0,0,5.0,17.0,12.0,0.0,5.0,Italian Grand Prix,,,,
-max_verstappen,45.0,15.0,10,5.0,30.0,25.0,0.0,5.0,Italian Grand Prix,,,,
-norris,28.0,5.0,0,5.0,23.0,18.0,0.0,5.0,Italian Grand Prix,,,,
-ocon,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Italian Grand Prix,,,,
-piastri,15.0,0.0,0,0.0,15.0,15.0,0.0,0.0,Italian Grand Prix,,,,
-russell,20.0,5.0,0,5.0,15.0,10.0,0.0,5.0,Italian Grand Prix,,,,
-sainz,9.0,5.0,0,5.0,4.0,0.0,4.0,0.0,Italian Grand Prix,,,,
-stroll,5.0,0.0,0,0.0,5.0,0.0,0.0,5.0,Italian Grand Prix,,,,
-tsunoda,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Italian Grand Prix,,,,
-albon,12.0,0.0,0,0.0,12.0,0.0,12.0,0.0,Azerbaijan Grand Prix,,,,
-alonso,10.0,5.0,0,5.0,5.0,0.0,0.0,5.0,Azerbaijan Grand Prix,,,,
-antonelli,17.0,5.0,0,5.0,12.0,12.0,0.0,0.0,Azerbaijan Grand Prix,,,,
-bearman,16.0,5.0,0,5.0,11.0,0.0,6.0,5.0,Azerbaijan Grand Prix,,,,
-bortoleto,14.0,5.0,0,5.0,9.0,0.0,4.0,5.0,Azerbaijan Grand Prix,,,,
-colapinto,5.0,5.0,0,5.0,0.0,0.0,0.0,0.0,Azerbaijan Grand Prix,,,,
-gasly,5.0,0.0,0,0.0,5.0,0.0,0.0,5.0,Azerbaijan Grand Prix,,,,
-hadjar,1.0,0.0,0,0.0,1.0,1.0,0.0,0.0,Azerbaijan Grand Prix,,,,
-hamilton,17.0,0.0,0,0.0,17.0,4.0,8.0,5.0,Azerbaijan Grand Prix,,,,
-hulkenberg,2.0,0.0,0,0.0,2.0,0.0,2.0,0.0,Azerbaijan Grand Prix,,,,
-lawson,20.0,5.0,0,5.0,15.0,10.0,0.0,5.0,Azerbaijan Grand Prix,,,,
-leclerc,9.0,5.0,0,5.0,4.0,2.0,2.0,0.0,Azerbaijan Grand Prix,,,,
-max_verstappen,45.0,15.0,10,5.0,30.0,25.0,0.0,5.0,Azerbaijan Grand Prix,,,,
-norris,16.0,5.0,0,5.0,11.0,6.0,0.0,5.0,Azerbaijan Grand Prix,,,,
-ocon,12.0,0.0,0,0.0,12.0,0.0,12.0,0.0,Azerbaijan Grand Prix,,,,
-piastri,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Azerbaijan Grand Prix,,,,
-russell,29.0,0.0,0,0.0,29.0,18.0,6.0,5.0,Azerbaijan Grand Prix,,,,
-sainz,25.0,5.0,0,5.0,20.0,15.0,0.0,5.0,Azerbaijan Grand Prix,,,,
-stroll,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Azerbaijan Grand Prix,,,,
-tsunoda,8.0,0.0,0,0.0,8.0,8.0,0.0,0.0,Azerbaijan Grand Prix,,,,
-albon,12.0,0.0,0,0.0,12.0,0.0,12.0,0.0,Singapore Grand Prix,,,,
-alonso,22.0,5.0,0,5.0,17.0,6.0,6.0,5.0,Singapore Grand Prix,,,,
-antonelli,10.0,0.0,0,0.0,10.0,10.0,0.0,0.0,Singapore Grand Prix,,,,
-bearman,12.0,5.0,0,5.0,7.0,2.0,0.0,5.0,Singapore Grand Prix,,,,
-bortoleto,5.0,0.0,0,0.0,5.0,0.0,0.0,5.0,Singapore Grand Prix,,,,
-colapinto,10.0,5.0,0,5.0,5.0,0.0,0.0,5.0,Singapore Grand Prix,,,,
-gasly,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Singapore Grand Prix,,,,
-hadjar,10.0,5.0,0,5.0,5.0,0.0,0.0,5.0,Singapore Grand Prix,,,,
-hamilton,9.0,5.0,0,5.0,4.0,4.0,0.0,0.0,Singapore Grand Prix,,,,
-hulkenberg,5.0,5.0,0,5.0,0.0,0.0,0.0,0.0,Singapore Grand Prix,,,,
-lawson,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Singapore Grand Prix,,,,
-leclerc,15.0,0.0,0,0.0,15.0,8.0,2.0,5.0,Singapore Grand Prix,,,,
-max_verstappen,28.0,5.0,0,5.0,23.0,18.0,0.0,5.0,Singapore Grand Prix,,,,
-norris,24.0,0.0,0,0.0,24.0,15.0,4.0,5.0,Singapore Grand Prix,,,,
-ocon,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Singapore Grand Prix,,,,
-piastri,17.0,5.0,0,5.0,12.0,12.0,0.0,0.0,Singapore Grand Prix,,,,
-russell,45.0,15.0,10,5.0,30.0,25.0,0.0,5.0,Singapore Grand Prix,,,,
-sainz,27.0,5.0,0,5.0,22.0,1.0,16.0,5.0,Singapore Grand Prix,,,,
-stroll,4.0,0.0,0,0.0,4.0,0.0,4.0,0.0,Singapore Grand Prix,,,,
-tsunoda,2.0,0.0,0,0.0,2.0,0.0,2.0,0.0,Singapore Grand Prix,,,,
-albon,19.0,0.0,0,0.0,13.0,0.0,8.0,5.0,United States Grand Prix,6.0,3.0,3.0,0.0
-alonso,11.0,5.0,0,5.0,6.0,1.0,0.0,5.0,United States Grand Prix,0.0,0.0,0.0,0.0
-antonelli,4.0,0.0,0,0.0,0.0,0.0,0.0,0.0,United States Grand Prix,4.0,1.0,3.0,0.0
-bearman,18.0,5.0,0,5.0,7.0,2.0,0.0,5.0,United States Grand Prix,6.0,0.0,1.0,5.0
-bortoleto,14.0,0.0,0,0.0,0.0,0.0,0.0,0.0,United States Grand Prix,14.0,0.0,9.0,5.0
-colapinto,8.0,0.0,0,0.0,5.0,0.0,0.0,5.0,United States Grand Prix,3.0,0.0,3.0,0.0
-gasly,13.0,5.0,0,5.0,0.0,0.0,0.0,0.0,United States Grand Prix,8.0,0.0,3.0,5.0
-hadjar,8.0,0.0,0,0.0,8.0,0.0,8.0,0.0,United States Grand Prix,0.0,0.0,0.0,0.0
-hamilton,28.0,0.0,0,0.0,14.0,12.0,2.0,0.0,United States Grand Prix,14.0,5.0,4.0,5.0
-hulkenberg,20.0,5.0,0,5.0,15.0,4.0,6.0,5.0,United States Grand Prix,0.0,0.0,0.0,0.0
-lawson,23.0,5.0,0,5.0,7.0,0.0,2.0,5.0,United States Grand Prix,11.0,0.0,6.0,5.0
-leclerc,34.0,5.0,0,5.0,20.0,15.0,0.0,5.0,United States Grand Prix,9.0,4.0,5.0,0.0
-max_verstappen,58.0,15.0,10,5.0,30.0,25.0,0.0,5.0,United States Grand Prix,13.0,8.0,0.0,5.0
-norris,33.0,5.0,0,5.0,23.0,18.0,0.0,5.0,United States Grand Prix,5.0,0.0,0.0,5.0
-ocon,7.0,0.0,0,0.0,4.0,0.0,4.0,0.0,United States Grand Prix,3.0,0.0,3.0,0.0
-piastri,12.0,0.0,0,0.0,12.0,10.0,2.0,0.0,United States Grand Prix,0.0,0.0,0.0,0.0
-russell,33.0,5.0,0,5.0,13.0,8.0,0.0,5.0,United States Grand Prix,15.0,7.0,3.0,5.0
-sainz,20.0,5.0,0,5.0,0.0,0.0,0.0,0.0,United States Grand Prix,15.0,6.0,4.0,5.0
-stroll,19.0,0.0,0,0.0,14.0,0.0,14.0,0.0,United States Grand Prix,5.0,0.0,0.0,5.0
-tsunoda,31.0,0.0,0,0.0,18.0,6.0,12.0,0.0,United States Grand Prix,13.0,2.0,11.0,0.0
-albon,15.0,0.0,0,0.0,15.0,0.0,10.0,5.0,Mexico City Grand Prix,,,,
-alonso,5.0,5.0,0,5.0,0.0,0.0,0.0,0.0,Mexico City Grand Prix,,,,
-antonelli,13.0,0.0,0,0.0,13.0,8.0,0.0,5.0,Mexico City Grand Prix,,,,
-bearman,32.0,5.0,0,5.0,27.0,12.0,10.0,5.0,Mexico City Grand Prix,,,,
-bortoleto,18.0,0.0,0,0.0,18.0,1.0,12.0,5.0,Mexico City Grand Prix,,,,
-colapinto,8.0,0.0,0,0.0,8.0,0.0,8.0,0.0,Mexico City Grand Prix,,,,
-gasly,16.0,5.0,0,5.0,11.0,0.0,6.0,5.0,Mexico City Grand Prix,,,,
-hadjar,10.0,5.0,0,5.0,5.0,0.0,0.0,5.0,Mexico City Grand Prix,,,,
-hamilton,4.0,0.0,0,0.0,4.0,4.0,0.0,0.0,Mexico City Grand Prix,,,,
-hulkenberg,5.0,5.0,0,5.0,0.0,0.0,0.0,0.0,Mexico City Grand Prix,,,,
-lawson,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Mexico City Grand Prix,,,,
-leclerc,28.0,5.0,0,5.0,23.0,18.0,0.0,5.0,Mexico City Grand Prix,,,,
-max_verstappen,29.0,5.0,0,5.0,24.0,15.0,4.0,5.0,Mexico City Grand Prix,,,,
-norris,45.0,15.0,10,5.0,30.0,25.0,0.0,5.0,Mexico City Grand Prix,,,,
-ocon,6.0,0.0,0,0.0,6.0,2.0,4.0,0.0,Mexico City Grand Prix,,,,
-piastri,14.0,0.0,0,0.0,14.0,10.0,4.0,0.0,Mexico City Grand Prix,,,,
-russell,11.0,5.0,0,5.0,6.0,6.0,0.0,0.0,Mexico City Grand Prix,,,,
-sainz,5.0,5.0,0,5.0,0.0,0.0,0.0,0.0,Mexico City Grand Prix,,,,
-stroll,15.0,0.0,0,0.0,15.0,0.0,10.0,5.0,Mexico City Grand Prix,,,,
-tsunoda,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0,Mexico City Grand Prix,,,,
+albon,22.0,5.0,0.0,5.0,17.0,10.0,2.0,5.0,Australian Grand Prix,,,,
+alonso,5.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,Australian Grand Prix,,,,
+antonelli,36.0,0.0,0.0,0.0,36.0,12.0,24.0,0.0,Australian Grand Prix,,,,
+bearman,12.0,0.0,0.0,0.0,12.0,0.0,12.0,0.0,Australian Grand Prix,,,,
+bortoleto,5.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,Australian Grand Prix,,,,
+doohan,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Australian Grand Prix,,,,
+gasly,10.0,5.0,0.0,5.0,5.0,0.0,0.0,5.0,Australian Grand Prix,,,,
+hadjar,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Australian Grand Prix,,,,
+hamilton,1.0,0.0,0.0,0.0,1.0,1.0,0.0,0.0,Australian Grand Prix,,,,
+hulkenberg,31.0,0.0,0.0,0.0,31.0,6.0,20.0,5.0,Australian Grand Prix,,,,
+lawson,6.0,0.0,0.0,0.0,6.0,0.0,6.0,0.0,Australian Grand Prix,,,,
+leclerc,14.0,5.0,0.0,5.0,9.0,4.0,0.0,5.0,Australian Grand Prix,,,,
+max_verstappen,30.0,5.0,0.0,5.0,25.0,18.0,2.0,5.0,Australian Grand Prix,,,,
+norris,45.0,15.0,10.0,5.0,30.0,25.0,0.0,5.0,Australian Grand Prix,,,,
+ocon,22.0,5.0,0.0,5.0,17.0,0.0,12.0,5.0,Australian Grand Prix,,,,
+piastri,2.0,0.0,0.0,0.0,2.0,2.0,0.0,0.0,Australian Grand Prix,,,,
+russell,27.0,5.0,0.0,5.0,22.0,15.0,2.0,5.0,Australian Grand Prix,,,,
+sainz,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Australian Grand Prix,,,,
+stroll,27.0,0.0,0.0,0.0,27.0,8.0,14.0,5.0,Australian Grand Prix,,,,
+tsunoda,10.0,5.0,0.0,5.0,5.0,0.0,0.0,5.0,Australian Grand Prix,,,,
+albon,27.0,5.0,0.0,5.0,17.0,6.0,6.0,5.0,Chinese Grand Prix,5.0,0.0,0.0,5.0
+alonso,6.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,Chinese Grand Prix,1.0,0.0,1.0,0.0
+antonelli,14.0,0.0,0.0,0.0,12.0,8.0,4.0,0.0,Chinese Grand Prix,2.0,2.0,0.0,0.0
+bearman,27.0,0.0,0.0,0.0,22.0,4.0,18.0,0.0,Chinese Grand Prix,5.0,0.0,0.0,5.0
+bortoleto,20.0,0.0,0.0,0.0,15.0,0.0,10.0,5.0,Chinese Grand Prix,5.0,0.0,0.0,5.0
+doohan,15.0,0.0,0.0,0.0,15.0,0.0,10.0,5.0,Chinese Grand Prix,0.0,0.0,0.0,0.0
+gasly,15.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,Chinese Grand Prix,10.0,0.0,5.0,5.0
+hadjar,12.0,5.0,0.0,5.0,5.0,0.0,0.0,5.0,Chinese Grand Prix,2.0,0.0,2.0,0.0
+hamilton,18.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,Chinese Grand Prix,13.0,8.0,0.0,5.0
+hulkenberg,6.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,Chinese Grand Prix,1.0,0.0,1.0,0.0
+lawson,21.0,0.0,0.0,0.0,16.0,0.0,16.0,0.0,Chinese Grand Prix,5.0,0.0,5.0,0.0
+leclerc,9.0,0.0,0.0,0.0,5.0,0.0,0.0,5.0,Chinese Grand Prix,4.0,4.0,0.0,0.0
+max_verstappen,33.0,5.0,0.0,5.0,17.0,12.0,0.0,5.0,Chinese Grand Prix,11.0,6.0,0.0,5.0
+norris,21.0,0.0,0.0,0.0,20.0,18.0,2.0,0.0,Chinese Grand Prix,1.0,1.0,0.0,0.0
+ocon,34.0,5.0,0.0,5.0,27.0,10.0,12.0,5.0,Chinese Grand Prix,2.0,0.0,2.0,0.0
+piastri,58.0,15.0,10.0,5.0,30.0,25.0,0.0,5.0,Chinese Grand Prix,13.0,7.0,1.0,5.0
+russell,36.0,5.0,0.0,5.0,20.0,15.0,0.0,5.0,Chinese Grand Prix,11.0,5.0,1.0,5.0
+sainz,11.0,0.0,0.0,0.0,11.0,1.0,10.0,0.0,Chinese Grand Prix,0.0,0.0,0.0,0.0
+stroll,23.0,0.0,0.0,0.0,17.0,2.0,10.0,5.0,Chinese Grand Prix,6.0,0.0,1.0,5.0
+tsunoda,10.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Chinese Grand Prix,10.0,3.0,2.0,5.0
+albon,12.0,5.0,0.0,5.0,7.0,2.0,0.0,5.0,Japanese Grand Prix,,,,
+alonso,12.0,5.0,0.0,5.0,7.0,0.0,2.0,5.0,Japanese Grand Prix,,,,
+antonelli,8.0,0.0,0.0,0.0,8.0,8.0,0.0,0.0,Japanese Grand Prix,,,,
+bearman,11.0,5.0,0.0,5.0,6.0,1.0,0.0,5.0,Japanese Grand Prix,,,,
+bortoleto,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Japanese Grand Prix,,,,
+doohan,8.0,0.0,0.0,0.0,8.0,0.0,8.0,0.0,Japanese Grand Prix,,,,
+gasly,10.0,5.0,0.0,5.0,5.0,0.0,0.0,5.0,Japanese Grand Prix,,,,
+hadjar,14.0,5.0,0.0,5.0,9.0,4.0,0.0,5.0,Japanese Grand Prix,,,,
+hamilton,8.0,0.0,0.0,0.0,8.0,6.0,2.0,0.0,Japanese Grand Prix,,,,
+hulkenberg,10.0,5.0,0.0,5.0,5.0,0.0,0.0,5.0,Japanese Grand Prix,,,,
+lawson,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Japanese Grand Prix,,,,
+leclerc,22.0,5.0,0.0,5.0,17.0,12.0,0.0,5.0,Japanese Grand Prix,,,,
+max_verstappen,45.0,15.0,10.0,5.0,30.0,25.0,0.0,5.0,Japanese Grand Prix,,,,
+norris,28.0,5.0,0.0,5.0,23.0,18.0,0.0,5.0,Japanese Grand Prix,,,,
+ocon,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Japanese Grand Prix,,,,
+piastri,15.0,0.0,0.0,0.0,15.0,15.0,0.0,0.0,Japanese Grand Prix,,,,
+russell,20.0,5.0,0.0,5.0,15.0,10.0,0.0,5.0,Japanese Grand Prix,,,,
+sainz,2.0,0.0,0.0,0.0,2.0,0.0,2.0,0.0,Japanese Grand Prix,,,,
+stroll,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Japanese Grand Prix,,,,
+tsunoda,4.0,0.0,0.0,0.0,4.0,0.0,4.0,0.0,Japanese Grand Prix,,,,
+albon,11.0,0.0,0.0,0.0,11.0,0.0,6.0,5.0,Bahrain Grand Prix,,,,
+alonso,10.0,5.0,0.0,5.0,5.0,0.0,0.0,5.0,Bahrain Grand Prix,,,,
+antonelli,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Bahrain Grand Prix,,,,
+bearman,21.0,0.0,0.0,0.0,21.0,1.0,20.0,0.0,Bahrain Grand Prix,,,,
+bortoleto,5.0,0.0,0.0,0.0,5.0,0.0,0.0,5.0,Bahrain Grand Prix,,,,
+doohan,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Bahrain Grand Prix,,,,
+gasly,16.0,5.0,0.0,5.0,11.0,6.0,0.0,5.0,Bahrain Grand Prix,,,,
+hadjar,10.0,5.0,0.0,5.0,5.0,0.0,0.0,5.0,Bahrain Grand Prix,,,,
+hamilton,18.0,0.0,0.0,0.0,18.0,10.0,8.0,0.0,Bahrain Grand Prix,,,,
+hulkenberg,5.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,Bahrain Grand Prix,,,,
+lawson,2.0,0.0,0.0,0.0,2.0,0.0,2.0,0.0,Bahrain Grand Prix,,,,
+leclerc,22.0,5.0,0.0,5.0,17.0,12.0,0.0,5.0,Bahrain Grand Prix,,,,
+max_verstappen,20.0,5.0,0.0,5.0,15.0,8.0,2.0,5.0,Bahrain Grand Prix,,,,
+norris,21.0,0.0,0.0,0.0,21.0,15.0,6.0,0.0,Bahrain Grand Prix,,,,
+ocon,26.0,5.0,0.0,5.0,21.0,4.0,12.0,5.0,Bahrain Grand Prix,,,,
+piastri,45.0,15.0,10.0,5.0,30.0,25.0,0.0,5.0,Bahrain Grand Prix,,,,
+russell,30.0,5.0,0.0,5.0,25.0,18.0,2.0,5.0,Bahrain Grand Prix,,,,
+sainz,5.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,Bahrain Grand Prix,,,,
+stroll,4.0,0.0,0.0,0.0,4.0,0.0,4.0,0.0,Bahrain Grand Prix,,,,
+tsunoda,4.0,0.0,0.0,0.0,4.0,2.0,2.0,0.0,Bahrain Grand Prix,,,,
+albon,6.0,0.0,0.0,0.0,6.0,2.0,4.0,0.0,Saudi Arabian Grand Prix,,,,
+alonso,14.0,5.0,0.0,5.0,9.0,0.0,4.0,5.0,Saudi Arabian Grand Prix,,,,
+antonelli,8.0,0.0,0.0,0.0,8.0,8.0,0.0,0.0,Saudi Arabian Grand Prix,,,,
+bearman,14.0,5.0,0.0,5.0,9.0,0.0,4.0,5.0,Saudi Arabian Grand Prix,,,,
+bortoleto,4.0,0.0,0.0,0.0,4.0,0.0,4.0,0.0,Saudi Arabian Grand Prix,,,,
+doohan,5.0,0.0,0.0,0.0,5.0,0.0,0.0,5.0,Saudi Arabian Grand Prix,,,,
+gasly,5.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,Saudi Arabian Grand Prix,,,,
+hadjar,14.0,0.0,0.0,0.0,14.0,1.0,8.0,5.0,Saudi Arabian Grand Prix,,,,
+hamilton,6.0,0.0,0.0,0.0,6.0,6.0,0.0,0.0,Saudi Arabian Grand Prix,,,,
+hulkenberg,16.0,5.0,0.0,5.0,11.0,0.0,6.0,5.0,Saudi Arabian Grand Prix,,,,
+lawson,5.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,Saudi Arabian Grand Prix,,,,
+leclerc,27.0,5.0,0.0,5.0,22.0,15.0,2.0,5.0,Saudi Arabian Grand Prix,,,,
+max_verstappen,38.0,15.0,10.0,5.0,23.0,18.0,0.0,5.0,Saudi Arabian Grand Prix,,,,
+norris,24.0,0.0,0.0,0.0,24.0,12.0,12.0,0.0,Saudi Arabian Grand Prix,,,,
+ocon,10.0,0.0,0.0,0.0,10.0,0.0,10.0,0.0,Saudi Arabian Grand Prix,,,,
+piastri,37.0,5.0,0.0,5.0,32.0,25.0,2.0,5.0,Saudi Arabian Grand Prix,,,,
+russell,20.0,5.0,0.0,5.0,15.0,10.0,0.0,5.0,Saudi Arabian Grand Prix,,,,
+sainz,14.0,5.0,0.0,5.0,9.0,4.0,0.0,5.0,Saudi Arabian Grand Prix,,,,
+stroll,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Saudi Arabian Grand Prix,,,,
+tsunoda,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Saudi Arabian Grand Prix,,,,
+albon,24.0,0.0,0.0,0.0,19.0,10.0,4.0,5.0,Miami Grand Prix,5.0,0.0,0.0,5.0
+alonso,14.0,5.0,0.0,5.0,9.0,0.0,4.0,5.0,Miami Grand Prix,0.0,0.0,0.0,0.0
+antonelli,15.0,5.0,0.0,5.0,8.0,8.0,0.0,0.0,Miami Grand Prix,2.0,2.0,0.0,0.0
+bearman,5.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Miami Grand Prix,5.0,0.0,5.0,0.0
+bortoleto,8.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,Miami Grand Prix,3.0,0.0,3.0,0.0
+doohan,6.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,Miami Grand Prix,1.0,0.0,1.0,0.0
+gasly,30.0,0.0,0.0,0.0,19.0,0.0,14.0,5.0,Miami Grand Prix,11.0,1.0,5.0,5.0
+hadjar,15.0,5.0,0.0,5.0,5.0,0.0,0.0,5.0,Miami Grand Prix,5.0,0.0,0.0,5.0
+hamilton,27.0,0.0,0.0,0.0,12.0,4.0,8.0,0.0,Miami Grand Prix,15.0,6.0,4.0,5.0
+hulkenberg,16.0,0.0,0.0,0.0,9.0,0.0,4.0,5.0,Miami Grand Prix,7.0,0.0,2.0,5.0
+lawson,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Miami Grand Prix,1.0,0.0,1.0,0.0
+leclerc,18.0,5.0,0.0,5.0,13.0,6.0,2.0,5.0,Miami Grand Prix,0.0,0.0,0.0,0.0
+max_verstappen,32.0,15.0,10.0,5.0,17.0,12.0,0.0,5.0,Miami Grand Prix,0.0,0.0,0.0,0.0
+norris,38.0,5.0,0.0,5.0,18.0,18.0,0.0,0.0,Miami Grand Prix,15.0,8.0,2.0,5.0
+ocon,15.0,5.0,0.0,5.0,5.0,0.0,0.0,5.0,Miami Grand Prix,5.0,0.0,0.0,5.0
+piastri,43.0,0.0,0.0,0.0,36.0,25.0,6.0,5.0,Miami Grand Prix,7.0,7.0,0.0,0.0
+russell,35.0,0.0,0.0,0.0,24.0,15.0,4.0,5.0,Miami Grand Prix,11.0,5.0,1.0,5.0
+sainz,7.0,5.0,0.0,5.0,2.0,2.0,0.0,0.0,Miami Grand Prix,0.0,0.0,0.0,0.0
+stroll,24.0,0.0,0.0,0.0,4.0,0.0,4.0,0.0,Miami Grand Prix,20.0,4.0,11.0,5.0
+tsunoda,23.0,0.0,0.0,0.0,1.0,1.0,0.0,0.0,Miami Grand Prix,22.0,3.0,14.0,5.0
+albon,19.0,0.0,0.0,0.0,19.0,10.0,4.0,5.0,Emilia Romagna Grand Prix,,,,
+alonso,10.0,5.0,0.0,5.0,5.0,0.0,0.0,5.0,Emilia Romagna Grand Prix,,,,
+antonelli,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Emilia Romagna Grand Prix,,,,
+bearman,9.0,0.0,0.0,0.0,9.0,0.0,4.0,5.0,Emilia Romagna Grand Prix,,,,
+bortoleto,5.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,Emilia Romagna Grand Prix,,,,
+colapinto,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Emilia Romagna Grand Prix,,,,
+gasly,10.0,5.0,0.0,5.0,5.0,0.0,0.0,5.0,Emilia Romagna Grand Prix,,,,
+hadjar,12.0,5.0,0.0,5.0,7.0,2.0,0.0,5.0,Emilia Romagna Grand Prix,,,,
+hamilton,33.0,0.0,0.0,0.0,33.0,12.0,16.0,5.0,Emilia Romagna Grand Prix,,,,
+hulkenberg,15.0,0.0,0.0,0.0,15.0,0.0,10.0,5.0,Emilia Romagna Grand Prix,,,,
+lawson,2.0,0.0,0.0,0.0,2.0,0.0,2.0,0.0,Emilia Romagna Grand Prix,,,,
+leclerc,23.0,5.0,0.0,5.0,18.0,8.0,10.0,0.0,Emilia Romagna Grand Prix,,,,
+max_verstappen,37.0,5.0,0.0,5.0,32.0,25.0,2.0,5.0,Emilia Romagna Grand Prix,,,,
+norris,27.0,0.0,0.0,0.0,27.0,18.0,4.0,5.0,Emilia Romagna Grand Prix,,,,
+ocon,5.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,Emilia Romagna Grand Prix,,,,
+piastri,30.0,15.0,10.0,5.0,15.0,15.0,0.0,0.0,Emilia Romagna Grand Prix,,,,
+russell,16.0,5.0,0.0,5.0,11.0,6.0,0.0,5.0,Emilia Romagna Grand Prix,,,,
+sainz,9.0,5.0,0.0,5.0,4.0,4.0,0.0,0.0,Emilia Romagna Grand Prix,,,,
+stroll,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Emilia Romagna Grand Prix,,,,
+tsunoda,21.0,0.0,0.0,0.0,21.0,1.0,20.0,0.0,Emilia Romagna Grand Prix,,,,
+albon,14.0,5.0,0.0,5.0,9.0,2.0,2.0,5.0,Monaco Grand Prix,,,,
+alonso,5.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,Monaco Grand Prix,,,,
+antonelli,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Monaco Grand Prix,,,,
+bearman,16.0,0.0,0.0,0.0,16.0,0.0,16.0,0.0,Monaco Grand Prix,,,,
+bortoleto,9.0,0.0,0.0,0.0,9.0,0.0,4.0,5.0,Monaco Grand Prix,,,,
+colapinto,15.0,0.0,0.0,0.0,15.0,0.0,10.0,5.0,Monaco Grand Prix,,,,
+gasly,5.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,Monaco Grand Prix,,,,
+hadjar,18.0,5.0,0.0,5.0,13.0,8.0,0.0,5.0,Monaco Grand Prix,,,,
+hamilton,14.0,0.0,0.0,0.0,14.0,10.0,4.0,0.0,Monaco Grand Prix,,,,
+hulkenberg,5.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,Monaco Grand Prix,,,,
+lawson,6.0,0.0,0.0,0.0,6.0,4.0,2.0,0.0,Monaco Grand Prix,,,,
+leclerc,28.0,5.0,0.0,5.0,23.0,18.0,0.0,5.0,Monaco Grand Prix,,,,
+max_verstappen,22.0,5.0,0.0,5.0,17.0,12.0,0.0,5.0,Monaco Grand Prix,,,,
+norris,45.0,15.0,10.0,5.0,30.0,25.0,0.0,5.0,Monaco Grand Prix,,,,
+ocon,18.0,5.0,0.0,5.0,13.0,6.0,2.0,5.0,Monaco Grand Prix,,,,
+piastri,15.0,0.0,0.0,0.0,15.0,15.0,0.0,0.0,Monaco Grand Prix,,,,
+russell,16.0,5.0,0.0,5.0,11.0,0.0,6.0,5.0,Monaco Grand Prix,,,,
+sainz,3.0,0.0,0.0,0.0,3.0,1.0,2.0,0.0,Monaco Grand Prix,,,,
+stroll,13.0,0.0,0.0,0.0,13.0,0.0,8.0,5.0,Monaco Grand Prix,,,,
+tsunoda,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Monaco Grand Prix,,,,
+albon,5.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,Spanish Grand Prix,,,,
+alonso,4.0,0.0,0.0,0.0,4.0,2.0,2.0,0.0,Spanish Grand Prix,,,,
+antonelli,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Spanish Grand Prix,,,,
+bearman,5.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,Spanish Grand Prix,,,,
+bortoleto,5.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,Spanish Grand Prix,,,,
+colapinto,6.0,0.0,0.0,0.0,6.0,0.0,6.0,0.0,Spanish Grand Prix,,,,
+gasly,14.0,5.0,0.0,5.0,9.0,4.0,0.0,5.0,Spanish Grand Prix,,,,
+hadjar,20.0,5.0,0.0,5.0,15.0,6.0,4.0,5.0,Spanish Grand Prix,,,,
+hamilton,13.0,5.0,0.0,5.0,8.0,8.0,0.0,0.0,Spanish Grand Prix,,,,
+hulkenberg,35.0,0.0,0.0,0.0,35.0,10.0,20.0,5.0,Spanish Grand Prix,,,,
+lawson,4.0,0.0,0.0,0.0,4.0,0.0,4.0,0.0,Spanish Grand Prix,,,,
+leclerc,28.0,0.0,0.0,0.0,28.0,15.0,8.0,5.0,Spanish Grand Prix,,,,
+max_verstappen,11.0,5.0,0.0,5.0,6.0,1.0,0.0,5.0,Spanish Grand Prix,,,,
+norris,18.0,0.0,0.0,0.0,18.0,18.0,0.0,0.0,Spanish Grand Prix,,,,
+ocon,5.0,0.0,0.0,0.0,5.0,0.0,0.0,5.0,Spanish Grand Prix,,,,
+piastri,45.0,15.0,10.0,5.0,30.0,25.0,0.0,5.0,Spanish Grand Prix,,,,
+russell,22.0,5.0,0.0,5.0,17.0,12.0,0.0,5.0,Spanish Grand Prix,,,,
+sainz,11.0,0.0,0.0,0.0,11.0,0.0,6.0,5.0,Spanish Grand Prix,,,,
+stroll,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Spanish Grand Prix,,,,
+tsunoda,12.0,0.0,0.0,0.0,12.0,0.0,12.0,0.0,Spanish Grand Prix,,,,
+albon,5.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,Canadian Grand Prix,,,,
+alonso,16.0,5.0,0.0,5.0,11.0,6.0,0.0,5.0,Canadian Grand Prix,,,,
+antonelli,17.0,0.0,0.0,0.0,17.0,15.0,2.0,0.0,Canadian Grand Prix,,,,
+bearman,9.0,5.0,0.0,5.0,4.0,0.0,4.0,0.0,Canadian Grand Prix,,,,
+bortoleto,2.0,0.0,0.0,0.0,2.0,0.0,2.0,0.0,Canadian Grand Prix,,,,
+colapinto,10.0,5.0,0.0,5.0,5.0,0.0,0.0,5.0,Canadian Grand Prix,,,,
+gasly,10.0,0.0,0.0,0.0,10.0,0.0,10.0,0.0,Canadian Grand Prix,,,,
+hadjar,10.0,5.0,0.0,5.0,5.0,0.0,0.0,5.0,Canadian Grand Prix,,,,
+hamilton,13.0,5.0,0.0,5.0,8.0,8.0,0.0,0.0,Canadian Grand Prix,,,,
+hulkenberg,20.0,5.0,0.0,5.0,15.0,4.0,6.0,5.0,Canadian Grand Prix,,,,
+lawson,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Canadian Grand Prix,,,,
+leclerc,21.0,0.0,0.0,0.0,21.0,10.0,6.0,5.0,Canadian Grand Prix,,,,
+max_verstappen,28.0,5.0,0.0,5.0,23.0,18.0,0.0,5.0,Canadian Grand Prix,,,,
+norris,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Canadian Grand Prix,,,,
+ocon,17.0,0.0,0.0,0.0,17.0,2.0,10.0,5.0,Canadian Grand Prix,,,,
+piastri,22.0,5.0,0.0,5.0,17.0,12.0,0.0,5.0,Canadian Grand Prix,,,,
+russell,45.0,15.0,10.0,5.0,30.0,25.0,0.0,5.0,Canadian Grand Prix,,,,
+sainz,18.0,0.0,0.0,0.0,18.0,1.0,12.0,5.0,Canadian Grand Prix,,,,
+stroll,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Canadian Grand Prix,,,,
+tsunoda,12.0,0.0,0.0,0.0,12.0,0.0,12.0,0.0,Canadian Grand Prix,,,,
+albon,10.0,5.0,0.0,5.0,5.0,0.0,0.0,5.0,Austrian Grand Prix,,,,
+alonso,24.0,5.0,0.0,5.0,19.0,6.0,8.0,5.0,Austrian Grand Prix,,,,
+antonelli,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Austrian Grand Prix,,,,
+bearman,13.0,5.0,0.0,5.0,8.0,0.0,8.0,0.0,Austrian Grand Prix,,,,
+bortoleto,14.0,5.0,0.0,5.0,9.0,4.0,0.0,5.0,Austrian Grand Prix,,,,
+colapinto,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Austrian Grand Prix,,,,
+gasly,10.0,5.0,0.0,5.0,5.0,0.0,0.0,5.0,Austrian Grand Prix,,,,
+hadjar,2.0,0.0,0.0,0.0,2.0,0.0,2.0,0.0,Austrian Grand Prix,,,,
+hamilton,12.0,0.0,0.0,0.0,12.0,12.0,0.0,0.0,Austrian Grand Prix,,,,
+hulkenberg,24.0,0.0,0.0,0.0,24.0,2.0,22.0,0.0,Austrian Grand Prix,,,,
+lawson,18.0,5.0,0.0,5.0,13.0,8.0,0.0,5.0,Austrian Grand Prix,,,,
+leclerc,25.0,5.0,0.0,5.0,20.0,15.0,0.0,5.0,Austrian Grand Prix,,,,
+max_verstappen,5.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,Austrian Grand Prix,,,,
+norris,45.0,15.0,10.0,5.0,30.0,25.0,0.0,5.0,Austrian Grand Prix,,,,
+ocon,20.0,0.0,0.0,0.0,20.0,1.0,14.0,5.0,Austrian Grand Prix,,,,
+piastri,20.0,0.0,0.0,0.0,20.0,18.0,2.0,0.0,Austrian Grand Prix,,,,
+russell,20.0,5.0,0.0,5.0,15.0,10.0,0.0,5.0,Austrian Grand Prix,,,,
+sainz,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Austrian Grand Prix,,,,
+stroll,4.0,0.0,0.0,0.0,4.0,0.0,4.0,0.0,Austrian Grand Prix,,,,
+tsunoda,9.0,0.0,0.0,0.0,9.0,0.0,4.0,5.0,Austrian Grand Prix,,,,
+albon,19.0,0.0,0.0,0.0,19.0,4.0,10.0,5.0,British Grand Prix,,,,
+alonso,7.0,5.0,0.0,5.0,2.0,2.0,0.0,0.0,British Grand Prix,,,,
+antonelli,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,British Grand Prix,,,,
+bearman,19.0,0.0,0.0,0.0,19.0,0.0,14.0,5.0,British Grand Prix,,,,
+bortoleto,5.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,British Grand Prix,,,,
+colapinto,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,British Grand Prix,,,,
+gasly,22.0,5.0,0.0,5.0,17.0,8.0,4.0,5.0,British Grand Prix,,,,
+hadjar,10.0,5.0,0.0,5.0,5.0,0.0,0.0,5.0,British Grand Prix,,,,
+hamilton,24.0,5.0,0.0,5.0,19.0,12.0,2.0,5.0,British Grand Prix,,,,
+hulkenberg,52.0,0.0,0.0,0.0,52.0,15.0,32.0,5.0,British Grand Prix,,,,
+lawson,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,British Grand Prix,,,,
+leclerc,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,British Grand Prix,,,,
+max_verstappen,30.0,15.0,10.0,5.0,15.0,10.0,0.0,5.0,British Grand Prix,,,,
+norris,34.0,0.0,0.0,0.0,34.0,25.0,4.0,5.0,British Grand Prix,,,,
+ocon,7.0,5.0,0.0,5.0,2.0,0.0,2.0,0.0,British Grand Prix,,,,
+piastri,23.0,5.0,0.0,5.0,18.0,18.0,0.0,0.0,British Grand Prix,,,,
+russell,11.0,5.0,0.0,5.0,6.0,1.0,0.0,5.0,British Grand Prix,,,,
+sainz,5.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,British Grand Prix,,,,
+stroll,31.0,0.0,0.0,0.0,31.0,6.0,20.0,5.0,British Grand Prix,,,,
+tsunoda,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,British Grand Prix,,,,
+albon,18.0,5.0,0.0,5.0,13.0,8.0,0.0,5.0,Belgian Grand Prix,0.0,0.0,0.0,0.0
+alonso,6.0,0.0,0.0,0.0,6.0,0.0,6.0,0.0,Belgian Grand Prix,0.0,0.0,0.0,0.0
+antonelli,8.0,0.0,0.0,0.0,6.0,0.0,6.0,0.0,Belgian Grand Prix,2.0,0.0,2.0,0.0
+bearman,9.0,0.0,0.0,0.0,7.0,0.0,2.0,5.0,Belgian Grand Prix,2.0,2.0,0.0,0.0
+bortoleto,20.0,5.0,0.0,5.0,9.0,2.0,2.0,5.0,Belgian Grand Prix,6.0,0.0,1.0,5.0
+colapinto,6.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Belgian Grand Prix,6.0,0.0,1.0,5.0
+gasly,17.0,5.0,0.0,5.0,12.0,1.0,6.0,5.0,Belgian Grand Prix,0.0,0.0,0.0,0.0
+hadjar,12.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,Belgian Grand Prix,7.0,1.0,1.0,5.0
+hamilton,31.0,0.0,0.0,0.0,28.0,6.0,22.0,0.0,Belgian Grand Prix,3.0,0.0,3.0,0.0
+hulkenberg,4.0,0.0,0.0,0.0,4.0,0.0,4.0,0.0,Belgian Grand Prix,0.0,0.0,0.0,0.0
+lawson,12.0,0.0,0.0,0.0,11.0,4.0,2.0,5.0,Belgian Grand Prix,1.0,0.0,1.0,0.0
+leclerc,35.0,5.0,0.0,5.0,20.0,15.0,0.0,5.0,Belgian Grand Prix,10.0,5.0,0.0,5.0
+max_verstappen,36.0,5.0,0.0,5.0,17.0,12.0,0.0,5.0,Belgian Grand Prix,14.0,8.0,1.0,5.0
+norris,39.0,15.0,10.0,5.0,18.0,18.0,0.0,0.0,Belgian Grand Prix,6.0,6.0,0.0,0.0
+ocon,14.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,Belgian Grand Prix,9.0,4.0,0.0,5.0
+piastri,44.0,0.0,0.0,0.0,32.0,25.0,2.0,5.0,Belgian Grand Prix,12.0,7.0,0.0,5.0
+russell,28.0,5.0,0.0,5.0,17.0,10.0,2.0,5.0,Belgian Grand Prix,6.0,0.0,1.0,5.0
+sainz,8.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Belgian Grand Prix,8.0,3.0,0.0,5.0
+stroll,21.0,5.0,0.0,5.0,9.0,0.0,4.0,5.0,Belgian Grand Prix,7.0,0.0,2.0,5.0
+tsunoda,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Belgian Grand Prix,1.0,0.0,1.0,0.0
+albon,8.0,0.0,0.0,0.0,8.0,0.0,8.0,0.0,Hungarian Grand Prix,,,,
+alonso,20.0,5.0,0.0,5.0,15.0,10.0,0.0,5.0,Hungarian Grand Prix,,,,
+antonelli,11.0,0.0,0.0,0.0,11.0,1.0,10.0,0.0,Hungarian Grand Prix,,,,
+bearman,5.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,Hungarian Grand Prix,,,,
+bortoleto,20.0,5.0,0.0,5.0,15.0,8.0,2.0,5.0,Hungarian Grand Prix,,,,
+colapinto,10.0,5.0,0.0,5.0,5.0,0.0,0.0,5.0,Hungarian Grand Prix,,,,
+gasly,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Hungarian Grand Prix,,,,
+hadjar,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Hungarian Grand Prix,,,,
+hamilton,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Hungarian Grand Prix,,,,
+hulkenberg,10.0,0.0,0.0,0.0,10.0,0.0,10.0,0.0,Hungarian Grand Prix,,,,
+lawson,16.0,5.0,0.0,5.0,11.0,4.0,2.0,5.0,Hungarian Grand Prix,,,,
+leclerc,32.0,15.0,10.0,5.0,17.0,12.0,0.0,5.0,Hungarian Grand Prix,,,,
+max_verstappen,12.0,5.0,0.0,5.0,7.0,2.0,0.0,5.0,Hungarian Grand Prix,,,,
+norris,34.0,0.0,0.0,0.0,34.0,25.0,4.0,5.0,Hungarian Grand Prix,,,,
+ocon,7.0,0.0,0.0,0.0,7.0,0.0,2.0,5.0,Hungarian Grand Prix,,,,
+piastri,23.0,5.0,0.0,5.0,18.0,18.0,0.0,0.0,Hungarian Grand Prix,,,,
+russell,27.0,5.0,0.0,5.0,22.0,15.0,2.0,5.0,Hungarian Grand Prix,,,,
+sainz,10.0,5.0,0.0,5.0,5.0,0.0,0.0,5.0,Hungarian Grand Prix,,,,
+stroll,6.0,0.0,0.0,0.0,6.0,6.0,0.0,0.0,Hungarian Grand Prix,,,,
+tsunoda,6.0,0.0,0.0,0.0,6.0,0.0,6.0,0.0,Hungarian Grand Prix,,,,
+albon,35.0,0.0,0.0,0.0,35.0,10.0,20.0,5.0,Dutch Grand Prix,,,,
+alonso,13.0,5.0,0.0,5.0,8.0,4.0,4.0,0.0,Dutch Grand Prix,,,,
+antonelli,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Dutch Grand Prix,,,,
+bearman,41.0,0.0,0.0,0.0,41.0,8.0,28.0,5.0,Dutch Grand Prix,,,,
+bortoleto,5.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,Dutch Grand Prix,,,,
+colapinto,15.0,0.0,0.0,0.0,15.0,0.0,10.0,5.0,Dutch Grand Prix,,,,
+gasly,5.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,Dutch Grand Prix,,,,
+hadjar,27.0,5.0,0.0,5.0,22.0,15.0,2.0,5.0,Dutch Grand Prix,,,,
+hamilton,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Dutch Grand Prix,,,,
+hulkenberg,11.0,0.0,0.0,0.0,11.0,0.0,6.0,5.0,Dutch Grand Prix,,,,
+lawson,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Dutch Grand Prix,,,,
+leclerc,10.0,5.0,0.0,5.0,5.0,0.0,0.0,5.0,Dutch Grand Prix,,,,
+max_verstappen,30.0,5.0,0.0,5.0,25.0,18.0,2.0,5.0,Dutch Grand Prix,,,,
+norris,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Dutch Grand Prix,,,,
+ocon,22.0,5.0,0.0,5.0,17.0,1.0,16.0,0.0,Dutch Grand Prix,,,,
+piastri,45.0,15.0,10.0,5.0,30.0,25.0,0.0,5.0,Dutch Grand Prix,,,,
+russell,24.0,5.0,0.0,5.0,19.0,12.0,2.0,5.0,Dutch Grand Prix,,,,
+sainz,5.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,Dutch Grand Prix,,,,
+stroll,35.0,0.0,0.0,0.0,35.0,6.0,24.0,5.0,Dutch Grand Prix,,,,
+tsunoda,8.0,0.0,0.0,0.0,8.0,2.0,6.0,0.0,Dutch Grand Prix,,,,
+albon,25.0,0.0,0.0,0.0,25.0,6.0,14.0,5.0,Italian Grand Prix,,,,
+alonso,5.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,Italian Grand Prix,,,,
+antonelli,2.0,0.0,0.0,0.0,2.0,2.0,0.0,0.0,Italian Grand Prix,,,,
+bearman,10.0,5.0,0.0,5.0,5.0,0.0,0.0,5.0,Italian Grand Prix,,,,
+bortoleto,14.0,5.0,0.0,5.0,9.0,4.0,0.0,5.0,Italian Grand Prix,,,,
+colapinto,5.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,Italian Grand Prix,,,,
+gasly,13.0,0.0,0.0,0.0,13.0,0.0,8.0,5.0,Italian Grand Prix,,,,
+hadjar,24.0,0.0,0.0,0.0,24.0,1.0,18.0,5.0,Italian Grand Prix,,,,
+hamilton,16.0,0.0,0.0,0.0,16.0,8.0,8.0,0.0,Italian Grand Prix,,,,
+hulkenberg,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Italian Grand Prix,,,,
+lawson,13.0,5.0,0.0,5.0,8.0,0.0,8.0,0.0,Italian Grand Prix,,,,
+leclerc,22.0,5.0,0.0,5.0,17.0,12.0,0.0,5.0,Italian Grand Prix,,,,
+max_verstappen,45.0,15.0,10.0,5.0,30.0,25.0,0.0,5.0,Italian Grand Prix,,,,
+norris,28.0,5.0,0.0,5.0,23.0,18.0,0.0,5.0,Italian Grand Prix,,,,
+ocon,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Italian Grand Prix,,,,
+piastri,15.0,0.0,0.0,0.0,15.0,15.0,0.0,0.0,Italian Grand Prix,,,,
+russell,20.0,5.0,0.0,5.0,15.0,10.0,0.0,5.0,Italian Grand Prix,,,,
+sainz,9.0,5.0,0.0,5.0,4.0,0.0,4.0,0.0,Italian Grand Prix,,,,
+stroll,5.0,0.0,0.0,0.0,5.0,0.0,0.0,5.0,Italian Grand Prix,,,,
+tsunoda,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Italian Grand Prix,,,,
+albon,12.0,0.0,0.0,0.0,12.0,0.0,12.0,0.0,Azerbaijan Grand Prix,,,,
+alonso,10.0,5.0,0.0,5.0,5.0,0.0,0.0,5.0,Azerbaijan Grand Prix,,,,
+antonelli,17.0,5.0,0.0,5.0,12.0,12.0,0.0,0.0,Azerbaijan Grand Prix,,,,
+bearman,16.0,5.0,0.0,5.0,11.0,0.0,6.0,5.0,Azerbaijan Grand Prix,,,,
+bortoleto,14.0,5.0,0.0,5.0,9.0,0.0,4.0,5.0,Azerbaijan Grand Prix,,,,
+colapinto,5.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,Azerbaijan Grand Prix,,,,
+gasly,5.0,0.0,0.0,0.0,5.0,0.0,0.0,5.0,Azerbaijan Grand Prix,,,,
+hadjar,1.0,0.0,0.0,0.0,1.0,1.0,0.0,0.0,Azerbaijan Grand Prix,,,,
+hamilton,17.0,0.0,0.0,0.0,17.0,4.0,8.0,5.0,Azerbaijan Grand Prix,,,,
+hulkenberg,2.0,0.0,0.0,0.0,2.0,0.0,2.0,0.0,Azerbaijan Grand Prix,,,,
+lawson,20.0,5.0,0.0,5.0,15.0,10.0,0.0,5.0,Azerbaijan Grand Prix,,,,
+leclerc,9.0,5.0,0.0,5.0,4.0,2.0,2.0,0.0,Azerbaijan Grand Prix,,,,
+max_verstappen,45.0,15.0,10.0,5.0,30.0,25.0,0.0,5.0,Azerbaijan Grand Prix,,,,
+norris,16.0,5.0,0.0,5.0,11.0,6.0,0.0,5.0,Azerbaijan Grand Prix,,,,
+ocon,12.0,0.0,0.0,0.0,12.0,0.0,12.0,0.0,Azerbaijan Grand Prix,,,,
+piastri,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Azerbaijan Grand Prix,,,,
+russell,29.0,0.0,0.0,0.0,29.0,18.0,6.0,5.0,Azerbaijan Grand Prix,,,,
+sainz,25.0,5.0,0.0,5.0,20.0,15.0,0.0,5.0,Azerbaijan Grand Prix,,,,
+stroll,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Azerbaijan Grand Prix,,,,
+tsunoda,8.0,0.0,0.0,0.0,8.0,8.0,0.0,0.0,Azerbaijan Grand Prix,,,,
+albon,12.0,0.0,0.0,0.0,12.0,0.0,12.0,0.0,Singapore Grand Prix,,,,
+alonso,22.0,5.0,0.0,5.0,17.0,6.0,6.0,5.0,Singapore Grand Prix,,,,
+antonelli,10.0,0.0,0.0,0.0,10.0,10.0,0.0,0.0,Singapore Grand Prix,,,,
+bearman,12.0,5.0,0.0,5.0,7.0,2.0,0.0,5.0,Singapore Grand Prix,,,,
+bortoleto,5.0,0.0,0.0,0.0,5.0,0.0,0.0,5.0,Singapore Grand Prix,,,,
+colapinto,10.0,5.0,0.0,5.0,5.0,0.0,0.0,5.0,Singapore Grand Prix,,,,
+gasly,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Singapore Grand Prix,,,,
+hadjar,10.0,5.0,0.0,5.0,5.0,0.0,0.0,5.0,Singapore Grand Prix,,,,
+hamilton,9.0,5.0,0.0,5.0,4.0,4.0,0.0,0.0,Singapore Grand Prix,,,,
+hulkenberg,5.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,Singapore Grand Prix,,,,
+lawson,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Singapore Grand Prix,,,,
+leclerc,15.0,0.0,0.0,0.0,15.0,8.0,2.0,5.0,Singapore Grand Prix,,,,
+max_verstappen,28.0,5.0,0.0,5.0,23.0,18.0,0.0,5.0,Singapore Grand Prix,,,,
+norris,24.0,0.0,0.0,0.0,24.0,15.0,4.0,5.0,Singapore Grand Prix,,,,
+ocon,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Singapore Grand Prix,,,,
+piastri,17.0,5.0,0.0,5.0,12.0,12.0,0.0,0.0,Singapore Grand Prix,,,,
+russell,45.0,15.0,10.0,5.0,30.0,25.0,0.0,5.0,Singapore Grand Prix,,,,
+sainz,27.0,5.0,0.0,5.0,22.0,1.0,16.0,5.0,Singapore Grand Prix,,,,
+stroll,4.0,0.0,0.0,0.0,4.0,0.0,4.0,0.0,Singapore Grand Prix,,,,
+tsunoda,2.0,0.0,0.0,0.0,2.0,0.0,2.0,0.0,Singapore Grand Prix,,,,
+albon,19.0,0.0,0.0,0.0,13.0,0.0,8.0,5.0,United States Grand Prix,6.0,3.0,3.0,0.0
+alonso,11.0,5.0,0.0,5.0,6.0,1.0,0.0,5.0,United States Grand Prix,0.0,0.0,0.0,0.0
+antonelli,4.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,United States Grand Prix,4.0,1.0,3.0,0.0
+bearman,18.0,5.0,0.0,5.0,7.0,2.0,0.0,5.0,United States Grand Prix,6.0,0.0,1.0,5.0
+bortoleto,14.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,United States Grand Prix,14.0,0.0,9.0,5.0
+colapinto,8.0,0.0,0.0,0.0,5.0,0.0,0.0,5.0,United States Grand Prix,3.0,0.0,3.0,0.0
+gasly,13.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,United States Grand Prix,8.0,0.0,3.0,5.0
+hadjar,8.0,0.0,0.0,0.0,8.0,0.0,8.0,0.0,United States Grand Prix,0.0,0.0,0.0,0.0
+hamilton,28.0,0.0,0.0,0.0,14.0,12.0,2.0,0.0,United States Grand Prix,14.0,5.0,4.0,5.0
+hulkenberg,20.0,5.0,0.0,5.0,15.0,4.0,6.0,5.0,United States Grand Prix,0.0,0.0,0.0,0.0
+lawson,23.0,5.0,0.0,5.0,7.0,0.0,2.0,5.0,United States Grand Prix,11.0,0.0,6.0,5.0
+leclerc,34.0,5.0,0.0,5.0,20.0,15.0,0.0,5.0,United States Grand Prix,9.0,4.0,5.0,0.0
+max_verstappen,58.0,15.0,10.0,5.0,30.0,25.0,0.0,5.0,United States Grand Prix,13.0,8.0,0.0,5.0
+norris,33.0,5.0,0.0,5.0,23.0,18.0,0.0,5.0,United States Grand Prix,5.0,0.0,0.0,5.0
+ocon,7.0,0.0,0.0,0.0,4.0,0.0,4.0,0.0,United States Grand Prix,3.0,0.0,3.0,0.0
+piastri,12.0,0.0,0.0,0.0,12.0,10.0,2.0,0.0,United States Grand Prix,0.0,0.0,0.0,0.0
+russell,33.0,5.0,0.0,5.0,13.0,8.0,0.0,5.0,United States Grand Prix,15.0,7.0,3.0,5.0
+sainz,20.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,United States Grand Prix,15.0,6.0,4.0,5.0
+stroll,19.0,0.0,0.0,0.0,14.0,0.0,14.0,0.0,United States Grand Prix,5.0,0.0,0.0,5.0
+tsunoda,31.0,0.0,0.0,0.0,18.0,6.0,12.0,0.0,United States Grand Prix,13.0,2.0,11.0,0.0
+albon,15.0,0.0,0.0,0.0,15.0,0.0,10.0,5.0,Mexico City Grand Prix,,,,
+alonso,5.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,Mexico City Grand Prix,,,,
+antonelli,13.0,0.0,0.0,0.0,13.0,8.0,0.0,5.0,Mexico City Grand Prix,,,,
+bearman,32.0,5.0,0.0,5.0,27.0,12.0,10.0,5.0,Mexico City Grand Prix,,,,
+bortoleto,18.0,0.0,0.0,0.0,18.0,1.0,12.0,5.0,Mexico City Grand Prix,,,,
+colapinto,8.0,0.0,0.0,0.0,8.0,0.0,8.0,0.0,Mexico City Grand Prix,,,,
+gasly,16.0,5.0,0.0,5.0,11.0,0.0,6.0,5.0,Mexico City Grand Prix,,,,
+hadjar,10.0,5.0,0.0,5.0,5.0,0.0,0.0,5.0,Mexico City Grand Prix,,,,
+hamilton,4.0,0.0,0.0,0.0,4.0,4.0,0.0,0.0,Mexico City Grand Prix,,,,
+hulkenberg,5.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,Mexico City Grand Prix,,,,
+lawson,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Mexico City Grand Prix,,,,
+leclerc,28.0,5.0,0.0,5.0,23.0,18.0,0.0,5.0,Mexico City Grand Prix,,,,
+max_verstappen,29.0,5.0,0.0,5.0,24.0,15.0,4.0,5.0,Mexico City Grand Prix,,,,
+norris,45.0,15.0,10.0,5.0,30.0,25.0,0.0,5.0,Mexico City Grand Prix,,,,
+ocon,6.0,0.0,0.0,0.0,6.0,2.0,4.0,0.0,Mexico City Grand Prix,,,,
+piastri,14.0,0.0,0.0,0.0,14.0,10.0,4.0,0.0,Mexico City Grand Prix,,,,
+russell,11.0,5.0,0.0,5.0,6.0,6.0,0.0,0.0,Mexico City Grand Prix,,,,
+sainz,5.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,Mexico City Grand Prix,,,,
+stroll,15.0,0.0,0.0,0.0,15.0,0.0,10.0,5.0,Mexico City Grand Prix,,,,
+tsunoda,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Mexico City Grand Prix,,,,
+albon,12.0,5.0,0.0,5.0,7.0,0.0,2.0,5.0,São Paulo Grand Prix,0.0,0.0,0.0,0.0
+alonso,18.0,5.0,0.0,5.0,5.0,0.0,0.0,5.0,São Paulo Grand Prix,8.0,3.0,0.0,5.0
+antonelli,40.0,5.0,0.0,5.0,23.0,18.0,0.0,5.0,São Paulo Grand Prix,12.0,7.0,0.0,5.0
+bearman,25.0,5.0,0.0,5.0,17.0,8.0,4.0,5.0,São Paulo Grand Prix,3.0,0.0,3.0,0.0
+bortoleto,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,São Paulo Grand Prix,0.0,0.0,0.0,0.0
+colapinto,2.0,0.0,0.0,0.0,2.0,0.0,2.0,0.0,São Paulo Grand Prix,0.0,0.0,0.0,0.0
+gasly,22.0,5.0,0.0,5.0,6.0,1.0,0.0,5.0,São Paulo Grand Prix,11.0,1.0,5.0,5.0
+hadjar,14.0,5.0,0.0,5.0,4.0,4.0,0.0,0.0,São Paulo Grand Prix,5.0,0.0,0.0,5.0
+hamilton,11.0,0.0,0.0,0.0,5.0,0.0,0.0,5.0,São Paulo Grand Prix,6.0,2.0,4.0,0.0
+hulkenberg,19.0,5.0,0.0,5.0,9.0,2.0,2.0,5.0,São Paulo Grand Prix,5.0,0.0,0.0,5.0
+lawson,12.0,0.0,0.0,0.0,11.0,6.0,0.0,5.0,São Paulo Grand Prix,1.0,0.0,1.0,0.0
+leclerc,17.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,São Paulo Grand Prix,12.0,4.0,3.0,5.0
+max_verstappen,64.0,0.0,0.0,0.0,52.0,15.0,32.0,5.0,São Paulo Grand Prix,12.0,5.0,2.0,5.0
+,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,São Paulo Grand Prix,0.0,0.0,0.0,0.0
+norris,58.0,15.0,10.0,5.0,30.0,25.0,0.0,5.0,São Paulo Grand Prix,13.0,8.0,0.0,5.0
+ocon,28.0,0.0,0.0,0.0,16.0,0.0,16.0,0.0,São Paulo Grand Prix,12.0,0.0,7.0,5.0
+piastri,10.0,0.0,0.0,0.0,10.0,10.0,0.0,0.0,São Paulo Grand Prix,0.0,0.0,0.0,0.0
+russell,23.0,0.0,0.0,0.0,16.0,12.0,4.0,0.0,São Paulo Grand Prix,7.0,6.0,1.0,0.0
+sainz,15.0,0.0,0.0,0.0,4.0,0.0,4.0,0.0,São Paulo Grand Prix,11.0,0.0,6.0,5.0
+stroll,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,São Paulo Grand Prix,0.0,0.0,0.0,0.0
+tsunoda,11.0,5.0,0.0,5.0,0.0,0.0,0.0,0.0,São Paulo Grand Prix,6.0,0.0,6.0,0.0
