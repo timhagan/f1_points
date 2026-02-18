@@ -1,5 +1,5 @@
 # 🏁 F1 Points Tracker
-A modern, automated Formula 1 Fantasy standings tracker that provides driver and constructor fantasy points throughout the 2025 season.
+A modern, automated Formula 1 Fantasy standings tracker that provides driver and constructor fantasy points for the current Formula 1 season.
 
 # 🌟 Features
 - Fantasy Points Scored: Up-to-date driver and constructor championship points from the most recent race
@@ -24,7 +24,7 @@ Visit the live standings at: timhagan.github.io/f1_points
 
 # 🛠️ How It Works
 - Data Pipeline
-  - Event Schedule: Fetched annually from F1 API before season start
+  - Event Schedule: Refreshed automatically in-race pipeline runs and via annual pre-season sync
   - Race Results: Automatically collected after each Grand Prix
   - Points Calculation: Custom scoring system applied to raw results
   - Web Update: New standings automatically pushed to GitHub Pages

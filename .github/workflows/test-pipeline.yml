@@ -39,7 +39,7 @@ jobs:
       run: |
         echo "Testing most recent event points script..."
         python src/data_prep/get_most_recent_event_points.py
-        ls -la data/*_most_recent.csv
+        ls -la data/*_most_recent.csv || echo "No most recent event files generated yet"
         
     - name: Test combine event points
       run: |
