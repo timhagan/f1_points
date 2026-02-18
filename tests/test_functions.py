@@ -40,3 +40,23 @@ def test_merge_points_dataframes():
         # Check points columns exist and NaN filled with 0
         assert merged['RacePoints'].tolist() == [10,20,0]
         assert merged['SprintPoints'].tolist() == [5,0,15]
+
+
+def test_get_most_recent_session_df_returns_empty_when_no_past_sessions():
+    """No past sessions should return an empty DataFrame instead of raising errors."""
+    sessions = pd.DataFrame({
+        'SessionName': ['Race'],
+        'SessionDateUtc': ['2099-01-01T10:00:00Z'],
+        'EventName': ['Future GP'],
+        'EventFormat': ['conventional'],
+        'RoundNumber': [1]
+    })
+
+    result = functions.get_most_recent_session_df(
+        sessions=sessions,
+        session_type='Race',
+        today=datetime.datetime(2026, 1, 1, tzinfo=datetime.timezone.utc),
+        year=2026
+    )
+
+    assert result.empty
