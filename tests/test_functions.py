@@ -60,3 +60,18 @@ def test_get_most_recent_session_df_returns_empty_when_no_past_sessions():
     )
 
     assert result.empty
+
+
+def test_resolve_season_year_falls_back_to_latest_available_with_past_races():
+    """When current season has no past races, fallback should use latest eligible prior season."""
+    year = functions.resolve_season_year(
+        today=datetime.datetime(2026, 2, 1, tzinfo=datetime.timezone.utc),
+        require_past_races=True
+    )
+    assert year == 2025
+
+
+def test_get_round_number_from_event_name_with_no_year_uses_available_schedule():
+    """Round lookup should work without explicitly passing a year."""
+    round_number = functions.get_round_number_from_event_name('Australian Grand Prix')
+    assert round_number == 1

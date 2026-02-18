@@ -3,6 +3,73 @@ import pandas as pd
 import datetime
 import os
 
+
+def resolve_season_year(year=None, today=None, require_past_races=False):
+    """
+    Resolve which season year should be used based on available local schedule files.
+
+    Preference order:
+    1. Explicitly provided year (if its sessions file exists)
+    2. Current year (if its sessions file exists)
+    3. Latest available sessions_<year>.csv file in data/
+
+    If require_past_races=True, only return years where at least one race has already
+    occurred before ``today``.
+    """
+    if today is None:
+        today = datetime.datetime.now(datetime.timezone.utc)
+
+    data_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'data')
+
+    def sessions_path(season_year):
+        return os.path.join(data_dir, f'sessions_{season_year}.csv')
+
+    def has_past_races(season_year):
+        path = sessions_path(season_year)
+        if not os.path.exists(path):
+            return False
+
+        sessions_df = pd.read_csv(path)
+        races_df = sessions_df[sessions_df['SessionName'] == 'Race'].copy()
+        if races_df.empty:
+            return False
+
+        races_df['EventDateUtc'] = pd.to_datetime(races_df['EventDate'], errors='coerce', utc=True)
+        races_df['EventDateUtc'] = races_df['EventDateUtc'].dt.normalize() + pd.Timedelta(days=1) - pd.Timedelta(microseconds=1)
+        races_df = races_df.dropna(subset=['EventDateUtc'])
+        return (races_df['EventDateUtc'] < today).any()
+
+    requested_year = year if year is not None else today.year
+    candidate_years = []
+
+    if requested_year not in candidate_years:
+        candidate_years.append(requested_year)
+    if today.year not in candidate_years:
+        candidate_years.append(today.year)
+
+    available_years = []
+    for filename in os.listdir(data_dir):
+        if filename.startswith('sessions_') and filename.endswith('.csv'):
+            raw_year = filename.removeprefix('sessions_').removesuffix('.csv')
+            if raw_year.isdigit():
+                available_years.append(int(raw_year))
+
+    for season_year in sorted(set(available_years), reverse=True):
+        if season_year not in candidate_years:
+            candidate_years.append(season_year)
+
+    for season_year in candidate_years:
+        path = sessions_path(season_year)
+        if not os.path.exists(path):
+            continue
+        if require_past_races and not has_past_races(season_year):
+            continue
+        return season_year
+
+    raise FileNotFoundError(
+        f"No eligible sessions_<year>.csv file found in {data_dir}."
+    )
+
 def get_past_race_event_names(today=datetime.datetime.now(datetime.timezone.utc)):
     """
     Get all past event names from the FastF1 cache.
@@ -15,7 +82,8 @@ def get_past_race_event_names(today=datetime.datetime.now(datetime.timezone.utc)
     fastf1.Cache.enable_cache(cache_path)
 
     # Get all events from the cache
-    sessions_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', f'sessions_{today.year}.csv')
+    season_year = resolve_season_year(today=today, require_past_races=True)
+    sessions_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', f'sessions_{season_year}.csv')
     sessions_df = pd.read_csv(sessions_path)
     races_df    = sessions_df[sessions_df['SessionName'] == 'Race'].copy()
 
@@ -31,7 +99,7 @@ def get_past_race_event_names(today=datetime.datetime.now(datetime.timezone.utc)
 
     return races_df['EventName'].unique()
 
-def get_round_number_from_event_name(event_name, year=datetime.datetime.now(datetime.timezone.utc).year):
+def get_round_number_from_event_name(event_name, year=None):
     """
     Extract the round number from the event name.
     Args:
@@ -40,7 +108,8 @@ def get_round_number_from_event_name(event_name, year=datetime.datetime.now(date
         int: The round number extracted from the event name.
     """
     # Get all events from the cache
-    sessions_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', f'sessions_{year}.csv')
+    season_year = resolve_season_year(year=year)
+    sessions_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', f'sessions_{season_year}.csv')
     sessions_df = pd.read_csv(sessions_path)
     races_df    = sessions_df[sessions_df['SessionName'] == 'Race'].copy()
 
@@ -398,7 +467,7 @@ def calculate_constructor_points(session_results, session_type):
     return constructor_points_df
 
 
-def get_event_points(event_name=None, year=datetime.datetime.now(datetime.timezone.utc).year, return_dfs=False):
+def get_event_points(event_name=None, year=None, return_dfs=False):
     """
     Get the event points for a specific event in a specific year.
     Args:
@@ -413,7 +482,7 @@ def get_event_points(event_name=None, year=datetime.datetime.now(datetime.timezo
 
     reload(functions)    
     today = datetime.datetime.now(datetime.timezone.utc)
-    year  = today.year
+    year = resolve_season_year(year=year, today=today, require_past_races=True)
 
     # Set cache path relative to project root
     cache_path = os.path.join(os.path.dirname(__file__), '..', '..', '.cache', 'event_points')
@@ -437,10 +506,17 @@ def get_event_points(event_name=None, year=datetime.datetime.now(datetime.timezo
     session_dfs = {}
 
     for session_type in session_types:
-        f1_session      = fastf1.get_session(year, SELECTED_EVENT_NAME, session_type) 
-        f1_session.load(laps=False, telemetry=False, weather=False, messages=False) 
-        
-        event_results             = f1_session.results
+        try:
+            f1_session = fastf1.get_session(year, SELECTED_EVENT_NAME, session_type)
+            f1_session.load(laps=False, telemetry=False, weather=False, messages=False)
+        except ValueError as exc:
+            print(
+                f"Failed to load {session_type} session for {SELECTED_EVENT_NAME} ({year}): {exc}. "
+                "Skipping event point generation."
+            )
+            return None
+
+        event_results = f1_session.results
         session_dfs[session_type] = event_results
 
     driver_points_dfs       = {}

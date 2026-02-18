@@ -14,7 +14,7 @@ def main():
     # Prepare accumulators
     driver_points_df = pd.DataFrame()
     constructor_points_df = pd.DataFrame()
-    YEAR = datetime.datetime.now().year
+    YEAR = functions.resolve_season_year(require_past_races=True)
 
     if len(past_event_names) == 0:
         print(f"No past race events found for {YEAR}. Skipping current standings file generation.")
