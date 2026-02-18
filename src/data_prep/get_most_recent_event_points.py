@@ -7,9 +7,10 @@ from src.data_prep import functions
 
 def main():
     # Determine the year and fetch points DataFrames
-    year = datetime.datetime.now().year
+    year = functions.resolve_season_year(require_past_races=True)
     result = functions.get_event_points(
         event_name=None,  # Use the most recent event
+        year=year,
         return_dfs=True
     )
     if result is not None:
