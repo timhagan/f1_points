@@ -3,6 +3,27 @@ import pandas as pd
 import datetime
 import os
 
+
+def get_latest_sessions_year(preferred_year=None):
+    """Return the most appropriate season year based on available sessions files."""
+    data_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'data')
+    available_years = []
+
+    if os.path.isdir(data_dir):
+        for filename in os.listdir(data_dir):
+            if filename.startswith('sessions_') and filename.endswith('.csv'):
+                year_str = filename[len('sessions_'):-len('.csv')]
+                if year_str.isdigit():
+                    available_years.append(int(year_str))
+
+    if preferred_year is not None and preferred_year in available_years:
+        return preferred_year
+
+    if available_years:
+        return max(available_years)
+
+    return preferred_year
+
 def get_past_race_event_names(today=datetime.datetime.now(datetime.timezone.utc)):
     """
     Get all past event names from the FastF1 cache.
@@ -15,7 +36,14 @@ def get_past_race_event_names(today=datetime.datetime.now(datetime.timezone.utc)
     fastf1.Cache.enable_cache(cache_path)
 
     # Get all events from the cache
-    sessions_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', f'sessions_{today.year}.csv')
+    sessions_year = get_latest_sessions_year(preferred_year=today.year)
+    if sessions_year is None:
+        return pd.Series(dtype='object')
+
+    sessions_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', f'sessions_{sessions_year}.csv')
+    if not os.path.exists(sessions_path):
+        return pd.Series(dtype='object')
+
     sessions_df = pd.read_csv(sessions_path)
     races_df    = sessions_df[sessions_df['SessionName'] == 'Race'].copy()
 
@@ -63,6 +91,7 @@ def get_most_recent_session_df(sessions, session_type="Race", today=datetime.dat
         today (datetime): The current date and time. Default is the current UTC time.
         year (int): The current year. Default is the current year.
     """
+    most_recent_session_df = pd.DataFrame()
     sessions_limited = sessions[sessions['SessionName']==session_type].copy()
     # Convert 'SessionDateUtc' to datetime objects, handling potential errors by setting invalid parsing to NaT
     sessions_limited['SessionDateUtc'] = pd.to_datetime(sessions_limited['SessionDateUtc'], errors='coerce', utc=True)
@@ -412,7 +441,11 @@ def get_event_points(event_name=None, year=datetime.datetime.now(datetime.timezo
 
     reload(functions)    
     today = datetime.datetime.now(datetime.timezone.utc)
-    year  = today.year
+    year = get_latest_sessions_year(preferred_year=year)
+
+    if year is None:
+        print("No sessions file is available. Skipping event point calculation.")
+        return None
 
     # Set cache path relative to project root
     cache_path = os.path.join(os.path.dirname(__file__), '..', '..', '.cache', 'event_points')
@@ -421,7 +454,11 @@ def get_event_points(event_name=None, year=datetime.datetime.now(datetime.timezo
     sessions_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', f'sessions_{year}.csv')
     sessions_df = pd.read_csv(sessions_path)
 
-    selected_session_df   = functions.get_session_df(sessions_df, event_name=event_name)
+    selected_session_df   = functions.get_session_df(sessions_df, event_name=event_name, year=year)
+
+    if selected_session_df.empty:
+        print(f"No completed sessions found for year {year}. Skipping event point calculation.")
+        return None
 
     SELECTED_EVENT_NAME   = selected_session_df['EventName'].values[0]
     SELECTED_EVENT_FORMAT = selected_session_df['EventFormat'].values[0]
@@ -471,4 +508,3 @@ def get_event_points(event_name=None, year=datetime.datetime.now(datetime.timezo
 
     if return_dfs:
         return driver_points_df_slim, constructor_points_df_slim
-

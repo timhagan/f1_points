@@ -7,9 +7,14 @@ from src.data_prep import functions
 
 def main():
     # Determine the year and fetch points DataFrames
-    year = datetime.datetime.now().year
+    year = functions.get_latest_sessions_year(preferred_year=datetime.datetime.now().year)
+    if year is None:
+        print("No sessions file available; skipping most recent event point extraction.")
+        return
+
     result = functions.get_event_points(
         event_name=None,  # Use the most recent event
+        year=year,
         return_dfs=True
     )
     if result is not None:

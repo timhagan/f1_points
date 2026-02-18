@@ -14,7 +14,10 @@ def main():
     # Prepare accumulators
     driver_points_df = pd.DataFrame()
     constructor_points_df = pd.DataFrame()
-    YEAR = datetime.datetime.now().year
+    YEAR = functions.get_latest_sessions_year(preferred_year=datetime.datetime.now().year)
+    if YEAR is None:
+        print("No sessions file available; skipping combine step.")
+        return
     
     for past_event_name in past_event_names:
         SELECTED_EVENT_ROUND = functions.get_round_number_from_event_name(past_event_name, year=YEAR)
