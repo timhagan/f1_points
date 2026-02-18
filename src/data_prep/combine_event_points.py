@@ -15,6 +15,10 @@ def main():
     driver_points_df = pd.DataFrame()
     constructor_points_df = pd.DataFrame()
     YEAR = datetime.datetime.now().year
+
+    if len(past_event_names) == 0:
+        print(f"No past race events found for {YEAR}. Skipping current standings file generation.")
+        return
     
     for past_event_name in past_event_names:
         SELECTED_EVENT_ROUND = functions.get_round_number_from_event_name(past_event_name, year=YEAR)
@@ -53,6 +57,10 @@ def main():
     # Save to data directory relative to project root
     driver_output_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', f'driver_points_{YEAR}_current.csv')
     constructor_output_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', f'constructor_points_{YEAR}_current.csv')
+
+    if driver_points_df.empty and constructor_points_df.empty:
+        print(f"No event point files were available for {YEAR}. Skipping current standings file generation.")
+        return
 
     driver_points_df.to_csv(driver_output_path, index=False)
     constructor_points_df.to_csv(constructor_output_path, index=False)

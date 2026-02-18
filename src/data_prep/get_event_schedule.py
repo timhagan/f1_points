@@ -2,14 +2,22 @@ import fastf1
 import datetime
 import pandas as pd
 import os
+
 cache_path = os.path.join(os.path.dirname(__file__), '..', '..', '.cache', 'event_schedule')
+os.makedirs(cache_path, exist_ok=True)
 fastf1.Cache.enable_cache(cache_path)
 
 year                    = datetime.date.today().year
+output_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', f'sessions_{year}.csv')
 try:
     event_schedule = fastf1.get_event_schedule(year)
 except ValueError:
-    print(f"No schedule available for {year} yet. Writing an empty schedule file.")
+    print(f"No schedule available for {year} yet.")
+    if os.path.exists(output_path):
+        print(f"Keeping existing schedule file: {output_path}")
+        raise SystemExit(0)
+
+    print(f"No existing schedule file found for {year}. Writing an empty schedule file.")
     event_schedule = pd.DataFrame(columns=[
         'RoundNumber', 'Country', 'Location', 'OfficialEventName', 'EventDate', 'EventName',
         'EventFormat', 'Session1', 'SessionDate1', 'SessionDateUtc1', 'Session2', 'SessionDate2',
@@ -61,5 +69,4 @@ event_schedule_melted = event_schedule_melted.sort_values(['RoundNumber', 'Sessi
 event_schedule_melted = event_schedule_melted.dropna(subset=['SessionName'])
 
 # Save to data directory relative to project root
-output_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', f'sessions_{year}.csv')
 event_schedule_melted.to_csv(output_path, index=False)
