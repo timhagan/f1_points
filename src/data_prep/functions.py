@@ -85,6 +85,7 @@ def get_most_recent_session_df(sessions, session_type="Race", today=datetime.dat
         print(most_recent_session_df)
     else:
         print(f"No {session_type} sessions for year {year} found before today.")
+        return sessions_limited.head(0).copy()
 
     return most_recent_session_df
 
@@ -423,6 +424,10 @@ def get_event_points(event_name=None, year=datetime.datetime.now(datetime.timezo
 
     selected_session_df   = functions.get_session_df(sessions_df, event_name=event_name)
 
+    if selected_session_df.empty:
+        print("No eligible event session found. Skipping event point generation.")
+        return None
+
     SELECTED_EVENT_NAME   = selected_session_df['EventName'].values[0]
     SELECTED_EVENT_FORMAT = selected_session_df['EventFormat'].values[0]
     SELECTED_EVENT_ROUND  = selected_session_df['RoundNumber'].values[0]
@@ -471,4 +476,3 @@ def get_event_points(event_name=None, year=datetime.datetime.now(datetime.timezo
 
     if return_dfs:
         return driver_points_df_slim, constructor_points_df_slim
-

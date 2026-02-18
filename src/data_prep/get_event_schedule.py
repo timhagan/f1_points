@@ -6,7 +6,16 @@ cache_path = os.path.join(os.path.dirname(__file__), '..', '..', '.cache', 'even
 fastf1.Cache.enable_cache(cache_path)
 
 year                    = datetime.date.today().year
-event_schedule          = fastf1.get_event_schedule(year)
+try:
+    event_schedule = fastf1.get_event_schedule(year)
+except ValueError:
+    print(f"No schedule available for {year} yet. Writing an empty schedule file.")
+    event_schedule = pd.DataFrame(columns=[
+        'RoundNumber', 'Country', 'Location', 'OfficialEventName', 'EventDate', 'EventName',
+        'EventFormat', 'Session1', 'SessionDate1', 'SessionDateUtc1', 'Session2', 'SessionDate2',
+        'SessionDateUtc2', 'Session3', 'SessionDate3', 'SessionDateUtc3', 'Session4', 'SessionDate4',
+        'SessionDateUtc4', 'Session5', 'SessionDate5', 'SessionDateUtc5', 'F1ApiSupport'
+    ])
 event_schedule.columns  = ['RoundNumber', 
                           'Country', 
                           'Location', 
