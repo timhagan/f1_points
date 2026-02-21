@@ -4,6 +4,21 @@ import datetime
 import os
 
 
+PROJECT_ROOT = os.path.join(os.path.dirname(__file__), '..', '..')
+
+
+def ensure_fastf1_cache(cache_scope):
+    """Create and enable a deterministic FastF1 cache directory."""
+    base_cache_dir = os.environ.get(
+        'F1_POINTS_CACHE_DIR',
+        os.path.join(PROJECT_ROOT, '.cache')
+    )
+    cache_path = os.path.join(base_cache_dir, cache_scope)
+    os.makedirs(cache_path, exist_ok=True)
+    fastf1.Cache.enable_cache(cache_path)
+    return cache_path
+
+
 def resolve_season_year(year=None, today=None, require_past_races=False):
     """
     Resolve which season year should be used based on available local schedule files.
@@ -78,8 +93,7 @@ def get_past_race_event_names(today=datetime.datetime.now(datetime.timezone.utc)
     Returns:
         pd.Series: Series containing all past event names.    """
     # Set cache path relative to project root
-    cache_path = os.path.join(os.path.dirname(__file__), '..', '..', '.cache', 'event_points')
-    fastf1.Cache.enable_cache(cache_path)
+    ensure_fastf1_cache('event_points')
 
     # Get all events from the cache
     season_year = resolve_season_year(today=today, require_past_races=True)
@@ -485,8 +499,7 @@ def get_event_points(event_name=None, year=None, return_dfs=False):
     year = resolve_season_year(year=year, today=today, require_past_races=True)
 
     # Set cache path relative to project root
-    cache_path = os.path.join(os.path.dirname(__file__), '..', '..', '.cache', 'event_points')
-    fastf1.Cache.enable_cache(cache_path)
+    ensure_fastf1_cache('event_points')
 
     sessions_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', f'sessions_{year}.csv')
     sessions_df = pd.read_csv(sessions_path)
