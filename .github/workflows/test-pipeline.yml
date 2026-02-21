@@ -32,17 +32,17 @@ jobs:
     - name: Test get event schedule
       run: |
         echo "Testing event schedule script..."
-        python src/data_prep/get_event_schedule.py
+        python -m src.data_prep.get_event_schedule
         ls -la data/sessions_*.csv
         
     - name: Test get most recent event points
       run: |
         echo "Testing most recent event points script..."
-        python src/data_prep/get_most_recent_event_points.py
+        python -m src.data_prep.get_most_recent_event_points
         ls -la data/*_most_recent.csv || echo "No most recent event files generated yet"
         
     - name: Test combine event points
       run: |
         echo "Testing combine event points script..."
-        python src/data_prep/combine_event_points.py
+        python -m src.data_prep.combine_event_points
         ls -la data/*_current.csv
