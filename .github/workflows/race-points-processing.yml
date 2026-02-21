@@ -39,13 +39,13 @@ jobs:
       run: mkdir -p data
 
     - name: Refresh event schedule
-      run: python src/data_prep/get_event_schedule.py
+      run: python -m src.data_prep.get_event_schedule
       
     - name: Get most recent event points
-      run: python src/data_prep/get_most_recent_event_points.py
+      run: python -m src.data_prep.get_most_recent_event_points
       
     - name: Combine event points
-      run: python src/data_prep/combine_event_points.py
+      run: python -m src.data_prep.combine_event_points
       
     - name: Commit and push changes
       run: |

@@ -2,6 +2,7 @@ import fastf1
 import datetime
 import pandas as pd
 import os
+
 from src.data_prep.functions import ensure_fastf1_cache
 
 ensure_fastf1_cache('event_schedule')

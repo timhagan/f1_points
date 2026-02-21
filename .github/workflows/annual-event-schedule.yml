@@ -37,7 +37,7 @@ jobs:
       run: mkdir -p data
       
     - name: Fetch F1 event schedule
-      run: python src/data_prep/get_event_schedule.py
+      run: python -m src.data_prep.get_event_schedule
       
     - name: Commit and push changes
       run: |
