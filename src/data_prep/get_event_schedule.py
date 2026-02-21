@@ -2,10 +2,9 @@ import fastf1
 import datetime
 import pandas as pd
 import os
+from src.data_prep.functions import ensure_fastf1_cache
 
-cache_path = os.path.join(os.path.dirname(__file__), '..', '..', '.cache', 'event_schedule')
-os.makedirs(cache_path, exist_ok=True)
-fastf1.Cache.enable_cache(cache_path)
+ensure_fastf1_cache('event_schedule')
 
 year                    = datetime.date.today().year
 output_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', f'sessions_{year}.csv')
