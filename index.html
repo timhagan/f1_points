@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>2025 F1 Standings</title>
+  <title>F1 Standings</title>
 
   <!-- Fonts & Tailwind -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=EB+Garamond:wght@500&display=swap" rel="stylesheet" />
@@ -138,7 +138,7 @@
 
 <body class="min-h-screen flex flex-col">
   <header>
-    <h1>2025 Formula 1 Standings</h1>
+    <h1 id="page-title">Formula 1 Standings</h1>
     <p class="text-sm mt-2 max-w-prose">
       Driver &amp; Constructor tables updated after every Grand Prix.
       <span class="italic">Unofficial; for analysis and historical reference only.</span>
@@ -219,15 +219,15 @@
   </main>
 
   <footer class="text-center">
-    © 2025 F1 Enthusiast | Inspired by classic race programmes &amp; modern data-journalism design. Not affiliated with Formula 1 or the FIA.
+    <span id="footer-year"></span> F1 Enthusiast | Inspired by classic race programmes &amp; modern data-journalism design. Not affiliated with Formula 1 or the FIA.
   </footer>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const seasonYear = 2025;
+    document.addEventListener("DOMContentLoaded", async () => {
+      let seasonYear = null;
       const trendLeafKeys = [
         "SprintPoints",
         "PlacesGainedSprintPoints",
@@ -238,6 +238,44 @@
         "PlacesGainedRacePoints",
         "TeammateRacePoints",
       ];
+
+
+      async function fileExists(path) {
+        const response = await fetch(path, { method: "HEAD" });
+        return response.ok;
+      }
+
+      async function resolveSeasonYear() {
+        const currentYear = new Date().getUTCFullYear();
+        const candidateYears = [currentYear, currentYear - 1, currentYear - 2, currentYear - 3];
+
+        for (const year of candidateYears) {
+          const sessionsPath = `data/sessions_${year}.csv`;
+          const hasSessions = await fileExists(sessionsPath);
+          if (!hasSessions) {
+            continue;
+          }
+
+          const hasDriverPoints = await fileExists(`data/driver_points_${year}_most_recent.csv`);
+          const hasConstructorPoints = await fileExists(`data/constructor_points_${year}_most_recent.csv`);
+
+          if (hasDriverPoints && hasConstructorPoints) {
+            return year;
+          }
+        }
+
+        throw new Error("No season data files were found for recent years.");
+      }
+
+      function updateSeasonLabels(year) {
+        document.title = `${year} F1 Standings`;
+
+        const pageTitle = document.getElementById("page-title");
+        pageTitle.textContent = `${year} Formula 1 Standings`;
+
+        const footerYear = document.getElementById("footer-year");
+        footerYear.textContent = `© ${year}`;
+      }
 
       let trendRows = [];
       let trendChart = null;
@@ -481,8 +519,16 @@
         renderTrendChart();
       }
 
-      buildTable("data/driver_points_2025_most_recent.csv", "driver-table");
-      buildTable("data/constructor_points_2025_most_recent.csv", "constructor-table");
+      try {
+        seasonYear = await resolveSeasonYear();
+        updateSeasonLabels(seasonYear);
+
+        buildTable(`data/driver_points_${seasonYear}_most_recent.csv`, "driver-table");
+        buildTable(`data/constructor_points_${seasonYear}_most_recent.csv`, "constructor-table");
+      } catch (error) {
+        document.getElementById("trend-status").textContent = `Could not resolve season data files: ${error.message}`;
+        return;
+      }
 
       const tabButtons = document.querySelectorAll("#table-tabs .tab");
       const tabContents = document.querySelectorAll(".tab-content");
