@@ -14,13 +14,11 @@
 
   <style>
     :root {
-      /* minimalist palette + F1 accent */
       --accent-red: #c60000;
       --neutral-100: #f9f9f9;
       --neutral-900: #111111;
     }
 
-    /* Base typography */
     body {
       font-family: "Inter", system-ui, sans-serif;
       background: #ffffff;
@@ -33,6 +31,7 @@
       padding: 2rem 1rem 1.5rem;
       border-bottom: 1px solid #e5e5e5;
     }
+
     header::before {
       content: "";
       position: absolute;
@@ -42,6 +41,7 @@
       height: 4px;
       background: var(--accent-red);
     }
+
     h1 {
       font-family: "EB Garamond", serif;
       font-size: 2.25rem;
@@ -50,36 +50,81 @@
       line-height: 1.2;
     }
 
-    /* Tab navigation styling */
     #table-tabs .tab {
       border-bottom: 2px solid transparent;
       transition: border-color 0.15s;
     }
+
     #table-tabs .tab.active-tab {
       border-color: var(--neutral-900);
     }
 
-    /* Ensure hidden tables stay hidden even after Tabulator injects inline styles */
     .tab-content.hidden {
       display: none !important;
     }
 
-    /* ─── Tabulator minimalist skin ─────────────────────────────── */
     .tabulator .tabulator-header {
       background: #f5f5f5;
       color: var(--neutral-900);
       font-weight: 600;
       border-bottom: 2px solid var(--accent-red);
     }
+
     .tabulator .tabulator-row {
       background: #ffffff;
       border-bottom: 1px solid #eeeeee;
     }
+
     .tabulator .tabulator-row:nth-child(even) {
       background: var(--neutral-100);
     }
+
     .tabulator .tabulator-row.tabulator-selectable:hover {
       background: #eaeaea;
+    }
+
+    .trend-card {
+      margin-top: 1.5rem;
+      border: 1px solid #e5e5e5;
+      border-radius: 12px;
+      padding: 1rem;
+      background: linear-gradient(180deg, #ffffff 0%, #fcfcfc 100%);
+    }
+
+    .trend-controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+      align-items: start;
+      margin-bottom: 1rem;
+    }
+
+    .control-card {
+      background: #fff;
+      border: 1px solid #ececec;
+      border-radius: 10px;
+      padding: 0.8rem;
+    }
+
+    .point-group {
+      border: 1px solid #f0f0f0;
+      border-radius: 8px;
+      padding: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .point-group h4 {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #444;
+      margin-bottom: 0.35rem;
+    }
+
+    .trend-canvas-wrap {
+      position: relative;
+      min-height: 380px;
     }
 
     footer {
@@ -93,13 +138,12 @@
 
 <body class="min-h-screen flex flex-col">
   <header>
-    <h1>2025 Formula 1 Standings</h1>
+    <h1>2025 Formula 1 Standings</h1>
     <p class="text-sm mt-2 max-w-prose">
       Driver &amp; Constructor tables updated after every Grand Prix.
       <span class="italic">Unofficial; for analysis and historical reference only.</span>
     </p>
 
-    <!-- Tabs navigation -->
     <nav id="table-tabs" class="flex space-x-6 mt-6 text-sm font-semibold uppercase tracking-wide">
       <button data-target="driver" class="tab active-tab px-1 pb-2 focus:outline-none">Drivers</button>
       <button data-target="constructor" class="tab px-1 pb-2 focus:outline-none">Constructors</button>
@@ -107,10 +151,67 @@
   </header>
 
   <main class="flex-grow p-4 mx-auto w-full max-w-5xl">
-    <!-- Driver Table -->
     <div id="driver-table" class="tab-content w-full"></div>
-    <!-- Constructor Table (initially hidden) -->
     <div id="constructor-table" class="tab-content w-full hidden"></div>
+
+    <section class="trend-card" aria-labelledby="trend-heading">
+      <div class="flex items-start justify-between flex-wrap gap-3 mb-4">
+        <div>
+          <h2 id="trend-heading" class="text-xl font-semibold">Driver points trend by race weekend</h2>
+          <p class="text-sm text-gray-600 max-w-3xl">
+            Select drivers and point categories to trend performance through the season. Point hierarchy follows project scoring:
+            <strong>Total Driver</strong> = Sprint total + Qualifying total + Race total.
+          </p>
+        </div>
+      </div>
+
+      <div class="trend-controls">
+        <div class="control-card">
+          <label for="driver-select" class="block text-sm font-semibold mb-2">Drivers to plot</label>
+          <select id="driver-select" class="w-full border rounded p-2 text-sm" multiple size="8"></select>
+          <div class="mt-2 flex gap-2 flex-wrap">
+            <button id="select-top-5" class="text-xs px-2 py-1 border rounded hover:bg-gray-50">Select top 5</button>
+            <button id="select-all-drivers" class="text-xs px-2 py-1 border rounded hover:bg-gray-50">Select all</button>
+            <button id="clear-drivers" class="text-xs px-2 py-1 border rounded hover:bg-gray-50">Clear</button>
+          </div>
+        </div>
+
+        <div class="control-card">
+          <p class="text-sm font-semibold mb-1">Point categories included in chart</p>
+          <p class="text-xs text-gray-500">Totals are automatically formed from the selected components.</p>
+
+          <div class="point-group">
+            <h4>Total Sprint Race Points</h4>
+            <label class="block text-sm"><input type="checkbox" class="point-toggle mr-2" value="SprintPoints" checked> Sprint finish points</label>
+            <label class="block text-sm"><input type="checkbox" class="point-toggle mr-2" value="PlacesGainedSprintPoints" checked> Sprint overtakes (places gained)</label>
+            <label class="block text-sm"><input type="checkbox" class="point-toggle mr-2" value="TeammateSprintPoints" checked> Sprint teammate beat bonus</label>
+          </div>
+
+          <div class="point-group">
+            <h4>Total Race Qualifying Points</h4>
+            <label class="block text-sm"><input type="checkbox" class="point-toggle mr-2" value="PolePoints" checked> Pole points</label>
+            <label class="block text-sm"><input type="checkbox" class="point-toggle mr-2" value="TeammateQualiPoints" checked> Qualifying teammate beat bonus</label>
+          </div>
+
+          <div class="point-group">
+            <h4>Total Race Points</h4>
+            <label class="block text-sm"><input type="checkbox" class="point-toggle mr-2" value="RacePoints" checked> Race finish points</label>
+            <label class="block text-sm"><input type="checkbox" class="point-toggle mr-2" value="PlacesGainedRacePoints" checked> Race overtakes (places gained)</label>
+            <label class="block text-sm"><input type="checkbox" class="point-toggle mr-2" value="TeammateRacePoints" checked> Race teammate beat bonus</label>
+          </div>
+
+          <label class="mt-2 block text-sm font-medium">
+            <input id="cumulative-toggle" type="checkbox" class="mr-2" checked>
+            Show cumulative trend (recommended)
+          </label>
+        </div>
+      </div>
+
+      <div class="trend-canvas-wrap">
+        <canvas id="driver-points-trend" aria-label="Driver points trend chart" role="img"></canvas>
+      </div>
+      <p id="trend-status" class="text-xs text-gray-500 mt-2"></p>
+    </section>
 
     <noscript>
       <p class="mt-4 text-red-600">Enable JavaScript to view the interactive tables.</p>
@@ -118,15 +219,30 @@
   </main>
 
   <footer class="text-center">
-    © 2025 F1 Enthusiast | Inspired by classic race programmes &amp; modern data‑journalism design. Not affiliated with Formula 1 or the FIA.
+    © 2025 F1 Enthusiast | Inspired by classic race programmes &amp; modern data-journalism design. Not affiliated with Formula 1 or the FIA.
   </footer>
 
-  <!-- Scripts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      /* Utility to build a Tabulator table from a CSV file */
+      const seasonYear = 2025;
+      const trendLeafKeys = [
+        "SprintPoints",
+        "PlacesGainedSprintPoints",
+        "TeammateSprintPoints",
+        "PolePoints",
+        "TeammateQualiPoints",
+        "RacePoints",
+        "PlacesGainedRacePoints",
+        "TeammateRacePoints",
+      ];
+
+      let trendRows = [];
+      let trendChart = null;
+      let driverSortByTotal = [];
+
       function buildTable(csvPath, targetId) {
         fetch(csvPath)
           .then((resp) => resp.text())
@@ -135,7 +251,7 @@
             const data = parsed.data;
             const columns = parsed.meta.fields.map((field) => ({
               title: field.replace(/_/g, " ").toUpperCase(),
-              field: field,
+              field,
               headerSort: true,
               responsive: 0,
             }));
@@ -155,11 +271,219 @@
           });
       }
 
-      /* Build both tables */
+      async function fetchCsvRows(path) {
+        try {
+          const response = await fetch(path);
+          if (!response.ok) {
+            return [];
+          }
+          const csv = await response.text();
+          return Papa.parse(csv, { header: true, skipEmptyLines: true }).data;
+        } catch (error) {
+          return [];
+        }
+      }
+
+      function toNumber(value) {
+        const n = Number(value);
+        return Number.isFinite(n) ? n : 0;
+      }
+
+      function colorFromDriver(driverId) {
+        let hash = 0;
+        for (let i = 0; i < driverId.length; i += 1) {
+          hash = driverId.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const hue = Math.abs(hash) % 360;
+        return `hsl(${hue}, 72%, 42%)`;
+      }
+
+      function getSelectedPointKeys() {
+        return Array.from(document.querySelectorAll(".point-toggle:checked")).map((el) => el.value);
+      }
+
+      function getSelectedDrivers() {
+        const select = document.getElementById("driver-select");
+        return Array.from(select.selectedOptions).map((opt) => opt.value);
+      }
+
+      function calculateWeekendValue(row, selectedKeys) {
+        return selectedKeys.reduce((sum, key) => sum + toNumber(row[key]), 0);
+      }
+
+      function getRoundLabel(row) {
+        const shortName = row.EventName.replace("Grand Prix", "GP").trim();
+        return `R${row.RoundNumber} • ${shortName}`;
+      }
+
+      function renderTrendChart() {
+        const selectedDrivers = getSelectedDrivers();
+        const selectedKeys = getSelectedPointKeys();
+        const cumulative = document.getElementById("cumulative-toggle").checked;
+        const statusEl = document.getElementById("trend-status");
+
+        if (!selectedDrivers.length) {
+          if (trendChart) {
+            trendChart.destroy();
+            trendChart = null;
+          }
+          statusEl.textContent = "Select at least one driver to render the trend chart.";
+          return;
+        }
+
+        const labels = trendRows.map(getRoundLabel);
+        const datasets = selectedDrivers.map((driverId) => {
+          const driverRows = trendRows.map((row) => row.DriverPoints[driverId] || {});
+          let running = 0;
+          const data = driverRows.map((driverRow) => {
+            const weekendPoints = calculateWeekendValue(driverRow, selectedKeys);
+            if (cumulative) {
+              running += weekendPoints;
+              return running;
+            }
+            return weekendPoints;
+          });
+
+          return {
+            label: driverId,
+            data,
+            borderColor: colorFromDriver(driverId),
+            pointRadius: 2,
+            borderWidth: 2,
+            tension: 0.25,
+            fill: false,
+          };
+        });
+
+        if (trendChart) {
+          trendChart.destroy();
+        }
+
+        const ctx = document.getElementById("driver-points-trend");
+        trendChart = new Chart(ctx, {
+          type: "line",
+          data: { labels, datasets },
+          options: {
+            maintainAspectRatio: false,
+            interaction: {
+              mode: "nearest",
+              intersect: false,
+            },
+            plugins: {
+              legend: {
+                position: "bottom",
+                labels: {
+                  usePointStyle: true,
+                  boxWidth: 8,
+                },
+              },
+              tooltip: {
+                callbacks: {
+                  label(context) {
+                    return `${context.dataset.label}: ${context.parsed.y.toFixed(1)} pts`;
+                  },
+                },
+              },
+            },
+            scales: {
+              x: {
+                title: {
+                  display: true,
+                  text: "Race weekend",
+                },
+                ticks: {
+                  maxRotation: 35,
+                  minRotation: 20,
+                },
+              },
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: "Points",
+                },
+              },
+            },
+          },
+        });
+
+        const mode = cumulative ? "Cumulative" : "Per-weekend";
+        statusEl.textContent = `${mode} view • ${selectedDrivers.length} driver(s) • ${selectedKeys.length} point component(s).`;
+      }
+
+      function setDriverSelection(driverIds) {
+        const select = document.getElementById("driver-select");
+        Array.from(select.options).forEach((opt) => {
+          opt.selected = driverIds.includes(opt.value);
+        });
+      }
+
+      async function buildTrendData() {
+        const sessions = await fetchCsvRows(`data/sessions_${seasonYear}.csv`);
+        const raceWeekends = sessions
+          .filter((row) => row.SessionName === "Race")
+          .map((row) => ({
+            RoundNumber: Number(row.RoundNumber),
+            EventName: row.EventName,
+          }))
+          .sort((a, b) => a.RoundNumber - b.RoundNumber);
+
+        const weekendData = await Promise.all(
+          raceWeekends.map(async (weekend) => {
+            const filePath = `data/driver_points_${seasonYear}_${weekend.RoundNumber}_${weekend.EventName}.csv`;
+            const rows = await fetchCsvRows(filePath);
+            const byDriver = {};
+
+            rows.forEach((row) => {
+              const driverId = row.DriverId;
+              if (!driverId) {
+                return;
+              }
+              byDriver[driverId] = { ...row };
+              trendLeafKeys.forEach((key) => {
+                byDriver[driverId][key] = toNumber(row[key]);
+              });
+              byDriver[driverId].TotalDriverPoints = toNumber(row.TotalDriverPoints);
+            });
+
+            return {
+              RoundNumber: weekend.RoundNumber,
+              EventName: weekend.EventName,
+              DriverPoints: byDriver,
+              hasRows: rows.length > 0,
+            };
+          })
+        );
+
+        trendRows = weekendData.filter((weekend) => weekend.hasRows);
+
+        const totals = {};
+        trendRows.forEach((weekend) => {
+          Object.entries(weekend.DriverPoints).forEach(([driverId, row]) => {
+            totals[driverId] = (totals[driverId] || 0) + toNumber(row.TotalDriverPoints);
+          });
+        });
+
+        driverSortByTotal = Object.entries(totals)
+          .sort((a, b) => b[1] - a[1])
+          .map(([driverId]) => driverId);
+
+        const select = document.getElementById("driver-select");
+        select.innerHTML = "";
+        driverSortByTotal.forEach((driverId) => {
+          const option = document.createElement("option");
+          option.value = driverId;
+          option.textContent = driverId;
+          select.appendChild(option);
+        });
+
+        setDriverSelection(driverSortByTotal.slice(0, 5));
+        renderTrendChart();
+      }
+
       buildTable("data/driver_points_2025_most_recent.csv", "driver-table");
       buildTable("data/constructor_points_2025_most_recent.csv", "constructor-table");
 
-      /* Tab toggling */
       const tabButtons = document.querySelectorAll("#table-tabs .tab");
       const tabContents = document.querySelectorAll(".tab-content");
 
@@ -167,11 +491,9 @@
         btn.addEventListener("click", () => {
           const target = btn.dataset.target + "-table";
 
-          // update button status
           tabButtons.forEach((b) => b.classList.remove("active-tab"));
           btn.classList.add("active-tab");
 
-          // show/hide tables
           tabContents.forEach((div) => {
             if (div.id === target) {
               div.classList.remove("hidden");
@@ -180,6 +502,31 @@
             }
           });
         });
+      });
+
+      document.querySelectorAll(".point-toggle").forEach((toggle) => {
+        toggle.addEventListener("change", renderTrendChart);
+      });
+      document.getElementById("driver-select").addEventListener("change", renderTrendChart);
+      document.getElementById("cumulative-toggle").addEventListener("change", renderTrendChart);
+
+      document.getElementById("select-top-5").addEventListener("click", () => {
+        setDriverSelection(driverSortByTotal.slice(0, 5));
+        renderTrendChart();
+      });
+
+      document.getElementById("select-all-drivers").addEventListener("click", () => {
+        setDriverSelection(driverSortByTotal);
+        renderTrendChart();
+      });
+
+      document.getElementById("clear-drivers").addEventListener("click", () => {
+        setDriverSelection([]);
+        renderTrendChart();
+      });
+
+      buildTrendData().catch((error) => {
+        document.getElementById("trend-status").textContent = `Could not load historical trend data: ${error.message}`;
       });
     });
   </script>
