@@ -213,6 +213,60 @@
       <p id="trend-status" class="text-xs text-gray-500 mt-2"></p>
     </section>
 
+    <section class="trend-card" aria-labelledby="constructor-trend-heading">
+      <div class="flex items-start justify-between flex-wrap gap-3 mb-4">
+        <div>
+          <h2 id="constructor-trend-heading" class="text-xl font-semibold">Constructor points trend by race weekend</h2>
+          <p class="text-sm text-gray-600 max-w-3xl">
+            Compare constructor momentum across race weekends using configurable scoring components.
+            <strong>Total Constructor</strong> = Total Constructor Sprint (Sprint total + Sprint overtakes + Sprint finishing bonus)
+            + Total Constructor Race (Race total + Race overtakes + Race finishing bonus).
+          </p>
+        </div>
+      </div>
+
+      <div class="trend-controls">
+        <div class="control-card">
+          <label for="constructor-select" class="block text-sm font-semibold mb-2">Constructors to plot</label>
+          <select id="constructor-select" class="w-full border rounded p-2 text-sm" multiple size="8"></select>
+          <div class="mt-2 flex gap-2 flex-wrap">
+            <button id="select-top-5-constructors" class="text-xs px-2 py-1 border rounded hover:bg-gray-50">Select top 5</button>
+            <button id="select-all-constructors" class="text-xs px-2 py-1 border rounded hover:bg-gray-50">Select all</button>
+            <button id="clear-constructors" class="text-xs px-2 py-1 border rounded hover:bg-gray-50">Clear</button>
+          </div>
+        </div>
+
+        <div class="control-card">
+          <p class="text-sm font-semibold mb-1">Point categories included in chart</p>
+          <p class="text-xs text-gray-500">Totals are automatically formed from the selected components.</p>
+
+          <div class="point-group">
+            <h4>Total Constructor Sprint Points</h4>
+            <label class="block text-sm"><input type="checkbox" class="constructor-point-toggle mr-2" value="TotalSprintPoints" checked> Sprint finish points (both cars)</label>
+            <label class="block text-sm"><input type="checkbox" class="constructor-point-toggle mr-2" value="PlacesGainedSprintPoints" checked> Sprint overtakes (places gained)</label>
+            <label class="block text-sm"><input type="checkbox" class="constructor-point-toggle mr-2" value="ConstructorSprintFinishingPoints" checked> Sprint finishing bonus</label>
+          </div>
+
+          <div class="point-group">
+            <h4>Total Constructor Race Points</h4>
+            <label class="block text-sm"><input type="checkbox" class="constructor-point-toggle mr-2" value="TotalRacePoints" checked> Race finish points (both cars)</label>
+            <label class="block text-sm"><input type="checkbox" class="constructor-point-toggle mr-2" value="PlacesGainedRacePoints" checked> Race overtakes (places gained)</label>
+            <label class="block text-sm"><input type="checkbox" class="constructor-point-toggle mr-2" value="ConstructorRaceFinishingPoints" checked> Race finishing bonus</label>
+          </div>
+
+          <label class="mt-2 block text-sm font-medium">
+            <input id="constructor-cumulative-toggle" type="checkbox" class="mr-2" checked>
+            Show cumulative trend (recommended)
+          </label>
+        </div>
+      </div>
+
+      <div class="trend-canvas-wrap">
+        <canvas id="constructor-points-trend" aria-label="Constructor points trend chart" role="img"></canvas>
+      </div>
+      <p id="constructor-trend-status" class="text-xs text-gray-500 mt-2"></p>
+    </section>
+
     <noscript>
       <p class="mt-4 text-red-600">Enable JavaScript to view the interactive tables.</p>
     </noscript>
@@ -237,6 +291,14 @@
         "RacePoints",
         "PlacesGainedRacePoints",
         "TeammateRacePoints",
+      ];
+      const constructorTrendLeafKeys = [
+        "TotalSprintPoints",
+        "PlacesGainedSprintPoints",
+        "ConstructorSprintFinishingPoints",
+        "TotalRacePoints",
+        "PlacesGainedRacePoints",
+        "ConstructorRaceFinishingPoints",
       ];
 
 
@@ -277,9 +339,12 @@
         footerYear.textContent = `© ${year}`;
       }
 
-      let trendRows = [];
+      let driverTrendRows = [];
+      let constructorTrendRows = [];
       let trendChart = null;
+      let constructorTrendChart = null;
       let driverSortByTotal = [];
+      let constructorSortByTotal = [];
 
       function buildTable(csvPath, targetId) {
         fetch(csvPath)
@@ -327,10 +392,10 @@
         return Number.isFinite(n) ? n : 0;
       }
 
-      function colorFromDriver(driverId) {
+      function colorFromId(entityId) {
         let hash = 0;
-        for (let i = 0; i < driverId.length; i += 1) {
-          hash = driverId.charCodeAt(i) + ((hash << 5) - hash);
+        for (let i = 0; i < entityId.length; i += 1) {
+          hash = entityId.charCodeAt(i) + ((hash << 5) - hash);
         }
         const hue = Math.abs(hash) % 360;
         return `hsl(${hue}, 72%, 42%)`;
@@ -342,6 +407,15 @@
 
       function getSelectedDrivers() {
         const select = document.getElementById("driver-select");
+        return Array.from(select.selectedOptions).map((opt) => opt.value);
+      }
+
+      function getSelectedConstructorPointKeys() {
+        return Array.from(document.querySelectorAll(".constructor-point-toggle:checked")).map((el) => el.value);
+      }
+
+      function getSelectedConstructors() {
+        const select = document.getElementById("constructor-select");
         return Array.from(select.selectedOptions).map((opt) => opt.value);
       }
 
@@ -369,9 +443,9 @@
           return;
         }
 
-        const labels = trendRows.map(getRoundLabel);
+        const labels = driverTrendRows.map(getRoundLabel);
         const datasets = selectedDrivers.map((driverId) => {
-          const driverRows = trendRows.map((row) => row.DriverPoints[driverId] || {});
+          const driverRows = driverTrendRows.map((row) => row.DriverPoints[driverId] || {});
           let running = 0;
           const data = driverRows.map((driverRow) => {
             const weekendPoints = calculateWeekendValue(driverRow, selectedKeys);
@@ -385,7 +459,7 @@
           return {
             label: driverId,
             data,
-            borderColor: colorFromDriver(driverId),
+            borderColor: colorFromId(driverId),
             pointRadius: 2,
             borderWidth: 2,
             tension: 0.25,
@@ -449,10 +523,105 @@
         statusEl.textContent = `${mode} view • ${selectedDrivers.length} driver(s) • ${selectedKeys.length} point component(s).`;
       }
 
-      function setDriverSelection(driverIds) {
-        const select = document.getElementById("driver-select");
+      function renderConstructorTrendChart() {
+        const selectedConstructors = getSelectedConstructors();
+        const selectedKeys = getSelectedConstructorPointKeys();
+        const cumulative = document.getElementById("constructor-cumulative-toggle").checked;
+        const statusEl = document.getElementById("constructor-trend-status");
+
+        if (!selectedConstructors.length) {
+          if (constructorTrendChart) {
+            constructorTrendChart.destroy();
+            constructorTrendChart = null;
+          }
+          statusEl.textContent = "Select at least one constructor to render the trend chart.";
+          return;
+        }
+
+        const labels = constructorTrendRows.map(getRoundLabel);
+        const datasets = selectedConstructors.map((teamId) => {
+          const constructorRows = constructorTrendRows.map((row) => row.ConstructorPoints[teamId] || {});
+          let running = 0;
+          const data = constructorRows.map((constructorRow) => {
+            const weekendPoints = calculateWeekendValue(constructorRow, selectedKeys);
+            if (cumulative) {
+              running += weekendPoints;
+              return running;
+            }
+            return weekendPoints;
+          });
+
+          return {
+            label: teamId,
+            data,
+            borderColor: colorFromId(teamId),
+            pointRadius: 2,
+            borderWidth: 2,
+            tension: 0.25,
+            fill: false,
+          };
+        });
+
+        if (constructorTrendChart) {
+          constructorTrendChart.destroy();
+        }
+
+        const ctx = document.getElementById("constructor-points-trend");
+        constructorTrendChart = new Chart(ctx, {
+          type: "line",
+          data: { labels, datasets },
+          options: {
+            maintainAspectRatio: false,
+            interaction: {
+              mode: "nearest",
+              intersect: false,
+            },
+            plugins: {
+              legend: {
+                position: "bottom",
+                labels: {
+                  usePointStyle: true,
+                  boxWidth: 8,
+                },
+              },
+              tooltip: {
+                callbacks: {
+                  label(context) {
+                    return `${context.dataset.label}: ${context.parsed.y.toFixed(1)} pts`;
+                  },
+                },
+              },
+            },
+            scales: {
+              x: {
+                title: {
+                  display: true,
+                  text: "Race weekend",
+                },
+                ticks: {
+                  maxRotation: 35,
+                  minRotation: 20,
+                },
+              },
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: "Points",
+                },
+              },
+            },
+          },
+        });
+
+        const mode = cumulative ? "Cumulative" : "Per-weekend";
+        statusEl.textContent = `${mode} view • ${selectedConstructors.length} constructor(s) • ${selectedKeys.length} point component(s).`;
+      }
+
+      function setSelection(selectId, selectedIds) {
+        const select = document.getElementById(selectId);
         Array.from(select.options).forEach((opt) => {
-          opt.selected = driverIds.includes(opt.value);
+          opt.selected = selectedIds.includes(opt.value);
         });
       }
 
@@ -468,11 +637,14 @@
 
         const weekendData = await Promise.all(
           raceWeekends.map(async (weekend) => {
-            const filePath = `data/driver_points_${seasonYear}_${weekend.RoundNumber}_${weekend.EventName}.csv`;
-            const rows = await fetchCsvRows(filePath);
+            const [driverRows, constructorRows] = await Promise.all([
+              fetchCsvRows(`data/driver_points_${seasonYear}_${weekend.RoundNumber}_${weekend.EventName}.csv`),
+              fetchCsvRows(`data/constructor_points_${seasonYear}_${weekend.RoundNumber}_${weekend.EventName}.csv`),
+            ]);
             const byDriver = {};
+            const byConstructor = {};
 
-            rows.forEach((row) => {
+            driverRows.forEach((row) => {
               const driverId = row.DriverId;
               if (!driverId) {
                 return;
@@ -484,19 +656,34 @@
               byDriver[driverId].TotalDriverPoints = toNumber(row.TotalDriverPoints);
             });
 
+            constructorRows.forEach((row) => {
+              const teamId = row.TeamId;
+              if (!teamId) {
+                return;
+              }
+              byConstructor[teamId] = { ...row };
+              constructorTrendLeafKeys.forEach((key) => {
+                byConstructor[teamId][key] = toNumber(row[key]);
+              });
+              byConstructor[teamId].TotalConstructorPoints = toNumber(row.TotalConstructorPoints);
+            });
+
             return {
               RoundNumber: weekend.RoundNumber,
               EventName: weekend.EventName,
               DriverPoints: byDriver,
-              hasRows: rows.length > 0,
+              ConstructorPoints: byConstructor,
+              hasRows: driverRows.length > 0 || constructorRows.length > 0,
             };
           })
         );
 
-        trendRows = weekendData.filter((weekend) => weekend.hasRows);
+        const filteredRows = weekendData.filter((weekend) => weekend.hasRows);
+        driverTrendRows = filteredRows;
+        constructorTrendRows = filteredRows;
 
         const totals = {};
-        trendRows.forEach((weekend) => {
+        driverTrendRows.forEach((weekend) => {
           Object.entries(weekend.DriverPoints).forEach(([driverId, row]) => {
             totals[driverId] = (totals[driverId] || 0) + toNumber(row.TotalDriverPoints);
           });
@@ -515,8 +702,30 @@
           select.appendChild(option);
         });
 
-        setDriverSelection(driverSortByTotal.slice(0, 5));
+        const constructorTotals = {};
+        constructorTrendRows.forEach((weekend) => {
+          Object.entries(weekend.ConstructorPoints).forEach(([teamId, row]) => {
+            constructorTotals[teamId] = (constructorTotals[teamId] || 0) + toNumber(row.TotalConstructorPoints);
+          });
+        });
+
+        constructorSortByTotal = Object.entries(constructorTotals)
+          .sort((a, b) => b[1] - a[1])
+          .map(([teamId]) => teamId);
+
+        const constructorSelect = document.getElementById("constructor-select");
+        constructorSelect.innerHTML = "";
+        constructorSortByTotal.forEach((teamId) => {
+          const option = document.createElement("option");
+          option.value = teamId;
+          option.textContent = teamId;
+          constructorSelect.appendChild(option);
+        });
+
+        setSelection("driver-select", driverSortByTotal.slice(0, 5));
+        setSelection("constructor-select", constructorSortByTotal.slice(0, 5));
         renderTrendChart();
+        renderConstructorTrendChart();
       }
 
       try {
@@ -555,20 +764,40 @@
       });
       document.getElementById("driver-select").addEventListener("change", renderTrendChart);
       document.getElementById("cumulative-toggle").addEventListener("change", renderTrendChart);
+      document.querySelectorAll(".constructor-point-toggle").forEach((toggle) => {
+        toggle.addEventListener("change", renderConstructorTrendChart);
+      });
+      document.getElementById("constructor-select").addEventListener("change", renderConstructorTrendChart);
+      document.getElementById("constructor-cumulative-toggle").addEventListener("change", renderConstructorTrendChart);
 
       document.getElementById("select-top-5").addEventListener("click", () => {
-        setDriverSelection(driverSortByTotal.slice(0, 5));
+        setSelection("driver-select", driverSortByTotal.slice(0, 5));
         renderTrendChart();
       });
 
       document.getElementById("select-all-drivers").addEventListener("click", () => {
-        setDriverSelection(driverSortByTotal);
+        setSelection("driver-select", driverSortByTotal);
         renderTrendChart();
       });
 
       document.getElementById("clear-drivers").addEventListener("click", () => {
-        setDriverSelection([]);
+        setSelection("driver-select", []);
         renderTrendChart();
+      });
+
+      document.getElementById("select-top-5-constructors").addEventListener("click", () => {
+        setSelection("constructor-select", constructorSortByTotal.slice(0, 5));
+        renderConstructorTrendChart();
+      });
+
+      document.getElementById("select-all-constructors").addEventListener("click", () => {
+        setSelection("constructor-select", constructorSortByTotal);
+        renderConstructorTrendChart();
+      });
+
+      document.getElementById("clear-constructors").addEventListener("click", () => {
+        setSelection("constructor-select", []);
+        renderConstructorTrendChart();
       });
 
       buildTrendData().catch((error) => {
