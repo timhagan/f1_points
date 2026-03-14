@@ -4,6 +4,8 @@ A modern, automated Formula 1 Fantasy standings tracker that provides driver and
 # 🌟 Features
 - Fantasy Points Scored: Up-to-date driver and constructor championship points from the most recent race
 - Automated Updates: GitHub Actions workflows automatically fetch new data after each race
+- FantasyGP Prices: Weekly authenticated scrape of current driver and constructor prices
+- Points-per-Dollar Ready: Normalized price output to support future value ranking
 - Clean Interface: Responsive web design with tabbed navigation
 - Custom Scoring: Includes additional points for pole positions and places gained
 - Historical Data: Tracks points progression throughout the season (Coming Soon!)
@@ -31,6 +33,7 @@ Visit the live standings at: timhagan.github.io/f1_points
 - Automation Schedule
   - 📅 Annual: January 1st - Fetch F1 event schedule
   - 🏁 Weekly: Every Monday - Process race results from weekend
+  - 💰 Weekly: Every Monday - Scrape FantasyGP driver/constructor prices
   - 🔄 Manual: On-demand triggers available for Sprint weekends
 
 # 📁 Project Structure
@@ -81,6 +84,17 @@ python src/data_prep/get_most_recent_event_points.py
 # Combine all season data
 python src/data_prep/combine_event_points.py
 ```
+
+### FantasyGP price scraping setup
+To enable the authenticated weekly FantasyGP scrape workflow, add these repository secrets:
+- `FANTASYGP_USERNAME`
+- `FANTASYGP_PASSWORD`
+
+The workflow runs every Monday and can also be triggered manually from GitHub Actions. It writes the latest files to:
+- `data/fantasygp_driver_prices_current.csv`
+- `data/fantasygp_constructor_prices_current.csv`
+- `data/fantasygp_prices_current.csv` (combined normalized table for points-per-dollar analysis)
+- Date-stamped archives in `data/` (one file per run day for each output)
 
 # 🤝 Contributing
 Contributions welcome! Here's how to help:
