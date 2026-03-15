@@ -34,6 +34,45 @@ def _debug_log(message):
         logger.warning("[FantasyGP debug] %s", message)
 
 
+def _log_event(event, **fields):
+    payload = {"event": event, **fields}
+    logger.info(json.dumps(payload, sort_keys=True))
+
+
+def _get_validation_thresholds():
+    return {
+        "driver": int(os.environ.get("FANTASYGP_MIN_DRIVER_ROWS", "20")),
+        "constructor": int(os.environ.get("FANTASYGP_MIN_CONSTRUCTOR_ROWS", "10")),
+    }
+
+
+def _get_report_path():
+    return os.environ.get("FANTASYGP_DEBUG_REPORT_PATH", ".artifacts/fantasygp_scrape_report.json")
+
+
+def _set_validation_failure(report, reason_codes, **details):
+    report["validation"] = {
+        "status": "failed",
+        "reason_codes": reason_codes,
+        **details,
+    }
+    _log_event("validation_failed", reason_codes=reason_codes, **details)
+
+
+def _write_debug_report(report_payload):
+    report_path = _get_report_path()
+    try:
+        parent_dir = os.path.dirname(report_path)
+        if parent_dir:
+            os.makedirs(parent_dir, exist_ok=True)
+        with open(report_path, "w", encoding="utf-8") as file:
+            json.dump(report_payload, file, ensure_ascii=False, indent=2, sort_keys=True)
+            file.write("\n")
+        _log_event("debug_report_written", report_path=report_path)
+    except OSError as exc:
+        logger.warning("Failed to write FantasyGP debug report to %s: %s", report_path, exc)
+
+
 def _write_debug_html_snapshot(html_text, error_message):
     debug_path = os.environ.get("FANTASYGP_DEBUG_HTML_PATH")
     if not debug_path:
@@ -816,9 +855,62 @@ def _extract_prices_from_ajax_payload(payload_text):
     return None, None
 
 
-def fetch_prices_via_ajax(session, html, page_url, headers):
-    """Backward-compatible wrapper around endpoint extraction."""
-    return fetch_prices_from_endpoint(session, html, page_url, headers)
+def fetch_prices_via_ajax(session, html, page_url, headers, report=None):
+    ajax_url, security, script_url = _discover_ajax_context(html, page_url)
+    if not ajax_url or not script_url or not security:
+        _debug_log("Missing AJAX context (ajax_url, security token, or script_url).")
+        return None, None
+
+    _log_event("price_endpoint_used", endpoint=ajax_url, source="ajax")
+    if report is not None:
+        report["price_endpoint"] = ajax_url
+        report["price_source"] = "ajax"
+
+    try:
+        js_response = session.get(script_url, headers=headers, timeout=30)
+        js_response.raise_for_status()
+    except requests_exceptions.RequestException:
+        _debug_log(f"Unable to fetch AJAX script: {script_url}")
+        return None, None
+
+    actions = _candidate_ajax_actions(js_response.text)
+    if not actions:
+        logger.warning("Could not discover ajax actions from script: %s", script_url)
+        return None, None
+
+    nonce_keys = ["security", "nonce", "_ajax_nonce"]
+    attempts = []
+    last_response_text = None
+    last_content_type = None
+    for action in actions:
+        for nonce_key in nonce_keys:
+            attempts.append((action, nonce_key))
+            payload = {"action": action, nonce_key: security}
+            try:
+                response = session.post(ajax_url, data=payload, headers=headers, timeout=30)
+                response.raise_for_status()
+                last_response_text = response.text
+                last_content_type = (response.headers.get("Content-Type") or "").split(";")[0].strip()
+                _log_event("response_content_type", endpoint=ajax_url, content_type=last_content_type or "unknown")
+            except requests_exceptions.RequestException:
+                _debug_log(f"AJAX request failed for action={action}, nonce_key={nonce_key}")
+                continue
+
+            driver_prices, constructor_prices = _extract_prices_from_ajax_payload(response.text)
+            if driver_prices is not None and constructor_prices is not None:
+                _debug_log(f"AJAX extraction succeeded for action={action}, nonce_key={nonce_key}")
+                if report is not None:
+                    report["response_content_type"] = last_content_type or "unknown"
+                return driver_prices, constructor_prices
+
+    logger.warning(
+        "FantasyGP AJAX extraction failed after %d attempts to %s. Last payload snippet: %s",
+        len(attempts),
+        ajax_url,
+        _summarize_payload_text(last_response_text) if last_response_text else "<no successful responses>",
+    )
+
+    return None, None
 
 
 def extract_driver_constructor_prices(html):
@@ -1026,7 +1118,11 @@ def fetch_authenticated_html(url, username, password):
     return html
 
 
-def _fetch_with_proxy_retry(session, url, headers):
+def fetch_authenticated_page(url, username, password, report=None):
+    headers = {"User-Agent": "Mozilla/5.0 (compatible; f1-points-bot/1.0)"}
+    page_password = os.environ.get("FANTASYGP_PAGE_PASSWORD", password)
+
+    session = requests.Session()
     try:
         response = session.get(url, headers=headers, timeout=30)
         response.raise_for_status()
@@ -1046,11 +1142,10 @@ def _fetch_with_proxy_retry(session, url, headers):
                 "Check network egress/proxy allowlist for fantasygp.com."
             ) from exc
 
-
-def _fetch_with_requests_fallback(url, username, password, headers):
-    page_password = os.environ.get("FANTASYGP_PAGE_PASSWORD", password)
-    session = requests.Session()
-    first_response, session = _fetch_with_proxy_retry(session, url, headers)
+    initial_content_type = (first_response.headers.get("Content-Type") or "").split(";")[0].strip()
+    if report is not None:
+        report["initial_response_content_type"] = initial_content_type
+    _log_event("response_content_type", endpoint=url, content_type=initial_content_type or "unknown")
 
     login_info = _discover_login_form(first_response.text, first_response.url)
     if login_info is None:
@@ -1064,14 +1159,24 @@ def _fetch_with_requests_fallback(url, username, password, headers):
                 headers,
             )
             if wordpress_result:
+                if report is not None:
+                    report["auth_strategy"] = "fresh_browser_login"
+                _log_event("auth_strategy_used", auth_strategy="fresh_browser_login")
                 return wordpress_result, session, headers
         ready_html = _wait_for_page_readiness(session, url, headers, first_response.text)
+        if report is not None:
+            report["auth_strategy"] = "cached_state"
+        _log_event("auth_strategy_used", auth_strategy="cached_state")
         return ready_html, session, headers
 
     action_url, payload, username_key, password_key = login_info
 
     if password_key is None:
         raise ValueError("Could not determine a password field on the detected login form.")
+
+    if report is not None:
+        report["auth_strategy"] = "fresh_browser_login"
+    _log_event("auth_strategy_used", auth_strategy="fresh_browser_login")
 
     final_html = _submit_discovered_login_form(
         session,
@@ -1087,50 +1192,57 @@ def _fetch_with_requests_fallback(url, username, password, headers):
     return final_html, session, headers
 
 
-def _requires_reauthentication(response):
-    return response.status_code == 401 or _looks_like_login_page(response.text)
+def _validate_price_data(driver_prices, constructor_prices, report):
+    thresholds = _get_validation_thresholds()
+    min_driver_rows = thresholds["driver"]
+    min_constructor_rows = thresholds["constructor"]
 
+    driver_rows = int(len(driver_prices.index))
+    constructor_rows = int(len(constructor_prices.index))
 
-def fetch_authenticated_page(url, username, password):
-    headers = {"User-Agent": "Mozilla/5.0 (compatible; f1-points-bot/1.0)"}
+    report["row_counts"] = {
+        "driver": driver_rows,
+        "constructor": constructor_rows,
+    }
+    _log_event("extracted_row_counts", driver_rows=driver_rows, constructor_rows=constructor_rows)
 
-    if AUTH_MODE == "requests_fallback":
-        _debug_log("Using requests_fallback auth mode")
-        return _fetch_with_requests_fallback(url, username, password, headers)
+    reason_codes = []
+    if driver_rows < min_driver_rows:
+        reason_codes.append("DRV_LT_MIN")
+    if constructor_rows < min_constructor_rows:
+        reason_codes.append("CON_LT_MIN")
 
-    playwright_auth = PlaywrightAuthProvider(STORAGE_STATE_PATH, STORAGE_STATE_MAX_AGE_SECONDS)
-    requests_auth = RequestsAuthProvider(STORAGE_STATE_PATH)
+    threshold_details = {
+        "min_thresholds": {
+            "driver": min_driver_rows,
+            "constructor": min_constructor_rows,
+        },
+        "driver_rows": driver_rows,
+        "constructor_rows": constructor_rows,
+    }
 
-    if not playwright_auth.has_fresh_state():
-        _debug_log("Cached Playwright storage state missing or stale; logging in")
-        playwright_auth.login_and_save_state(username, password)
-
-    def _build_session_from_state():
-        return requests_auth.session_from_playwright_state()
-
-    try:
-        session = _build_session_from_state()
-    except (FileNotFoundError, json.JSONDecodeError):
-        _debug_log("Stored Playwright state unavailable or invalid; refreshing login")
-        playwright_auth.login_and_save_state(username, password)
-        session = _build_session_from_state()
-
-    response, session = _fetch_with_proxy_retry(session, url, headers)
-
-    if _requires_reauthentication(response):
-        _debug_log("Detected unauthorized response; refreshing Playwright login state")
-        playwright_auth.login_and_save_state(username, password)
-        session = _build_session_from_state()
-        response, session = _fetch_with_proxy_retry(session, url, headers)
-
-    if _requires_reauthentication(response):
+    if reason_codes:
+        _set_validation_failure(report, reason_codes, **threshold_details)
         raise RuntimeError(
-            "FantasyGP authentication appears invalid after Playwright refresh. "
-            "Set FANTASYGP_AUTH_MODE=requests_fallback to use the legacy fallback auth flow."
+            "Validation failed (%s): expected at least %d driver rows and %d constructor rows, got %d and %d."
+            % (
+                ",".join(reason_codes),
+                min_driver_rows,
+                min_constructor_rows,
+                driver_rows,
+                constructor_rows,
+            )
         )
 
-    ready_html = _wait_for_page_readiness(session, url, headers, response.text)
-    return ready_html, session, headers
+    report["validation"] = {
+        "status": "passed",
+        "reason_codes": [],
+        "min_thresholds": {
+            "driver": min_driver_rows,
+            "constructor": min_constructor_rows,
+        },
+    }
+    _log_event("validation_passed", min_driver_rows=min_driver_rows, min_constructor_rows=min_constructor_rows)
 
 
 def save_prices(driver_prices, constructor_prices):
@@ -1163,34 +1275,57 @@ def save_prices(driver_prices, constructor_prices):
 def main():
     username = os.environ.get("FANTASYGP_USERNAME")
     password = os.environ.get("FANTASYGP_PASSWORD")
+    report = {
+        "target_url": TARGET_URL,
+        "status": "started",
+        "run_started_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        "validation": {"status": "not_run", "reason_codes": []},
+    }
 
     if not username or not password:
+        report["status"] = "failed"
+        _set_validation_failure(report, ["MISSING_CREDENTIALS"])
+        _write_debug_report(report)
         raise EnvironmentError(
             "Missing FantasyGP credentials. Set FANTASYGP_USERNAME and FANTASYGP_PASSWORD environment variables."
         )
 
-    html, session, headers = fetch_authenticated_page(TARGET_URL, username, password)
+    try:
+        html, session, headers = fetch_authenticated_page(TARGET_URL, username, password, report=report)
+        report["price_endpoint"] = TARGET_URL
+        report["price_source"] = "page_html"
+        _log_event("price_endpoint_used", endpoint=TARGET_URL, source="page_html")
 
-    endpoint_error = None
-    driver_prices, constructor_prices = fetch_prices_from_endpoint(session, html, TARGET_URL, headers)
-    if driver_prices is None or constructor_prices is None:
-        endpoint_error = ValueError("Endpoint extraction did not return both driver and constructor prices.")
-        logger.warning("Primary FantasyGP endpoint extraction failed; falling back to HTML parsing.")
         try:
             driver_prices, constructor_prices = extract_driver_constructor_prices(html)
+            report["response_content_type"] = "text/html"
+            _log_event("response_content_type", endpoint=TARGET_URL, content_type="text/html")
         except ValueError as extract_error:
-            _write_debug_html_snapshot(html, str(extract_error))
-            if _looks_like_login_page(html):
-                raise RuntimeError(
-                    "FantasyGP page still appears to require login after authentication. "
-                    "Verify credentials and inspect debug HTML artifact."
-                ) from extract_error
-            if endpoint_error:
-                logger.warning("Endpoint extraction error: %s", endpoint_error)
-            raise
+            logger.warning("Primary FantasyGP extraction failed: %s", extract_error)
+            driver_prices, constructor_prices = fetch_prices_via_ajax(session, html, TARGET_URL, headers, report=report)
+            if driver_prices is None or constructor_prices is None:
+                report["status"] = "failed"
+                _set_validation_failure(report, ["EXTRACTION_FAILED"])
+                _write_debug_html_snapshot(html, str(extract_error))
+                if _looks_like_login_page(html):
+                    _set_validation_failure(report, ["LOGIN_REQUIRED"])
+                    raise RuntimeError(
+                        "FantasyGP page still appears to require login after authentication. "
+                        "Verify credentials and inspect debug HTML artifact."
+                    ) from extract_error
+                raise
 
-    _validate_prices(driver_prices, constructor_prices, "FantasyGP extraction")
-    save_prices(driver_prices, constructor_prices)
+        _validate_price_data(driver_prices, constructor_prices, report)
+        save_prices(driver_prices, constructor_prices)
+        report["status"] = "success"
+    except Exception as exc:
+        if report.get("status") != "failed":
+            report["status"] = "failed"
+        report["error"] = str(exc)
+        raise
+    finally:
+        report["run_completed_at_utc"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+        _write_debug_report(report)
 
 
 if __name__ == "__main__":
