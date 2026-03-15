@@ -52,6 +52,7 @@ jobs:
           FANTASYGP_DEBUG_HTML_PATH: .artifacts/fantasygp_last_failed_page.html
           FANTASYGP_READY_CHECK_ATTEMPTS: "8"
           FANTASYGP_READY_CHECK_DELAY_SECONDS: "5"
+          FANTASYGP_DEBUG_REPORT_PATH: .artifacts/fantasygp_scrape_report.json
         run: |
           set -e
           for attempt in 1 2 3; do
@@ -67,8 +68,7 @@ jobs:
           echo "FantasyGP price scrape failed after 3 attempts"
           exit 1
 
-      - name: Upload scrape debug artifacts on failure
-        if: failure()
+      - name: Upload scrape debug artifacts
         uses: actions/upload-artifact@v4
         with:
           name: fantasygp-scrape-debug
