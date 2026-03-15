@@ -415,6 +415,20 @@ def test_discover_ajax_context_accepts_single_quotes_and_unquoted_keys():
     assert script_url == "https://fantasygp.com/wp-content/plugins/fantasy-gp/js/alldriverscars.js"
 
 
+def test_discover_ajax_context_falls_back_to_generic_admin_ajax_markers():
+    html = """
+    <script>
+      window.someConfig = {"endpoint":"/wp-admin/admin-ajax.php","security":"abc123def456"};
+    </script>
+    """
+
+    ajax_url, security, script_url = _discover_ajax_context(html, "https://fantasygp.com/drivers-cars/")
+
+    assert ajax_url == "https://fantasygp.com/wp-admin/admin-ajax.php"
+    assert security == "abc123def456"
+    assert script_url is None
+
+
 def test_fetch_prices_via_ajax_extracts_prices_from_structured_json_payload_without_html():
     class FakeResponse:
         def __init__(self, text):
@@ -557,6 +571,50 @@ def test_fetch_prices_via_ajax_extracts_prices_from_aligned_array_payload_shape(
     assert set(driver_df["Price"]) == {22.0, 19.0}
     assert set(constructor_df["Name"]) == {"Red Bull", "Mercedes"}
     assert set(constructor_df["Price"]) == {19.0, 20.5}
+
+
+def test_fetch_prices_via_ajax_works_without_script_url_or_security_token():
+    class FakeResponse:
+        def __init__(self, text):
+            self.text = text
+
+        def raise_for_status(self):
+            return None
+
+    class FakeSession:
+        def __init__(self):
+            self.post_payloads = []
+
+        def post(self, url, data=None, **kwargs):
+            self.post_payloads.append(data)
+            if data["action"] != "fetchAllDriversAndCars":
+                return FakeResponse('{"success":false}')
+
+            import json
+
+            payload = {
+                "loggedin": True,
+                "car": ["-", "Red Bull"],
+                "cprice": ["0.0", "19.0"],
+                "drv": ["-", "Verstappen"],
+                "nicks": ["NO", "VER"],
+                "dprice": ["0.0", "22.0"],
+            }
+            return FakeResponse(json.dumps(payload))
+
+    html = "<script>window.wpApiSettings = {\"ajaxUrl\":\"/wp-admin/admin-ajax.php\"};</script>"
+
+    fake_session = FakeSession()
+    driver_df, constructor_df = fetch_prices_via_ajax(
+        fake_session,
+        html,
+        "https://fantasygp.com/drivers-cars/",
+        {"User-Agent": "ua"},
+    )
+
+    assert list(driver_df["Name"]) == ["Verstappen"]
+    assert list(constructor_df["Name"]) == ["Red Bull"]
+    assert any("security" not in payload for payload in fake_session.post_payloads)
 
 
 def test_candidate_ajax_actions_merges_discovered_and_default_actions_without_duplicates(monkeypatch):
