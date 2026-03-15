@@ -1,4 +1,5 @@
 import datetime
+import html
 import json
 import os
 import re
@@ -288,9 +289,15 @@ def _extract_prices_from_cards(html):
 
 
 def _extract_js_object_value(html, object_name, key):
-    pattern = rf"var\s+{re.escape(object_name)}\s*=\s*\{{.*?\"{re.escape(key)}\"\s*:\s*\"([^\"]+)\""
-    match = re.search(pattern, html, flags=re.IGNORECASE | re.DOTALL)
-    return match.group(1) if match else None
+    object_pattern = rf"(?:var|let|const)\s+{re.escape(object_name)}\s*=\s*\{{(.*?)\}}"
+    object_match = re.search(object_pattern, html, flags=re.IGNORECASE | re.DOTALL)
+    if not object_match:
+        return None
+
+    object_body = object_match.group(1)
+    value_pattern = rf"(?:['\"]?{re.escape(key)}['\"]?)\s*:\s*['\"]([^'\"]+)['\"]"
+    value_match = re.search(value_pattern, object_body, flags=re.IGNORECASE | re.DOTALL)
+    return value_match.group(1) if value_match else None
 
 
 def _discover_ajax_context(html, base_url):
@@ -326,8 +333,9 @@ def _discover_ajax_actions(js_text):
 def _extract_html_like_chunks(value):
     chunks = []
     if isinstance(value, str):
-        if "<" in value and ">" in value:
-            chunks.append(value)
+        unescaped = html.unescape(value)
+        if "<" in unescaped and ">" in unescaped:
+            chunks.append(unescaped)
     elif isinstance(value, dict):
         for v in value.values():
             chunks.extend(_extract_html_like_chunks(v))
@@ -337,10 +345,70 @@ def _extract_html_like_chunks(value):
     return chunks
 
 
+def _extract_prices_from_json_payload(payload):
+    records = []
+
+    def walk(value, context=""):
+        if isinstance(value, dict):
+            local_context = context.lower()
+            name = None
+            raw_price = None
+
+            for key in ["name", "driver", "driver_name", "constructor", "team", "car", "title"]:
+                if key in value and str(value[key]).strip():
+                    name = str(value[key]).strip()
+                    break
+
+            for key in ["price", "cost", "value"]:
+                if key in value:
+                    raw_price = value[key]
+                    break
+
+            if name and raw_price is not None:
+                parsed_price = parse_price_value(raw_price)
+                if pd.notna(parsed_price):
+                    if "driver" in local_context:
+                        entity_type = "driver"
+                    elif any(token in local_context for token in ["constructor", "team", "car"]):
+                        entity_type = "constructor"
+                    else:
+                        entity_type = None
+                    records.append((entity_type, name, parsed_price))
+
+            for key, item in value.items():
+                walk(item, f"{local_context} {key}".strip())
+
+        elif isinstance(value, list):
+            for item in value:
+                walk(item, context)
+
+    walk(payload)
+
+    typed = [record for record in records if record[0] in {"driver", "constructor"}]
+    if not typed:
+        return None, None
+
+    driver_rows = [{"Name": name, "Price": price} for entity, name, price in typed if entity == "driver"]
+    constructor_rows = [
+        {"Name": name, "Price": price} for entity, name, price in typed if entity == "constructor"
+    ]
+
+    if not driver_rows or not constructor_rows:
+        return None, None
+
+    return (
+        _prepare_price_dataframe(pd.DataFrame(driver_rows).drop_duplicates(), "driver"),
+        _prepare_price_dataframe(pd.DataFrame(constructor_rows).drop_duplicates(), "constructor"),
+    )
+
+
 def _extract_prices_from_ajax_payload(payload_text):
     html_candidates = [payload_text]
     try:
         json_payload = json.loads(payload_text)
+        driver_prices, constructor_prices = _extract_prices_from_json_payload(json_payload)
+        if driver_prices is not None and constructor_prices is not None:
+            return driver_prices, constructor_prices
         html_candidates.extend(_extract_html_like_chunks(json_payload))
     except ValueError:
         pass
