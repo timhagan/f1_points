@@ -17,6 +17,11 @@ DEFAULT_AJAX_ACTIONS = ["getdriversandcars", "allDriversAndCars", "driversandcar
 logger = logging.getLogger(__name__)
 
 
+def _debug_log(message):
+    if os.environ.get("FANTASYGP_DEBUG", "").lower() in {"1", "true", "yes", "on"}:
+        logger.warning("[FantasyGP debug] %s", message)
+
+
 def _write_debug_html_snapshot(html_text, error_message):
     debug_path = os.environ.get("FANTASYGP_DEBUG_HTML_PATH")
     if not debug_path:

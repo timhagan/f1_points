@@ -2,6 +2,7 @@ import pandas as pd
 
 from src.data_prep.get_fantasygp_prices import (
     _candidate_ajax_actions,
+    _debug_log,
     _discover_ajax_context,
     _discover_login_form,
     _summarize_payload_text,
@@ -400,3 +401,14 @@ def test_write_debug_html_snapshot_uses_current_dir_when_no_parent(monkeypatch, 
     _write_debug_html_snapshot("<html></html>", "error")
 
     assert (tmp_path / "snapshot.html").exists()
+
+
+def test_debug_log_emits_only_when_enabled(monkeypatch, caplog):
+    monkeypatch.delenv("FANTASYGP_DEBUG", raising=False)
+    caplog.clear()
+    _debug_log("hidden")
+    assert not caplog.records
+
+    monkeypatch.setenv("FANTASYGP_DEBUG", "true")
+    _debug_log("visible")
+    assert any("visible" in record.message for record in caplog.records)
