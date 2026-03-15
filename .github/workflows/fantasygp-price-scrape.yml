@@ -69,6 +69,7 @@ jobs:
           exit 1
 
       - name: Upload scrape debug artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: fantasygp-scrape-debug
