@@ -494,6 +494,58 @@ def test_fetch_prices_via_ajax_uses_default_action_candidates_when_script_has_no
     assert list(constructor_df["Name"]) == ["Red Bull"]
 
 
+def test_fetch_prices_via_ajax_extracts_prices_from_aligned_array_payload_shape():
+    class FakeResponse:
+        def __init__(self, text):
+            self.text = text
+
+        def raise_for_status(self):
+            return None
+
+    class FakeSession:
+        def __init__(self):
+            self.actions = []
+
+        def get(self, url, **kwargs):
+            return FakeResponse("console.log('bundle');")
+
+        def post(self, url, data=None, **kwargs):
+            self.actions.append(data["action"])
+            if data["action"] != "fetchAllDriversAndCars":
+                return FakeResponse('{"success":false}')
+
+            import json
+
+            payload = {
+                "loggedin": True,
+                "car": ["-", "Red Bull", "Mercedes"],
+                "cprice": ["0.0", "19.0", "20.5"],
+                "drv": ["-", "Verstappen", "Russell"],
+                "nicks": ["NO", "VER", "RUS"],
+                "dprice": ["0.0", "22.0", "19.0"],
+            }
+            return FakeResponse(json.dumps(payload))
+
+    html = """
+    <script id="alldriverscars-js-js-extra">var MyAjax = {'ajaxurl':'https://fantasygp.com/wp-admin/admin-ajax.php','security':'token123'};</script>
+    <script id="alldriverscars-js-js" src="https://fantasygp.com/wp-content/plugins/fantasy-gp/js/alldriverscars.js?ver=202602"></script>
+    """
+
+    fake_session = FakeSession()
+    driver_df, constructor_df = fetch_prices_via_ajax(
+        fake_session,
+        html,
+        "https://fantasygp.com/drivers-cars/",
+        {"User-Agent": "ua"},
+    )
+
+    assert "fetchAllDriversAndCars" in fake_session.actions
+    assert set(driver_df["Name"]) == {"Verstappen", "Russell"}
+    assert set(driver_df["Price"]) == {22.0, 19.0}
+    assert set(constructor_df["Name"]) == {"Red Bull", "Mercedes"}
+    assert set(constructor_df["Price"]) == {19.0, 20.5}
+
+
 def test_candidate_ajax_actions_merges_discovered_and_default_actions_without_duplicates(monkeypatch):
     monkeypatch.setenv("FANTASYGP_AJAX_ACTIONS", "customAction,getdriversandcars")
 

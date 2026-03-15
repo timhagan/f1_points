@@ -14,7 +14,12 @@ from requests import exceptions as requests_exceptions
 
 TARGET_URL = os.environ.get("FANTASYGP_TARGET_URL", "https://fantasygp.com/drivers-cars/")
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "data")
-DEFAULT_AJAX_ACTIONS = ["getdriversandcars", "allDriversAndCars", "driversandcars"]
+DEFAULT_AJAX_ACTIONS = [
+    "fetchAllDriversAndCars",
+    "getdriversandcars",
+    "allDriversAndCars",
+    "driversandcars",
+]
 DEFAULT_AJAX_NONCE_KEYS = ["security", "nonce", "_ajax_nonce"]
 
 logger = logging.getLogger(__name__)
@@ -620,6 +625,48 @@ def _extract_prices_from_json_payload(payload):
     )
 
 
+def _extract_prices_from_aligned_arrays(payload):
+    if not isinstance(payload, dict):
+        return None, None
+
+    required_keys = {"car", "cprice", "drv", "dprice"}
+    if not required_keys.issubset(payload.keys()):
+        return None, None
+
+    car_names = payload.get("car") or []
+    car_prices = payload.get("cprice") or []
+    driver_names = payload.get("drv") or []
+    driver_prices = payload.get("dprice") or []
+
+    constructor_rows = []
+    for name, price in zip(car_names, car_prices):
+        parsed_price = parse_price_value(price)
+        if pd.isna(parsed_price):
+            continue
+        cleaned_name = str(name).strip()
+        if cleaned_name in {"", "-"}:
+            continue
+        constructor_rows.append({"Name": cleaned_name, "Price": parsed_price})
+
+    driver_rows = []
+    for name, price in zip(driver_names, driver_prices):
+        parsed_price = parse_price_value(price)
+        if pd.isna(parsed_price):
+            continue
+        cleaned_name = str(name).strip()
+        if cleaned_name in {"", "-"}:
+            continue
+        driver_rows.append({"Name": cleaned_name, "Price": parsed_price})
+
+    if not driver_rows or not constructor_rows:
+        return None, None
+
+    return (
+        _prepare_price_dataframe(pd.DataFrame(driver_rows).drop_duplicates(), "driver"),
+        _prepare_price_dataframe(pd.DataFrame(constructor_rows).drop_duplicates(), "constructor"),
+    )
+
+
 def _infer_entity_type_from_tokens(tokens):
     lowered = [token.lower() for token in tokens if token]
     if any("driver" in token for token in lowered):
@@ -857,6 +904,9 @@ def _extract_prices_from_ajax_payload(payload_text):
     html_candidates = [payload_text]
     try:
         json_payload = json.loads(payload_text)
+        driver_prices, constructor_prices = _extract_prices_from_aligned_arrays(json_payload)
+        if driver_prices is not None and constructor_prices is not None:
+            return driver_prices, constructor_prices
         driver_prices, constructor_prices = normalize_json_price_payload(json_payload)
         if driver_prices is not None and constructor_prices is not None:
             return driver_prices, constructor_prices
