@@ -46,7 +46,6 @@ jobs:
         env:
           FANTASYGP_USERNAME: ${{ secrets.FANTASYGP_USERNAME }}
           FANTASYGP_PASSWORD: ${{ secrets.FANTASYGP_PASSWORD }}
-          FANTASYGP_PAGE_PASSWORD: ${{ secrets.FANTASYGP_PAGE_PASSWORD }}
           FANTASYGP_TARGET_URL: https://fantasygp.com/drivers-cars/
           FANTASYGP_AJAX_ACTIONS: getdriversandcars,allDriversAndCars,driversandcars
           FANTASYGP_DEBUG_HTML_PATH: .artifacts/fantasygp_last_failed_page.html
