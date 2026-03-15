@@ -2,6 +2,7 @@ import pandas as pd
 
 from src.data_prep.get_fantasygp_prices import (
     _candidate_ajax_actions,
+    _load_default_ajax_actions,
     _contains_password_field,
     _debug_log,
     _discover_ajax_context,
@@ -209,6 +210,18 @@ def test_fetch_authenticated_html_raises_clear_error_when_proxy_and_direct_paths
 
     with pytest.raises(RuntimeError, match="Unable to reach FantasyGP"):
         fetch_authenticated_html("https://fantasygp.com/drivers-cars/", "u", "p")
+
+
+
+def test_load_default_ajax_actions_appends_fallback_actions(monkeypatch):
+    monkeypatch.setenv("FANTASYGP_AJAX_ACTIONS", "getdriversandcars")
+
+    actions = _load_default_ajax_actions()
+
+    assert "getdriversandcars" in actions
+    assert "fetchAllDriversAndCars" in actions
+    assert "allDriversAndCars" in actions
+    assert "driversandcars" in actions
 
 
 def test_contains_password_field_detects_password_input():
@@ -551,7 +564,7 @@ def test_candidate_ajax_actions_merges_discovered_and_default_actions_without_du
 
     actions = _candidate_ajax_actions("$.post(MyAjax.ajaxurl,{action:'getdriversandcars'},function(){});")
 
-    assert actions[0] == "getdriversandcars"
+    assert "getdriversandcars" in actions
     assert "customAction" in actions
     assert len(actions) == len(set(actions))
 
