@@ -52,6 +52,83 @@ class _SimpleTableParser(HTMLParser):
             self._in_table = False
 
 
+class _DriversCarsParser(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.cards = []
+        self._depth = 0
+        self._current_card = None
+        self._card_depth = None
+        self._current_driver = None
+        self._driver_depth = None
+        self._collect_team = False
+        self._collect_car_price = False
+        self._collect_driver_name = False
+
+    def handle_starttag(self, tag, attrs):
+        self._depth += 1
+        attrs_dict = {k.lower(): v for k, v in attrs}
+        class_list = (attrs_dict.get("class") or "").split()
+        element_id = (attrs_dict.get("id") or "").strip()
+
+        if tag == "div" and re.fullmatch(r"car\d+", element_id):
+            self._current_card = {"team": [], "car_price": [], "drivers": []}
+            self._card_depth = self._depth
+            return
+
+        if self._current_card is None:
+            return
+
+        if tag == "div" and "driverlist" in class_list:
+            self._current_driver = {"name_parts": [], "text_parts": []}
+            self._driver_depth = self._depth
+            return
+
+        if tag == "h3" and self._current_driver is None:
+            self._collect_team = True
+        elif tag == "h6" and "carprice" in class_list and self._current_driver is None:
+            self._collect_car_price = True
+        elif tag in {"h6", "h5"} and self._current_driver is not None:
+            self._collect_driver_name = True
+
+    def handle_data(self, data):
+        text = data.strip()
+        if not text:
+            return
+
+        if self._current_card is not None and self._collect_team:
+            self._current_card["team"].append(text)
+
+        if self._current_card is not None and self._collect_car_price:
+            self._current_card["car_price"].append(text)
+
+        if self._current_driver is not None:
+            self._current_driver["text_parts"].append(text)
+            if self._collect_driver_name:
+                self._current_driver["name_parts"].append(text)
+
+    def handle_endtag(self, tag):
+        if tag == "h3":
+            self._collect_team = False
+        elif tag == "h6":
+            self._collect_car_price = False
+            self._collect_driver_name = False
+        elif tag == "h5":
+            self._collect_driver_name = False
+
+        if tag == "div" and self._current_driver is not None and self._driver_depth == self._depth:
+            self._current_card["drivers"].append(self._current_driver)
+            self._current_driver = None
+            self._driver_depth = None
+
+        if tag == "div" and self._current_card is not None and self._card_depth == self._depth:
+            self.cards.append(self._current_card)
+            self._current_card = None
+            self._card_depth = None
+
+        self._depth -= 1
+
+
 def _normalize_column_name(name):
     return re.sub(r"\s+", " ", str(name)).strip().lower()
 
@@ -170,12 +247,54 @@ def _prepare_price_dataframe(df, entity_type):
     return prepared[["EntityType", "Name", "NameKey", "Price", "ScrapedAtUtc"]]
 
 
+def _extract_price_from_text(text):
+    for token in re.findall(r"(?:[$€£]\s*)?\d[\d.,]*(?:\s*[kKmMbB])?", text):
+        value = parse_price_value(token)
+        if pd.notna(value):
+            return value
+    return pd.NA
+
+
+def _extract_prices_from_cards(html):
+    parser = _DriversCarsParser()
+    parser.feed(html)
+
+    driver_rows = []
+    constructor_rows = []
+
+    for card in parser.cards:
+        team_name = " ".join(card["team"]).strip()
+        car_price = _extract_price_from_text(" ".join(card["car_price"]))
+        if team_name and pd.notna(car_price):
+            constructor_rows.append({"Name": team_name, "Price": car_price})
+
+        for driver in card["drivers"]:
+            name_candidates = [part.strip() for part in driver["name_parts"] if part.strip()]
+            if not name_candidates:
+                continue
+            driver_name = max(name_candidates, key=len)
+            price = _extract_price_from_text(" ".join(driver["text_parts"]))
+            if pd.notna(price):
+                driver_rows.append({"Name": driver_name, "Price": price})
+
+    if not driver_rows or not constructor_rows:
+        return None, None
+
+    return (
+        _prepare_price_dataframe(pd.DataFrame(driver_rows), "driver"),
+        _prepare_price_dataframe(pd.DataFrame(constructor_rows), "constructor"),
+    )
+
+
 def extract_driver_constructor_prices(html):
     tables = _html_to_tables(html)
     price_tables = _pick_price_tables(tables)
 
     if not price_tables:
-        raise ValueError("Could not identify any price tables in the page HTML.")
+        driver_prices, constructor_prices = _extract_prices_from_cards(html)
+        if driver_prices is not None and constructor_prices is not None:
+            return driver_prices, constructor_prices
+        raise ValueError("Could not identify price data in the page HTML.")
 
     by_type = {table_type: table for table_type, table in price_tables if table_type in {"driver", "constructor"}}
 

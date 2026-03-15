@@ -58,6 +58,36 @@ def test_extract_driver_constructor_prices_parses_typed_tables_without_fixed_rea
     assert pd.to_datetime(constructor_df["ScrapedAtUtc"], utc=True, errors="coerce").notna().all()
 
 
+def test_extract_driver_constructor_prices_parses_card_layout_without_tables():
+    html = """
+    <html><body>
+      <div id="allDriversAndCars" class="row">
+        <div id="car1">
+          <div class="carlist">
+            <h3>Red Bull</h3>
+            <h6 class="badge carprice">$32.0M</h6>
+          </div>
+          <div class="driverlist">
+            <h6 class="d-none d-sm-block">Verstappen</h6>
+            <strong>$30.5M</strong>
+          </div>
+          <div class="driverlist">
+            <h6 class="d-none d-sm-block">Perez</h6>
+            <strong>$23.0M</strong>
+          </div>
+        </div>
+      </div>
+    </body></html>
+    """
+
+    driver_df, constructor_df = extract_driver_constructor_prices(html)
+
+    assert set(driver_df["Name"]) == {"Verstappen", "Perez"}
+    assert set(driver_df["Price"]) == {30500000.0, 23000000.0}
+    assert list(constructor_df["Name"]) == ["Red Bull"]
+    assert list(constructor_df["Price"]) == [32000000.0]
+
+
 def test_combine_prices_for_ranking_returns_both_entity_types():
     driver_df = pd.DataFrame(
         {
