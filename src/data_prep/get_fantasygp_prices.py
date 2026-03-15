@@ -1,4 +1,5 @@
 import datetime
+import json
 import os
 import re
 from html.parser import HTMLParser
@@ -286,6 +287,106 @@ def _extract_prices_from_cards(html):
     )
 
 
+def _extract_js_object_value(html, object_name, key):
+    pattern = rf"var\s+{re.escape(object_name)}\s*=\s*\{{.*?\"{re.escape(key)}\"\s*:\s*\"([^\"]+)\""
+    match = re.search(pattern, html, flags=re.IGNORECASE | re.DOTALL)
+    return match.group(1) if match else None
+
+
+def _discover_ajax_context(html, base_url):
+    ajax_url = _extract_js_object_value(html, "MyAjax", "ajaxurl")
+    security = _extract_js_object_value(html, "MyAjax", "security")
+
+    script_match = re.search(
+        r"<script[^>]+id=[\"']alldriverscars-js-js[\"'][^>]+src=[\"']([^\"']+)[\"']",
+        html,
+        flags=re.IGNORECASE,
+    )
+    script_url = script_match.group(1) if script_match else None
+
+    if ajax_url:
+        ajax_url = requests.compat.urljoin(base_url, ajax_url)
+    if script_url:
+        script_url = requests.compat.urljoin(base_url, script_url)
+
+    return ajax_url, security, script_url
+
+
+def _discover_ajax_actions(js_text):
+    actions = []
+    for action in re.findall(r"action\s*:\s*['\"]([a-zA-Z0-9_-]+)['\"]", js_text):
+        if action not in actions:
+            actions.append(action)
+
+    # Prioritize likely matches for this page.
+    actions.sort(key=lambda x: ("driver" not in x.lower() and "car" not in x.lower(), x))
+    return actions
+
+
+def _extract_html_like_chunks(value):
+    chunks = []
+    if isinstance(value, str):
+        if "<" in value and ">" in value:
+            chunks.append(value)
+    elif isinstance(value, dict):
+        for v in value.values():
+            chunks.extend(_extract_html_like_chunks(v))
+    elif isinstance(value, list):
+        for item in value:
+            chunks.extend(_extract_html_like_chunks(item))
+    return chunks
+
+
+def _extract_prices_from_ajax_payload(payload_text):
+    html_candidates = [payload_text]
+    try:
+        json_payload = json.loads(payload_text)
+        html_candidates.extend(_extract_html_like_chunks(json_payload))
+    except ValueError:
+        pass
+
+    for chunk in html_candidates:
+        try:
+            driver_prices, constructor_prices = extract_driver_constructor_prices(chunk)
+            return driver_prices, constructor_prices
+        except ValueError:
+            continue
+
+    return None, None
+
+
+def fetch_prices_via_ajax(session, html, page_url, headers):
+    ajax_url, security, script_url = _discover_ajax_context(html, page_url)
+    if not ajax_url or not script_url or not security:
+        return None, None
+
+    try:
+        js_response = session.get(script_url, headers=headers, timeout=30)
+        js_response.raise_for_status()
+    except requests_exceptions.RequestException:
+        return None, None
+
+    actions = _discover_ajax_actions(js_response.text)
+    if not actions:
+        return None, None
+
+    nonce_keys = ["security", "nonce", "_ajax_nonce"]
+    for action in actions:
+        for nonce_key in nonce_keys:
+            payload = {"action": action, nonce_key: security}
+            try:
+                response = session.post(ajax_url, data=payload, headers=headers, timeout=30)
+                response.raise_for_status()
+            except requests_exceptions.RequestException:
+                continue
+
+            driver_prices, constructor_prices = _extract_prices_from_ajax_payload(response.text)
+            if driver_prices is not None and constructor_prices is not None:
+                return driver_prices, constructor_prices
+
+    return None, None
+
+
 def extract_driver_constructor_prices(html):
     tables = _html_to_tables(html)
     price_tables = _pick_price_tables(tables)
@@ -369,6 +470,11 @@ def _discover_login_form(html, base_url):
 
 
 def fetch_authenticated_html(url, username, password):
+    html, _, _ = fetch_authenticated_page(url, username, password)
+    return html
+
+
+def fetch_authenticated_page(url, username, password):
     headers = {"User-Agent": "Mozilla/5.0 (compatible; f1-points-bot/1.0)"}
 
     session = requests.Session()
@@ -391,7 +497,7 @@ def fetch_authenticated_html(url, username, password):
 
     login_info = _discover_login_form(first_response.text, first_response.url)
     if login_info is None:
-        return first_response.text
+        return first_response.text, session, headers
 
     action_url, payload, username_key, password_key = login_info
 
@@ -406,7 +512,7 @@ def fetch_authenticated_html(url, username, password):
 
     final_response = session.get(url, headers=headers, timeout=30)
     final_response.raise_for_status()
-    return final_response.text
+    return final_response.text, session, headers
 
 
 def save_prices(driver_prices, constructor_prices):
@@ -445,8 +551,15 @@ def main():
             "Missing FantasyGP credentials. Set FANTASYGP_USERNAME and FANTASYGP_PASSWORD environment variables."
         )
 
-    html = fetch_authenticated_html(TARGET_URL, username, password)
-    driver_prices, constructor_prices = extract_driver_constructor_prices(html)
+    html, session, headers = fetch_authenticated_page(TARGET_URL, username, password)
+
+    try:
+        driver_prices, constructor_prices = extract_driver_constructor_prices(html)
+    except ValueError:
+        driver_prices, constructor_prices = fetch_prices_via_ajax(session, html, TARGET_URL, headers)
+        if driver_prices is None or constructor_prices is None:
+            raise
+
     save_prices(driver_prices, constructor_prices)
 
 
