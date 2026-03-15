@@ -17,10 +17,6 @@ DEFAULT_AJAX_ACTIONS = ["getdriversandcars", "allDriversAndCars", "driversandcar
 
 logger = logging.getLogger(__name__)
 
-MIN_DRIVER_ROWS = int(os.environ.get("FANTASYGP_MIN_DRIVER_ROWS", "20"))
-MIN_CONSTRUCTOR_ROWS = int(os.environ.get("FANTASYGP_MIN_CONSTRUCTOR_ROWS", "10"))
-REPORT_PATH = os.environ.get("FANTASYGP_DEBUG_REPORT_PATH", ".artifacts/fantasygp_scrape_report.json")
-
 
 def _debug_log(message):
     if os.environ.get("FANTASYGP_DEBUG", "").lower() in {"1", "true", "yes", "on"}:
@@ -32,17 +28,38 @@ def _log_event(event, **fields):
     logger.info(json.dumps(payload, sort_keys=True))
 
 
+def _get_validation_thresholds():
+    return {
+        "driver": int(os.environ.get("FANTASYGP_MIN_DRIVER_ROWS", "20")),
+        "constructor": int(os.environ.get("FANTASYGP_MIN_CONSTRUCTOR_ROWS", "10")),
+    }
+
+
+def _get_report_path():
+    return os.environ.get("FANTASYGP_DEBUG_REPORT_PATH", ".artifacts/fantasygp_scrape_report.json")
+
+
+def _set_validation_failure(report, reason_codes, **details):
+    report["validation"] = {
+        "status": "failed",
+        "reason_codes": reason_codes,
+        **details,
+    }
+    _log_event("validation_failed", reason_codes=reason_codes, **details)
+
+
 def _write_debug_report(report_payload):
+    report_path = _get_report_path()
     try:
-        parent_dir = os.path.dirname(REPORT_PATH)
+        parent_dir = os.path.dirname(report_path)
         if parent_dir:
             os.makedirs(parent_dir, exist_ok=True)
-        with open(REPORT_PATH, "w", encoding="utf-8") as file:
+        with open(report_path, "w", encoding="utf-8") as file:
             json.dump(report_payload, file, ensure_ascii=False, indent=2, sort_keys=True)
             file.write("\n")
-        _log_event("debug_report_written", report_path=REPORT_PATH)
+        _log_event("debug_report_written", report_path=report_path)
     except OSError as exc:
-        logger.warning("Failed to write FantasyGP debug report to %s: %s", REPORT_PATH, exc)
+        logger.warning("Failed to write FantasyGP debug report to %s: %s", report_path, exc)
 
 
 def _write_debug_html_snapshot(html_text, error_message):
@@ -852,6 +869,10 @@ def fetch_authenticated_page(url, username, password, report=None):
 
 
 def _validate_price_data(driver_prices, constructor_prices, report):
+    thresholds = _get_validation_thresholds()
+    min_driver_rows = thresholds["driver"]
+    min_constructor_rows = thresholds["constructor"]
+
     driver_rows = int(len(driver_prices.index))
     constructor_rows = int(len(constructor_prices.index))
 
@@ -862,34 +883,28 @@ def _validate_price_data(driver_prices, constructor_prices, report):
     _log_event("extracted_row_counts", driver_rows=driver_rows, constructor_rows=constructor_rows)
 
     reason_codes = []
-    if driver_rows < MIN_DRIVER_ROWS:
+    if driver_rows < min_driver_rows:
         reason_codes.append("DRV_LT_MIN")
-    if constructor_rows < MIN_CONSTRUCTOR_ROWS:
+    if constructor_rows < min_constructor_rows:
         reason_codes.append("CON_LT_MIN")
 
+    threshold_details = {
+        "min_thresholds": {
+            "driver": min_driver_rows,
+            "constructor": min_constructor_rows,
+        },
+        "driver_rows": driver_rows,
+        "constructor_rows": constructor_rows,
+    }
+
     if reason_codes:
-        report["validation"] = {
-            "status": "failed",
-            "reason_codes": reason_codes,
-            "min_thresholds": {
-                "driver": MIN_DRIVER_ROWS,
-                "constructor": MIN_CONSTRUCTOR_ROWS,
-            },
-        }
-        _log_event(
-            "validation_failed",
-            reason_codes=reason_codes,
-            driver_rows=driver_rows,
-            constructor_rows=constructor_rows,
-            min_driver_rows=MIN_DRIVER_ROWS,
-            min_constructor_rows=MIN_CONSTRUCTOR_ROWS,
-        )
+        _set_validation_failure(report, reason_codes, **threshold_details)
         raise RuntimeError(
             "Validation failed (%s): expected at least %d driver rows and %d constructor rows, got %d and %d."
             % (
                 ",".join(reason_codes),
-                MIN_DRIVER_ROWS,
-                MIN_CONSTRUCTOR_ROWS,
+                min_driver_rows,
+                min_constructor_rows,
                 driver_rows,
                 constructor_rows,
             )
@@ -899,11 +914,11 @@ def _validate_price_data(driver_prices, constructor_prices, report):
         "status": "passed",
         "reason_codes": [],
         "min_thresholds": {
-            "driver": MIN_DRIVER_ROWS,
-            "constructor": MIN_CONSTRUCTOR_ROWS,
+            "driver": min_driver_rows,
+            "constructor": min_constructor_rows,
         },
     }
-    _log_event("validation_passed", min_driver_rows=MIN_DRIVER_ROWS, min_constructor_rows=MIN_CONSTRUCTOR_ROWS)
+    _log_event("validation_passed", min_driver_rows=min_driver_rows, min_constructor_rows=min_constructor_rows)
 
 
 def save_prices(driver_prices, constructor_prices):
@@ -945,7 +960,7 @@ def main():
 
     if not username or not password:
         report["status"] = "failed"
-        report["validation"] = {"status": "failed", "reason_codes": ["MISSING_CREDENTIALS"]}
+        _set_validation_failure(report, ["MISSING_CREDENTIALS"])
         _write_debug_report(report)
         raise EnvironmentError(
             "Missing FantasyGP credentials. Set FANTASYGP_USERNAME and FANTASYGP_PASSWORD environment variables."
@@ -966,10 +981,10 @@ def main():
             driver_prices, constructor_prices = fetch_prices_via_ajax(session, html, TARGET_URL, headers, report=report)
             if driver_prices is None or constructor_prices is None:
                 report["status"] = "failed"
-                report["validation"] = {"status": "failed", "reason_codes": ["EXTRACTION_FAILED"]}
+                _set_validation_failure(report, ["EXTRACTION_FAILED"])
                 _write_debug_html_snapshot(html, str(extract_error))
                 if _looks_like_login_page(html):
-                    report["validation"] = {"status": "failed", "reason_codes": ["LOGIN_REQUIRED"]}
+                    _set_validation_failure(report, ["LOGIN_REQUIRED"])
                     raise RuntimeError(
                         "FantasyGP page still appears to require login after authentication. "
                         "Verify credentials and inspect debug HTML artifact."
