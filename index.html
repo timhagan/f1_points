@@ -127,6 +127,55 @@
       min-height: 380px;
     }
 
+    .value-card {
+      margin-top: 1.5rem;
+      border: 1px solid #e5e5e5;
+      border-radius: 14px;
+      padding: 1rem;
+      background: linear-gradient(160deg, #ffffff 0%, #f8f9fb 100%);
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.75rem;
+      margin: 1rem 0;
+    }
+
+    .kpi-card {
+      border: 1px solid #eceff3;
+      border-radius: 10px;
+      padding: 0.7rem;
+      background: #fff;
+    }
+
+    .kpi-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #636b74;
+      font-weight: 700;
+    }
+
+    .kpi-value {
+      font-size: 1.02rem;
+      font-weight: 700;
+      margin-top: 0.2rem;
+      color: #111827;
+    }
+
+    .value-controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.8rem;
+      margin-bottom: 1rem;
+    }
+
+    .value-canvas-wrap {
+      position: relative;
+      min-height: 460px;
+    }
+
     footer {
       font-size: 0.75rem;
       color: #666;
@@ -267,6 +316,52 @@
       <p id="constructor-trend-status" class="text-xs text-gray-500 mt-2"></p>
     </section>
 
+
+    <section class="value-card" aria-labelledby="value-ranking-heading">
+      <div class="flex items-start justify-between flex-wrap gap-3 mb-4">
+        <div>
+          <h2 id="value-ranking-heading" class="text-xl font-semibold">Points per dollar value board</h2>
+          <p class="text-sm text-gray-600 max-w-3xl">
+            Unified ranking of <strong>drivers + constructors</strong> using most-recent points and current FantasyGP prices.
+            Value metric is shown as points per $1M for cleaner comparison across entity types.
+          </p>
+        </div>
+      </div>
+
+      <div class="kpi-grid" id="value-kpi-grid"></div>
+
+      <div class="value-controls">
+        <div class="control-card">
+          <label for="value-entity-filter" class="block text-sm font-semibold mb-2">Include entities</label>
+          <select id="value-entity-filter" class="w-full border rounded p-2 text-sm">
+            <option value="all">Drivers + Constructors</option>
+            <option value="driver">Drivers only</option>
+            <option value="constructor">Constructors only</option>
+          </select>
+        </div>
+
+        <div class="control-card">
+          <label for="value-sort-metric" class="block text-sm font-semibold mb-2">Sort by</label>
+          <select id="value-sort-metric" class="w-full border rounded p-2 text-sm">
+            <option value="pointsPerMillion">Points per $1M (value)</option>
+            <option value="totalPoints">Total points</option>
+            <option value="price">Price</option>
+          </select>
+        </div>
+
+        <div class="control-card">
+          <label for="value-top-n" class="block text-sm font-semibold mb-2">Show top N</label>
+          <input id="value-top-n" type="range" min="5" max="30" step="1" value="15" class="w-full">
+          <p class="text-xs text-gray-500 mt-1"><span id="value-top-n-label">15</span> entities displayed</p>
+        </div>
+      </div>
+
+      <div class="value-canvas-wrap">
+        <canvas id="points-per-dollar-chart" aria-label="Points per dollar ranking chart" role="img"></canvas>
+      </div>
+      <p id="value-status" class="text-xs text-gray-500 mt-2"></p>
+    </section>
+
     <noscript>
       <p class="mt-4 text-red-600">Enable JavaScript to view the interactive tables.</p>
     </noscript>
@@ -341,8 +436,10 @@
 
       let driverTrendRows = [];
       let constructorTrendRows = [];
+      let valueRankingRows = [];
       let trendChart = null;
       let constructorTrendChart = null;
+      let pointsPerDollarChart = null;
       let driverSortByTotal = [];
       let constructorSortByTotal = [];
 
@@ -417,6 +514,29 @@
       function getSelectedConstructors() {
         const select = document.getElementById("constructor-select");
         return Array.from(select.selectedOptions).map((opt) => opt.value);
+      }
+
+      function normalizeNameKey(value) {
+        return String(value || "")
+          .trim()
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "_")
+          .replace(/^_+|_+$/g, "");
+      }
+
+      function toCurrencyMillions(value) {
+        if (!Number.isFinite(value)) {
+          return "—";
+        }
+        return `$${(value / 1000000).toFixed(1)}M`;
+      }
+
+      function getDisplayName(entityId) {
+        return String(entityId || "")
+          .split("_")
+          .filter(Boolean)
+          .map((chunk) => chunk.charAt(0).toUpperCase() + chunk.slice(1))
+          .join(" ");
       }
 
       function calculateWeekendValue(row, selectedKeys) {
@@ -625,6 +745,128 @@
         });
       }
 
+
+
+      function renderValueKpis(rows) {
+        const grid = document.getElementById("value-kpi-grid");
+        if (!rows.length) {
+          grid.innerHTML = "";
+          return;
+        }
+
+        const topOverall = rows[0];
+        const topDriver = rows.find((row) => row.entityType === "driver") || topOverall;
+        const topConstructor = rows.find((row) => row.entityType === "constructor") || topOverall;
+
+        grid.innerHTML = [
+          {
+            label: "Top overall value",
+            text: `${topOverall.entityLabel} • ${topOverall.pointsPerMillion.toFixed(2)} pts/$1M`,
+          },
+          {
+            label: "Best driver value",
+            text: `${topDriver.entityLabel} • ${topDriver.pointsPerMillion.toFixed(2)} pts/$1M`,
+          },
+          {
+            label: "Best constructor value",
+            text: `${topConstructor.entityLabel} • ${topConstructor.pointsPerMillion.toFixed(2)} pts/$1M`,
+          },
+        ]
+          .map(
+            (item) =>
+              `<article class="kpi-card"><p class="kpi-label">${item.label}</p><p class="kpi-value">${item.text}</p></article>`
+          )
+          .join("");
+      }
+
+      function renderPointsPerDollarChart() {
+        const entityFilter = document.getElementById("value-entity-filter").value;
+        const sortMetric = document.getElementById("value-sort-metric").value;
+        const topN = toNumber(document.getElementById("value-top-n").value) || 15;
+        const statusEl = document.getElementById("value-status");
+        const metricLabels = {
+          pointsPerMillion: "Points per $1M",
+          totalPoints: "Total points",
+          price: "Price ($)",
+        };
+
+        const filtered = valueRankingRows
+          .filter((row) => entityFilter === "all" || row.entityType === entityFilter)
+          .sort((a, b) => b[sortMetric] - a[sortMetric])
+          .slice(0, topN);
+
+        renderValueKpis(filtered);
+
+        if (!filtered.length) {
+          statusEl.textContent = "No rows available. Ensure fantasygp_prices_current.csv exists and has matching names.";
+          if (pointsPerDollarChart) {
+            pointsPerDollarChart.destroy();
+            pointsPerDollarChart = null;
+          }
+          return;
+        }
+
+        const labels = filtered.map((row) => row.entityLabel);
+        const data = filtered.map((row) => row[sortMetric]);
+        const barColors = filtered.map((row) => (row.entityType === "driver" ? "#7f1d1d" : "#1d4ed8"));
+
+        if (pointsPerDollarChart) {
+          pointsPerDollarChart.destroy();
+        }
+
+        pointsPerDollarChart = new Chart(document.getElementById("points-per-dollar-chart"), {
+          type: "bar",
+          data: {
+            labels,
+            datasets: [
+              {
+                label: metricLabels[sortMetric],
+                data,
+                backgroundColor: barColors,
+                borderRadius: 6,
+              },
+            ],
+          },
+          options: {
+            indexAxis: "y",
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false,
+              },
+              tooltip: {
+                callbacks: {
+                  label(context) {
+                    const row = filtered[context.dataIndex];
+                    return [
+                      `${metricLabels[sortMetric]}: ${context.parsed.x.toFixed(sortMetric === "price" ? 0 : 2)}`,
+                      `Total points: ${row.totalPoints.toFixed(1)}`,
+                      `Price: ${toCurrencyMillions(row.price)}`,
+                      `Type: ${row.entityType}`,
+                    ];
+                  },
+                },
+              },
+            },
+            scales: {
+              x: {
+                beginAtZero: true,
+                grid: {
+                  color: "rgba(17,24,39,0.08)",
+                },
+              },
+              y: {
+                grid: {
+                  display: false,
+                },
+              },
+            },
+          },
+        });
+
+        statusEl.textContent = `Showing top ${filtered.length} ${entityFilter === "all" ? "entities" : `${entityFilter}s`} ranked by ${metricLabels[sortMetric].toLowerCase()}.`;
+      }
+
       async function buildTrendData() {
         const sessions = await fetchCsvRows(`data/sessions_${seasonYear}.csv`);
         const raceWeekends = sessions
@@ -728,6 +970,79 @@
         renderConstructorTrendChart();
       }
 
+
+
+      async function buildValueRankingData() {
+        const [driverRows, constructorRows, rawPrices] = await Promise.all([
+          fetchCsvRows(`data/driver_points_${seasonYear}_most_recent.csv`),
+          fetchCsvRows(`data/constructor_points_${seasonYear}_most_recent.csv`),
+          fetchCsvRows("data/fantasygp_prices_current.csv"),
+        ]);
+
+        const pointsRows = [
+          ...driverRows.map((row) => ({
+            entityType: "driver",
+            entityId: row.DriverId,
+            totalPoints: toNumber(row.TotalDriverPoints),
+          })),
+          ...constructorRows.map((row) => ({
+            entityType: "constructor",
+            entityId: row.TeamId,
+            totalPoints: toNumber(row.TotalConstructorPoints),
+          })),
+        ];
+
+        const pricesByTypeAndKey = {};
+        rawPrices.forEach((row) => {
+          const key = `${row.EntityType || ""}:${normalizeNameKey(row.NameKey || row.Name)}`;
+          pricesByTypeAndKey[key] = toNumber(row.Price);
+        });
+
+        const constructorAliases = {
+          racing_bulls: "rb",
+          red_bull_racing: "red_bull",
+          red_bull: "red_bull",
+          mercedes_amg_petronas: "mercedes",
+          mclaren_formula_1_team: "mclaren",
+          aston_martin_aramco: "aston_martin",
+          visa_cash_app_rb: "rb",
+          stake_f1_team_kick_sauber: "sauber",
+          alpine_renault: "alpine",
+        };
+
+        valueRankingRows = pointsRows
+          .map((row) => {
+            const normalizedId = normalizeNameKey(row.entityId);
+            const aliasMatch = row.entityType === "constructor" ? constructorAliases[normalizedId] : null;
+            const possibleKeys = [normalizedId, aliasMatch].filter(Boolean);
+
+            let matchedPrice = null;
+            for (const key of possibleKeys) {
+              const typeKey = `${row.entityType}:${key}`;
+              if (Number.isFinite(pricesByTypeAndKey[typeKey])) {
+                matchedPrice = pricesByTypeAndKey[typeKey];
+                break;
+              }
+            }
+
+            if (!Number.isFinite(matchedPrice) || matchedPrice <= 0) {
+              return null;
+            }
+
+            const pointsPerMillion = row.totalPoints / (matchedPrice / 1000000);
+            return {
+              ...row,
+              price: matchedPrice,
+              pointsPerMillion,
+              entityLabel: `${getDisplayName(row.entityId)} (${row.entityType === "driver" ? "Driver" : "Constructor"})`,
+            };
+          })
+          .filter(Boolean)
+          .sort((a, b) => b.pointsPerMillion - a.pointsPerMillion);
+
+        renderPointsPerDollarChart();
+      }
+
       try {
         seasonYear = await resolveSeasonYear();
         updateSeasonLabels(seasonYear);
@@ -800,8 +1115,21 @@
         renderConstructorTrendChart();
       });
 
+      ["value-entity-filter", "value-sort-metric"].forEach((id) => {
+        document.getElementById(id).addEventListener("change", renderPointsPerDollarChart);
+      });
+
+      document.getElementById("value-top-n").addEventListener("input", (event) => {
+        document.getElementById("value-top-n-label").textContent = event.target.value;
+        renderPointsPerDollarChart();
+      });
+
       buildTrendData().catch((error) => {
         document.getElementById("trend-status").textContent = `Could not load historical trend data: ${error.message}`;
+      });
+
+      buildValueRankingData().catch((error) => {
+        document.getElementById("value-status").textContent = `Could not build value ranking: ${error.message}`;
       });
     });
   </script>
