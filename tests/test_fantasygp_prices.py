@@ -2,6 +2,7 @@ import pandas as pd
 
 from src.data_prep.get_fantasygp_prices import (
     _candidate_ajax_actions,
+    _contains_password_field,
     _debug_log,
     _discover_ajax_context,
     _discover_login_form,
@@ -205,6 +206,40 @@ def test_fetch_authenticated_html_raises_clear_error_when_proxy_and_direct_paths
 
     with pytest.raises(RuntimeError, match="Unable to reach FantasyGP"):
         fetch_authenticated_html("https://fantasygp.com/drivers-cars/", "u", "p")
+
+
+def test_contains_password_field_detects_password_input():
+    assert _contains_password_field('<input type="password" name="pwd" />')
+    assert not _contains_password_field('<input type="text" name="user" />')
+
+
+def test_fetch_authenticated_html_attempts_wordpress_login_when_password_field_present_but_form_unknown(monkeypatch):
+    class WordPressFallbackSession:
+        def __init__(self):
+            self.trust_env = True
+            self.post_calls = []
+
+        def get(self, url, **kwargs):
+            if "wp-login.php" in url:
+                return _FakeResponse("<html><body>wp login</body></html>", url)
+            if self.post_calls:
+                return _FakeResponse("<html><body>drivers data page</body></html>", url)
+            return _FakeResponse('<html><body><input type="password" name="pwd" /></body></html>', url)
+
+        def post(self, url, data=None, **kwargs):
+            self.post_calls.append((url, data))
+            return _FakeResponse("<html><body>logged in</body></html>", url)
+
+    session = WordPressFallbackSession()
+    monkeypatch.setattr("src.data_prep.get_fantasygp_prices.requests.Session", lambda: session)
+
+    html = fetch_authenticated_html("https://fantasygp.com/drivers-cars/", "user", "pass")
+
+    assert "drivers data page" in html
+    assert session.post_calls
+    _, payload = session.post_calls[0]
+    assert payload["log"] == "user"
+    assert payload["pwd"] == "pass"
 
 
 def test_fetch_prices_via_ajax_extracts_prices_from_json_html_payload():

@@ -70,6 +70,7 @@ jobs:
         with:
           name: fantasygp-scrape-debug
           path: .artifacts/
+          include-hidden-files: true
           if-no-files-found: ignore
 
       - name: Commit and push changes

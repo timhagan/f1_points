@@ -624,6 +624,33 @@ def _discover_login_form(html, base_url):
     return None
 
 
+def _contains_password_field(html):
+    return bool(re.search(r"<input[^>]+type=[\"']password[\"']", html, flags=re.IGNORECASE))
+
+
+def _attempt_wordpress_login(session, page_url, target_url, username, password, headers):
+    login_url = requests.compat.urljoin(page_url, "/wp-login.php")
+    payload = {
+        "log": username,
+        "pwd": password,
+        "rememberme": "forever",
+        "redirect_to": target_url,
+        "testcookie": "1",
+        "wp-submit": "Log In",
+    }
+
+    try:
+        session.get(login_url, headers=headers, timeout=30)
+        login_response = session.post(login_url, data=payload, headers=headers, timeout=30)
+        login_response.raise_for_status()
+        final_response = session.get(target_url, headers=headers, timeout=30)
+        final_response.raise_for_status()
+    except requests_exceptions.RequestException:
+        return None
+
+    return final_response.text
+
+
 def fetch_authenticated_html(url, username, password):
     html, _, _ = fetch_authenticated_page(url, username, password)
     return html
@@ -652,6 +679,17 @@ def fetch_authenticated_page(url, username, password):
 
     login_info = _discover_login_form(first_response.text, first_response.url)
     if login_info is None:
+        if _contains_password_field(first_response.text):
+            wordpress_result = _attempt_wordpress_login(
+                session,
+                first_response.url,
+                url,
+                username,
+                password,
+                headers,
+            )
+            if wordpress_result:
+                return wordpress_result, session, headers
         return first_response.text, session, headers
 
     action_url, payload, username_key, password_key = login_info
@@ -715,6 +753,11 @@ def main():
         driver_prices, constructor_prices = fetch_prices_via_ajax(session, html, TARGET_URL, headers)
         if driver_prices is None or constructor_prices is None:
             _write_debug_html_snapshot(html, str(extract_error))
+            if _contains_password_field(html):
+                raise RuntimeError(
+                    "FantasyGP page still appears to require login after authentication. "
+                    "Verify credentials and inspect debug HTML artifact."
+                ) from extract_error
             raise
 
     save_prices(driver_prices, constructor_prices)
