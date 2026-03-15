@@ -5,6 +5,7 @@ import logging
 import os
 import re
 import time
+from pathlib import Path
 from html.parser import HTMLParser
 
 import pandas as pd
@@ -16,6 +17,15 @@ OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "data")
 DEFAULT_AJAX_ACTIONS = ["getdriversandcars", "allDriversAndCars", "driversandcars"]
 
 logger = logging.getLogger(__name__)
+
+AUTH_MODE = os.environ.get("FANTASYGP_AUTH_MODE", "playwright").strip().lower()
+STORAGE_STATE_PATH = Path(
+    os.environ.get(
+        "FANTASYGP_STORAGE_STATE_PATH",
+        os.path.join(os.path.dirname(__file__), "..", "..", ".cache", "fantasygp_storage_state.json"),
+    )
+).resolve()
+STORAGE_STATE_MAX_AGE_SECONDS = int(os.environ.get("FANTASYGP_STORAGE_STATE_MAX_AGE_SECONDS", "21600"))
 
 
 def _debug_log(message):
@@ -38,6 +48,88 @@ def _write_debug_html_snapshot(html_text, error_message):
         logger.warning("Saved FantasyGP debug HTML snapshot to %s", debug_path)
     except OSError as exc:
         logger.warning("Failed to write FantasyGP debug HTML snapshot: %s", exc)
+
+
+def _is_storage_state_fresh(state_path: Path, max_age_seconds: int) -> bool:
+    if not state_path.exists():
+        return False
+    age_seconds = time.time() - state_path.stat().st_mtime
+    return age_seconds <= max_age_seconds
+
+
+class PlaywrightAuthProvider:
+    LOGIN_URL = "https://fantasygp.com/drivers-cars/"
+
+    def __init__(self, storage_state_path: Path, state_max_age_seconds: int = STORAGE_STATE_MAX_AGE_SECONDS):
+        self.storage_state_path = Path(storage_state_path)
+        self.state_max_age_seconds = state_max_age_seconds
+
+    def has_fresh_state(self) -> bool:
+        return _is_storage_state_fresh(self.storage_state_path, self.state_max_age_seconds)
+
+    def login_and_save_state(self, username: str, password: str) -> Path:
+        self.storage_state_path.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
+            from playwright.sync_api import sync_playwright
+        except ImportError as exc:
+            raise RuntimeError(
+                "Playwright auth mode requires playwright to be installed. "
+                "Install playwright or set FANTASYGP_AUTH_MODE=requests_fallback."
+            ) from exc
+
+        with sync_playwright() as playwright:
+            browser = playwright.chromium.launch(headless=True)
+            context = browser.new_context()
+            page = context.new_page()
+            page.goto(self.LOGIN_URL, wait_until="domcontentloaded", timeout=60000)
+            page.fill('input[name="log"]', username)
+            page.fill('input[name="pwd"]', password)
+            page.click('input[type="submit"], button[type="submit"]')
+            try:
+                page.wait_for_load_state("networkidle", timeout=60000)
+            except PlaywrightTimeoutError:
+                _debug_log("Playwright login did not reach networkidle before timeout; proceeding with current state")
+
+            current_url = page.url.lower()
+            page_content = page.content().lower()
+            if "wp-login.php" in current_url or "name=\"pwd\"" in page_content:
+                browser.close()
+                raise RuntimeError("Playwright login appears unsuccessful; still on login page.")
+
+            context.storage_state(path=str(self.storage_state_path))
+            browser.close()
+
+        return self.storage_state_path
+
+
+class RequestsAuthProvider:
+    def __init__(self, storage_state_path: Path):
+        self.storage_state_path = Path(storage_state_path)
+
+    def session_from_playwright_state(self) -> requests.Session:
+        if not self.storage_state_path.exists():
+            raise FileNotFoundError(f"Missing Playwright storage state file: {self.storage_state_path}")
+
+        with self.storage_state_path.open("r", encoding="utf-8") as file:
+            state = json.load(file)
+
+        session = requests.Session()
+        cookies = state.get("cookies", [])
+        for cookie in cookies:
+            name = cookie.get("name")
+            value = cookie.get("value")
+            domain = cookie.get("domain")
+            if not name or value is None:
+                continue
+            session.cookies.set(
+                name,
+                value,
+                domain=domain,
+                path=cookie.get("path", "/"),
+            )
+
+        return session
 
 
 class _SimpleTableParser(HTMLParser):
@@ -747,27 +839,31 @@ def fetch_authenticated_html(url, username, password):
     return html
 
 
-def fetch_authenticated_page(url, username, password):
-    headers = {"User-Agent": "Mozilla/5.0 (compatible; f1-points-bot/1.0)"}
-    page_password = os.environ.get("FANTASYGP_PAGE_PASSWORD", password)
-
-    session = requests.Session()
+def _fetch_with_proxy_retry(session, url, headers):
     try:
-        first_response = session.get(url, headers=headers, timeout=30)
-        first_response.raise_for_status()
+        response = session.get(url, headers=headers, timeout=30)
+        response.raise_for_status()
+        return response, session
     except requests_exceptions.ProxyError:
         # Some environments inject an HTTPS proxy that blocks fantasygp.com.
         # Retry once without proxy env vars.
-        session = requests.Session()
-        session.trust_env = False
+        clean_session = requests.Session()
+        clean_session.trust_env = False
         try:
-            first_response = session.get(url, headers=headers, timeout=30)
-            first_response.raise_for_status()
+            response = clean_session.get(url, headers=headers, timeout=30)
+            response.raise_for_status()
+            return response, clean_session
         except requests_exceptions.RequestException as exc:
             raise RuntimeError(
                 "Unable to reach FantasyGP. Proxy tunnel was rejected and direct connection also failed. "
                 "Check network egress/proxy allowlist for fantasygp.com."
             ) from exc
+
+
+def _fetch_with_requests_fallback(url, username, password, headers):
+    page_password = os.environ.get("FANTASYGP_PAGE_PASSWORD", password)
+    session = requests.Session()
+    first_response, session = _fetch_with_proxy_retry(session, url, headers)
 
     login_info = _discover_login_form(first_response.text, first_response.url)
     if login_info is None:
@@ -802,6 +898,52 @@ def fetch_authenticated_page(url, username, password):
         url,
     )
     return final_html, session, headers
+
+
+def _requires_reauthentication(response):
+    return response.status_code == 401 or _looks_like_login_page(response.text)
+
+
+def fetch_authenticated_page(url, username, password):
+    headers = {"User-Agent": "Mozilla/5.0 (compatible; f1-points-bot/1.0)"}
+
+    if AUTH_MODE == "requests_fallback":
+        _debug_log("Using requests_fallback auth mode")
+        return _fetch_with_requests_fallback(url, username, password, headers)
+
+    playwright_auth = PlaywrightAuthProvider(STORAGE_STATE_PATH, STORAGE_STATE_MAX_AGE_SECONDS)
+    requests_auth = RequestsAuthProvider(STORAGE_STATE_PATH)
+
+    if not playwright_auth.has_fresh_state():
+        _debug_log("Cached Playwright storage state missing or stale; logging in")
+        playwright_auth.login_and_save_state(username, password)
+
+    def _build_session_from_state():
+        return requests_auth.session_from_playwright_state()
+
+    try:
+        session = _build_session_from_state()
+    except (FileNotFoundError, json.JSONDecodeError):
+        _debug_log("Stored Playwright state unavailable or invalid; refreshing login")
+        playwright_auth.login_and_save_state(username, password)
+        session = _build_session_from_state()
+
+    response, session = _fetch_with_proxy_retry(session, url, headers)
+
+    if _requires_reauthentication(response):
+        _debug_log("Detected unauthorized response; refreshing Playwright login state")
+        playwright_auth.login_and_save_state(username, password)
+        session = _build_session_from_state()
+        response, session = _fetch_with_proxy_retry(session, url, headers)
+
+    if _requires_reauthentication(response):
+        raise RuntimeError(
+            "FantasyGP authentication appears invalid after Playwright refresh. "
+            "Set FANTASYGP_AUTH_MODE=requests_fallback to use the legacy fallback auth flow."
+        )
+
+    ready_html = _wait_for_page_readiness(session, url, headers, response.text)
+    return ready_html, session, headers
 
 
 def save_prices(driver_prices, constructor_prices):
