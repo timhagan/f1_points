@@ -530,11 +530,16 @@ def _discover_ajax_actions(js_text):
 
 def _load_default_ajax_actions():
     configured = os.environ.get("FANTASYGP_AJAX_ACTIONS")
-    if not configured:
-        return DEFAULT_AJAX_ACTIONS.copy()
+    configured_actions = []
+    if configured:
+        configured_actions = [token.strip() for token in configured.split(",") if token.strip()]
 
-    actions = [token.strip() for token in configured.split(",") if token.strip()]
-    return actions if actions else DEFAULT_AJAX_ACTIONS.copy()
+    actions = []
+    for action in configured_actions + DEFAULT_AJAX_ACTIONS:
+        if action not in actions:
+            actions.append(action)
+
+    return actions
 
 
 def _candidate_ajax_actions(js_text):
