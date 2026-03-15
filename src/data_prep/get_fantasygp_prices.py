@@ -19,6 +19,29 @@ DEFAULT_AJAX_NONCE_KEYS = ["security", "nonce", "_ajax_nonce"]
 
 logger = logging.getLogger(__name__)
 
+
+def _int_env(name, default):
+    try:
+        return int(os.environ.get(name, str(default)))
+    except (TypeError, ValueError):
+        return default
+
+
+def _write_scrape_report(report):
+    report_path = os.environ.get("FANTASYGP_REPORT_PATH")
+    if not report_path:
+        return
+
+    try:
+        parent_dir = os.path.dirname(report_path)
+        if parent_dir:
+            os.makedirs(parent_dir, exist_ok=True)
+        with open(report_path, "w", encoding="utf-8") as file:
+            json.dump(report, file, indent=2, sort_keys=True)
+        _debug_log(f"Wrote FantasyGP scrape report to {report_path}")
+    except OSError as exc:
+        logger.warning("Failed to write FantasyGP scrape report: %s", exc)
+
 AUTH_MODE = os.environ.get("FANTASYGP_AUTH_MODE", "playwright").strip().lower()
 STORAGE_STATE_PATH = Path(
     os.environ.get(
@@ -890,7 +913,8 @@ def fetch_prices_via_ajax(session, html, page_url, headers, report=None):
                 response = session.post(ajax_url, data=payload, headers=headers, timeout=30)
                 response.raise_for_status()
                 last_response_text = response.text
-                last_content_type = (response.headers.get("Content-Type") or "").split(";")[0].strip()
+                response_headers = getattr(response, "headers", {}) or {}
+                last_content_type = (response_headers.get("Content-Type") or "").split(";")[0].strip()
                 _log_event("response_content_type", endpoint=ajax_url, content_type=last_content_type or "unknown")
             except requests_exceptions.RequestException:
                 _debug_log(f"AJAX request failed for action={action}, nonce_key={nonce_key}")
@@ -1120,29 +1144,46 @@ def fetch_authenticated_html(url, username, password):
 
 def fetch_authenticated_page(url, username, password, report=None):
     headers = {"User-Agent": "Mozilla/5.0 (compatible; f1-points-bot/1.0)"}
-    page_password = os.environ.get("FANTASYGP_PAGE_PASSWORD", password)
 
-    session = requests.Session()
+    if AUTH_MODE == "playwright":
+        auth_provider = PlaywrightAuthProvider(STORAGE_STATE_PATH)
+        requests_provider = RequestsAuthProvider(STORAGE_STATE_PATH)
+        try:
+            if not auth_provider.has_fresh_state():
+                auth_provider.login_and_save_state(username, password)
+                if report is not None:
+                    report["auth_strategy"] = "fresh_browser_login"
+                _log_event("auth_strategy_used", auth_strategy="fresh_browser_login")
+            else:
+                if report is not None:
+                    report["auth_strategy"] = "cached_state"
+                _log_event("auth_strategy_used", auth_strategy="cached_state")
+            session = requests_provider.session_from_playwright_state()
+        except Exception as exc:
+            logger.warning("Playwright auth failed; falling back to requests auth path: %s", exc)
+            session = requests.Session()
+    else:
+        session = requests.Session()
+
     try:
-        response = session.get(url, headers=headers, timeout=30)
-        response.raise_for_status()
-        return response, session
+        first_response = session.get(url, headers=headers, timeout=30)
+        first_response.raise_for_status()
     except requests_exceptions.ProxyError:
         # Some environments inject an HTTPS proxy that blocks fantasygp.com.
         # Retry once without proxy env vars.
-        clean_session = requests.Session()
-        clean_session.trust_env = False
+        session = requests.Session()
+        session.trust_env = False
         try:
-            response = clean_session.get(url, headers=headers, timeout=30)
-            response.raise_for_status()
-            return response, clean_session
+            first_response = session.get(url, headers=headers, timeout=30)
+            first_response.raise_for_status()
         except requests_exceptions.RequestException as exc:
             raise RuntimeError(
                 "Unable to reach FantasyGP. Proxy tunnel was rejected and direct connection also failed. "
                 "Check network egress/proxy allowlist for fantasygp.com."
             ) from exc
 
-    initial_content_type = (first_response.headers.get("Content-Type") or "").split(";")[0].strip()
+    response_headers = getattr(first_response, "headers", {}) or {}
+    initial_content_type = (response_headers.get("Content-Type") or "").split(";")[0].strip()
     if report is not None:
         report["initial_response_content_type"] = initial_content_type
     _log_event("response_content_type", endpoint=url, content_type=initial_content_type or "unknown")
@@ -1155,18 +1196,16 @@ def fetch_authenticated_page(url, username, password, report=None):
                 first_response.url,
                 url,
                 username,
-                page_password,
+                password,
                 headers,
             )
             if wordpress_result:
-                if report is not None:
+                if report is not None and "auth_strategy" not in report:
                     report["auth_strategy"] = "fresh_browser_login"
-                _log_event("auth_strategy_used", auth_strategy="fresh_browser_login")
                 return wordpress_result, session, headers
         ready_html = _wait_for_page_readiness(session, url, headers, first_response.text)
-        if report is not None:
+        if report is not None and "auth_strategy" not in report:
             report["auth_strategy"] = "cached_state"
-        _log_event("auth_strategy_used", auth_strategy="cached_state")
         return ready_html, session, headers
 
     action_url, payload, username_key, password_key = login_info
@@ -1174,9 +1213,8 @@ def fetch_authenticated_page(url, username, password, report=None):
     if password_key is None:
         raise ValueError("Could not determine a password field on the detected login form.")
 
-    if report is not None:
+    if report is not None and "auth_strategy" not in report:
         report["auth_strategy"] = "fresh_browser_login"
-    _log_event("auth_strategy_used", auth_strategy="fresh_browser_login")
 
     final_html = _submit_discovered_login_form(
         session,
@@ -1185,10 +1223,11 @@ def fetch_authenticated_page(url, username, password, report=None):
         username_key,
         password_key,
         username,
-        page_password,
+        password,
         headers,
         url,
     )
+
     return final_html, session, headers
 
 

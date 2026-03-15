@@ -89,7 +89,6 @@ python src/data_prep/combine_event_points.py
 To enable the authenticated weekly FantasyGP scrape workflow, add these repository secrets:
 - `FANTASYGP_USERNAME`
 - `FANTASYGP_PASSWORD`
-- `FANTASYGP_PAGE_PASSWORD` (optional; use if the drivers/cars page is protected by a separate page password)
 
 The workflow runs every Monday and can also be triggered manually from GitHub Actions. It writes the latest files to:
 - `data/fantasygp_driver_prices_current.csv`
@@ -98,6 +97,8 @@ The workflow runs every Monday and can also be triggered manually from GitHub Ac
 - Date-stamped archives in `data/` (one file per run day for each output)
 
 If the page temporarily renders a loading screen after auth, the scraper will poll for readiness (configurable with `FANTASYGP_READY_CHECK_ATTEMPTS` and `FANTASYGP_READY_CHECK_DELAY_SECONDS`).
+
+Each scrape run writes a structured debug report to `.artifacts/fantasygp_scrape_report.json` (workflow env `FANTASYGP_DEBUG_REPORT_PATH`) and uploads `.artifacts/` as an artifact for both successful and failed runs.
 
 # 🤝 Contributing
 Contributions welcome! Here's how to help:
