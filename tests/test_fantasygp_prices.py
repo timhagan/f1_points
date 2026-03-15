@@ -1,8 +1,10 @@
 import pandas as pd
 
 from src.data_prep.get_fantasygp_prices import (
+    _discover_ajax_actions,
     _discover_ajax_context,
     _discover_login_form,
+    _extract_prices_from_json_payload,
     combine_prices_for_ranking,
     fetch_prices_via_ajax,
     fetch_authenticated_html,
@@ -221,7 +223,7 @@ def test_fetch_prices_via_ajax_extracts_prices_from_json_html_payload():
 
         def post(self, url, data=None, **kwargs):
             self.post_calls += 1
-            assert data["action"] == "getdriversandcars"
+            assert data["action"] in {"getdriversandcars", "driversandcars", "get_drivers_and_cars"}
             payload = {
                 "success": True,
                 "data": {
@@ -265,6 +267,32 @@ def test_discover_ajax_context_accepts_single_quotes_and_unquoted_keys():
     assert ajax_url == "https://fantasygp.com/wp-admin/admin-ajax.php"
     assert security == "token123"
     assert script_url == "https://fantasygp.com/wp-content/plugins/fantasy-gp/js/alldriverscars.js"
+
+
+def test_discover_ajax_actions_uses_regex_and_default_fallbacks():
+    js_text = """
+      $.post(MyAjax.ajaxurl,{action:'custom_action',security:MyAjax.security},function(){});
+      const url = '/wp-admin/admin-ajax.php?action=getdriversandcars';
+    """
+    actions = _discover_ajax_actions(js_text)
+
+    assert "custom_action" in actions
+    assert "getdriversandcars" in actions
+
+
+def test_extract_prices_from_json_payload_supports_data_wrapper_schema():
+    payload = {
+        "success": True,
+        "data": {
+            "drivers": [{"driver": "Verstappen", "price": "$30.5M"}],
+            "teams": [{"constructor": "Red Bull", "cost": "$32.0M"}],
+        },
+    }
+
+    driver_df, constructor_df = _extract_prices_from_json_payload(payload)
+
+    assert list(driver_df["Name"]) == ["Verstappen"]
+    assert list(constructor_df["Name"]) == ["Red Bull"]
 
 
 def test_fetch_prices_via_ajax_extracts_prices_from_structured_json_payload_without_html():
