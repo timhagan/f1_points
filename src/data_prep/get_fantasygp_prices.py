@@ -348,7 +348,18 @@ def _discover_ajax_context(html, base_url):
 
 def _discover_ajax_actions(js_text):
     actions = []
-    for action in re.findall(r"action\s*:\s*['\"]([a-zA-Z0-9_-]+)['\"]", js_text):
+    patterns = [
+        r"action\s*:\s*['\"]([a-zA-Z0-9_-]+)['\"]",
+        r"[?&]action=([a-zA-Z0-9_-]+)",
+        r"\baction\s*=\s*['\"]([a-zA-Z0-9_-]+)['\"]",
+    ]
+    for pattern in patterns:
+        matches = re.findall(pattern, js_text)
+        for action in matches:
+            if action not in actions:
+                actions.append(action)
+
+    for action in _get_default_ajax_actions():
         if action not in actions:
             actions.append(action)
 
@@ -479,18 +490,21 @@ def _extract_prices_from_ajax_payload(payload_text):
         except ValueError:
             continue
 
+    _debug_log("AJAX payload could not be parsed as structured JSON or HTML price content.")
     return None, None
 
 
 def fetch_prices_via_ajax(session, html, page_url, headers):
     ajax_url, security, script_url = _discover_ajax_context(html, page_url)
     if not ajax_url or not script_url or not security:
+        _debug_log("Missing AJAX context (ajax_url, security token, or script_url).")
         return None, None
 
     try:
         js_response = session.get(script_url, headers=headers, timeout=30)
         js_response.raise_for_status()
     except requests_exceptions.RequestException:
+        _debug_log(f"Unable to fetch AJAX script: {script_url}")
         return None, None
 
     actions = _candidate_ajax_actions(js_response.text)
@@ -510,10 +524,12 @@ def fetch_prices_via_ajax(session, html, page_url, headers):
                 response.raise_for_status()
                 last_response_text = response.text
             except requests_exceptions.RequestException:
+                _debug_log(f"AJAX request failed for action={action}, nonce_key={nonce_key}")
                 continue
 
             driver_prices, constructor_prices = _extract_prices_from_ajax_payload(response.text)
             if driver_prices is not None and constructor_prices is not None:
+                _debug_log(f"AJAX extraction succeeded for action={action}, nonce_key={nonce_key}")
                 return driver_prices, constructor_prices
 
     logger.warning(
@@ -534,6 +550,7 @@ def extract_driver_constructor_prices(html):
         driver_prices, constructor_prices = _extract_prices_from_cards(html)
         if driver_prices is not None and constructor_prices is not None:
             return driver_prices, constructor_prices
+        _debug_log("No price tables or cards could be parsed from page HTML.")
         raise ValueError("Could not identify price data in the page HTML.")
 
     by_type = {table_type: table for table_type, table in price_tables if table_type in {"driver", "constructor"}}
