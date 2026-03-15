@@ -50,6 +50,8 @@ jobs:
           FANTASYGP_TARGET_URL: https://fantasygp.com/drivers-cars/
           FANTASYGP_AJAX_ACTIONS: getdriversandcars,allDriversAndCars,driversandcars
           FANTASYGP_DEBUG_HTML_PATH: .artifacts/fantasygp_last_failed_page.html
+          FANTASYGP_READY_CHECK_ATTEMPTS: "8"
+          FANTASYGP_READY_CHECK_DELAY_SECONDS: "5"
         run: |
           set -e
           for attempt in 1 2 3; do

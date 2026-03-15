@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import re
+import time
 from html.parser import HTMLParser
 
 import pandas as pd
@@ -628,6 +629,45 @@ def _contains_password_field(html):
     return bool(re.search(r"<input[^>]+type=[\"']password[\"']", html, flags=re.IGNORECASE))
 
 
+def _looks_like_loading_page(html_text):
+    lowered = html_text.lower()
+    if "loading" not in lowered:
+        return False
+
+    loading_markers = [
+        "loading",
+        "please wait",
+        "spinner",
+        "is-loading",
+        "data loading",
+    ]
+    return any(marker in lowered for marker in loading_markers)
+
+
+def _wait_for_page_readiness(session, target_url, headers, initial_html):
+    max_attempts = int(os.environ.get("FANTASYGP_READY_CHECK_ATTEMPTS", "4"))
+    delay_seconds = float(os.environ.get("FANTASYGP_READY_CHECK_DELAY_SECONDS", "3"))
+
+    html_text = initial_html
+    for attempt in range(1, max_attempts + 1):
+        if not _looks_like_loading_page(html_text):
+            return html_text
+
+        _debug_log(f"Page appears to be loading; readiness attempt {attempt}/{max_attempts}")
+        if attempt == max_attempts:
+            return html_text
+
+        time.sleep(delay_seconds)
+        try:
+            response = session.get(target_url, headers=headers, timeout=30)
+            response.raise_for_status()
+            html_text = response.text
+        except requests_exceptions.RequestException:
+            return html_text
+
+    return html_text
+
+
 def _attempt_wordpress_login(session, page_url, target_url, username, password, headers):
     login_url = requests.compat.urljoin(page_url, "/wp-login.php")
     payload = {
@@ -648,7 +688,7 @@ def _attempt_wordpress_login(session, page_url, target_url, username, password, 
     except requests_exceptions.RequestException:
         return None
 
-    return final_response.text
+    return _wait_for_page_readiness(session, target_url, headers, final_response.text)
 
 
 def _submit_discovered_login_form(
@@ -672,7 +712,7 @@ def _submit_discovered_login_form(
 
     final_response = session.get(target_url, headers=headers, timeout=30)
     final_response.raise_for_status()
-    return final_response.text
+    return _wait_for_page_readiness(session, target_url, headers, final_response.text)
 
 
 def fetch_authenticated_html(url, username, password):
@@ -715,7 +755,8 @@ def fetch_authenticated_page(url, username, password):
             )
             if wordpress_result:
                 return wordpress_result, session, headers
-        return first_response.text, session, headers
+        ready_html = _wait_for_page_readiness(session, url, headers, first_response.text)
+        return ready_html, session, headers
 
     action_url, payload, username_key, password_key = login_info
 

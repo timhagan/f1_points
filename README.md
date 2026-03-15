@@ -97,6 +97,8 @@ The workflow runs every Monday and can also be triggered manually from GitHub Ac
 - `data/fantasygp_prices_current.csv` (combined normalized table for points-per-dollar analysis)
 - Date-stamped archives in `data/` (one file per run day for each output)
 
+If the page temporarily renders a loading screen after auth, the scraper will poll for readiness (configurable with `FANTASYGP_READY_CHECK_ATTEMPTS` and `FANTASYGP_READY_CHECK_DELAY_SECONDS`).
+
 # 🤝 Contributing
 Contributions welcome! Here's how to help:
 

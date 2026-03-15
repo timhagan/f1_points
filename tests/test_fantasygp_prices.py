@@ -6,7 +6,9 @@ from src.data_prep.get_fantasygp_prices import (
     _debug_log,
     _discover_ajax_context,
     _discover_login_form,
+    _looks_like_loading_page,
     _summarize_payload_text,
+    _wait_for_page_readiness,
     _write_debug_html_snapshot,
     combine_prices_for_ranking,
     fetch_prices_via_ajax,
@@ -213,6 +215,11 @@ def test_contains_password_field_detects_password_input():
     assert not _contains_password_field('<input type="text" name="user" />')
 
 
+def test_looks_like_loading_page_detects_loading_markers():
+    assert _looks_like_loading_page("<html><body>Loading... please wait</body></html>")
+    assert not _looks_like_loading_page("<html><body>drivers and cars</body></html>")
+
+
 def test_fetch_authenticated_html_attempts_wordpress_login_when_password_field_present_but_form_unknown(monkeypatch):
     class WordPressFallbackSession:
         def __init__(self):
@@ -276,6 +283,30 @@ def test_fetch_authenticated_html_handles_password_only_form(monkeypatch):
     _, payload = session.login_posts[0]
     assert payload["post_password"] == "secret"
     assert payload["token"] == "abc"
+
+
+def test_wait_for_page_readiness_polls_until_loading_clears(monkeypatch):
+    class ReadySession:
+        def __init__(self):
+            self.calls = 0
+
+        def get(self, url, **kwargs):
+            self.calls += 1
+            if self.calls == 1:
+                return _FakeResponse("<html><body>Loading...</body></html>", url)
+            return _FakeResponse("<html><body>Driver table ready</body></html>", url)
+
+    monkeypatch.setenv("FANTASYGP_READY_CHECK_ATTEMPTS", "3")
+    monkeypatch.setenv("FANTASYGP_READY_CHECK_DELAY_SECONDS", "0")
+
+    html = _wait_for_page_readiness(
+        ReadySession(),
+        "https://fantasygp.com/drivers-cars/",
+        {"User-Agent": "ua"},
+        "<html><body>Loading...</body></html>",
+    )
+
+    assert "Driver table ready" in html
 
 
 def test_fetch_prices_via_ajax_extracts_prices_from_json_html_payload():
