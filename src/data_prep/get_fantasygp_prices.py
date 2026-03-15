@@ -1,4 +1,5 @@
 import datetime
+import html
 import json
 import os
 import re
@@ -10,6 +11,25 @@ from requests import exceptions as requests_exceptions
 
 TARGET_URL = os.environ.get("FANTASYGP_TARGET_URL", "https://fantasygp.com/drivers-cars/")
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "data")
+DEFAULT_AJAX_ACTIONS = ["getdriversandcars", "get_drivers_and_cars", "driversandcars"]
+
+
+def _is_debug_enabled():
+    return os.environ.get("FANTASYGP_DEBUG", "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _debug_log(message):
+    if _is_debug_enabled():
+        print(f"[fantasygp_prices] {message}")
+
+
+def _get_default_ajax_actions():
+    configured = os.environ.get("FANTASYGP_AJAX_ACTIONS", "").strip()
+    if not configured:
+        return DEFAULT_AJAX_ACTIONS
+
+    actions = [action.strip() for action in configured.split(",") if action.strip()]
+    return actions or DEFAULT_AJAX_ACTIONS
 
 
 class _SimpleTableParser(HTMLParser):
@@ -288,9 +308,15 @@ def _extract_prices_from_cards(html):
 
 
 def _extract_js_object_value(html, object_name, key):
-    pattern = rf"var\s+{re.escape(object_name)}\s*=\s*\{{.*?\"{re.escape(key)}\"\s*:\s*\"([^\"]+)\""
-    match = re.search(pattern, html, flags=re.IGNORECASE | re.DOTALL)
-    return match.group(1) if match else None
+    object_pattern = rf"(?:var|let|const)\s+{re.escape(object_name)}\s*=\s*\{{(.*?)\}}"
+    object_match = re.search(object_pattern, html, flags=re.IGNORECASE | re.DOTALL)
+    if not object_match:
+        return None
+
+    object_body = object_match.group(1)
+    value_pattern = rf"(?:['\"]?{re.escape(key)}['\"]?)\s*:\s*['\"]([^'\"]+)['\"]"
+    value_match = re.search(value_pattern, object_body, flags=re.IGNORECASE | re.DOTALL)
+    return value_match.group(1) if value_match else None
 
 
 def _discover_ajax_context(html, base_url):
@@ -314,7 +340,18 @@ def _discover_ajax_context(html, base_url):
 
 def _discover_ajax_actions(js_text):
     actions = []
-    for action in re.findall(r"action\s*:\s*['\"]([a-zA-Z0-9_-]+)['\"]", js_text):
+    patterns = [
+        r"action\s*:\s*['\"]([a-zA-Z0-9_-]+)['\"]",
+        r"[?&]action=([a-zA-Z0-9_-]+)",
+        r"\baction\s*=\s*['\"]([a-zA-Z0-9_-]+)['\"]",
+    ]
+    for pattern in patterns:
+        matches = re.findall(pattern, js_text)
+        for action in matches:
+            if action not in actions:
+                actions.append(action)
+
+    for action in _get_default_ajax_actions():
         if action not in actions:
             actions.append(action)
 
@@ -326,8 +363,9 @@ def _discover_ajax_actions(js_text):
 def _extract_html_like_chunks(value):
     chunks = []
     if isinstance(value, str):
-        if "<" in value and ">" in value:
-            chunks.append(value)
+        unescaped = html.unescape(value)
+        if "<" in unescaped and ">" in unescaped:
+            chunks.append(unescaped)
     elif isinstance(value, dict):
         for v in value.values():
             chunks.extend(_extract_html_like_chunks(v))
@@ -337,10 +375,130 @@ def _extract_html_like_chunks(value):
     return chunks
 
 
+def _build_price_rows(items, name_keys):
+    rows = []
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+
+        name = None
+        for key in name_keys:
+            value = item.get(key)
+            if value is not None and str(value).strip():
+                name = str(value).strip()
+                break
+
+        if not name:
+            continue
+
+        raw_price = None
+        for key in ["price", "cost", "value"]:
+            if key in item:
+                raw_price = item[key]
+                break
+
+        if raw_price is None:
+            continue
+
+        parsed_price = parse_price_value(raw_price)
+        if pd.notna(parsed_price):
+            rows.append({"Name": name, "Price": parsed_price})
+
+    return rows
+
+
+def _extract_prices_from_schema(payload):
+    if not isinstance(payload, dict):
+        return None, None
+
+    candidate_containers = [payload]
+    data = payload.get("data")
+    if isinstance(data, dict):
+        candidate_containers.append(data)
+
+    for container in candidate_containers:
+        drivers = container.get("drivers")
+        constructors = container.get("constructors") or container.get("teams") or container.get("cars")
+        if isinstance(drivers, list) and isinstance(constructors, list):
+            driver_rows = _build_price_rows(drivers, ["driver_name", "driver", "name", "title"])
+            constructor_rows = _build_price_rows(constructors, ["team", "constructor", "car", "name", "title"])
+            if driver_rows and constructor_rows:
+                return (
+                    _prepare_price_dataframe(pd.DataFrame(driver_rows).drop_duplicates(), "driver"),
+                    _prepare_price_dataframe(pd.DataFrame(constructor_rows).drop_duplicates(), "constructor"),
+                )
+
+    return None, None
+
+
+def _extract_prices_from_json_payload(payload):
+    driver_prices, constructor_prices = _extract_prices_from_schema(payload)
+    if driver_prices is not None and constructor_prices is not None:
+        return driver_prices, constructor_prices
+
+    records = []
+
+    def walk(value, context=""):
+        if isinstance(value, dict):
+            local_context = context.lower()
+            name = None
+            raw_price = None
+
+            for key in ["name", "driver", "driver_name", "constructor", "team", "car", "title"]:
+                if key in value and str(value[key]).strip():
+                    name = str(value[key]).strip()
+                    break
+
+            for key in ["price", "cost", "value"]:
+                if key in value:
+                    raw_price = value[key]
+                    break
+
+            if name and raw_price is not None:
+                parsed_price = parse_price_value(raw_price)
+                if pd.notna(parsed_price):
+                    if "driver" in local_context:
+                        entity_type = "driver"
+                    elif any(token in local_context for token in ["constructor", "team", "car"]):
+                        entity_type = "constructor"
+                    else:
+                        entity_type = None
+                    records.append((entity_type, name, parsed_price))
+
+            for key, item in value.items():
+                walk(item, f"{local_context} {key}".strip())
+
+        elif isinstance(value, list):
+            for item in value:
+                walk(item, context)
+
+    walk(payload)
+
+    typed = [record for record in records if record[0] in {"driver", "constructor"}]
+    if not typed:
+        return None, None
+
+    driver_rows = [{"Name": name, "Price": price} for entity, name, price in typed if entity == "driver"]
+    constructor_rows = [
+        {"Name": name, "Price": price} for entity, name, price in typed if entity == "constructor"
+    ]
+
+    if not driver_rows or not constructor_rows:
+        return None, None
+
+    return (
+        _prepare_price_dataframe(pd.DataFrame(driver_rows).drop_duplicates(), "driver"),
+        _prepare_price_dataframe(pd.DataFrame(constructor_rows).drop_duplicates(), "constructor"),
+    )
+
+
 def _extract_prices_from_ajax_payload(payload_text):
     html_candidates = [payload_text]
     try:
         json_payload = json.loads(payload_text)
+        driver_prices, constructor_prices = _extract_prices_from_json_payload(json_payload)
+        if driver_prices is not None and constructor_prices is not None:
+            return driver_prices, constructor_prices
         html_candidates.extend(_extract_html_like_chunks(json_payload))
     except ValueError:
         pass
@@ -352,22 +510,26 @@ def _extract_prices_from_ajax_payload(payload_text):
         except ValueError:
             continue
 
+    _debug_log("AJAX payload could not be parsed as structured JSON or HTML price content.")
     return None, None
 
 
 def fetch_prices_via_ajax(session, html, page_url, headers):
     ajax_url, security, script_url = _discover_ajax_context(html, page_url)
     if not ajax_url or not script_url or not security:
+        _debug_log("Missing AJAX context (ajax_url, security token, or script_url).")
         return None, None
 
     try:
         js_response = session.get(script_url, headers=headers, timeout=30)
         js_response.raise_for_status()
     except requests_exceptions.RequestException:
+        _debug_log(f"Unable to fetch AJAX script: {script_url}")
         return None, None
 
     actions = _discover_ajax_actions(js_response.text)
     if not actions:
+        _debug_log("No AJAX action names discovered from script.")
         return None, None
 
     nonce_keys = ["security", "nonce", "_ajax_nonce"]
@@ -378,12 +540,15 @@ def fetch_prices_via_ajax(session, html, page_url, headers):
                 response = session.post(ajax_url, data=payload, headers=headers, timeout=30)
                 response.raise_for_status()
             except requests_exceptions.RequestException:
+                _debug_log(f"AJAX request failed for action={action}, nonce_key={nonce_key}")
                 continue
 
             driver_prices, constructor_prices = _extract_prices_from_ajax_payload(response.text)
             if driver_prices is not None and constructor_prices is not None:
+                _debug_log(f"AJAX extraction succeeded for action={action}, nonce_key={nonce_key}")
                 return driver_prices, constructor_prices
 
+    _debug_log("AJAX extraction exhausted all action/nonce combinations without success.")
     return None, None
 
 
@@ -395,6 +560,7 @@ def extract_driver_constructor_prices(html):
         driver_prices, constructor_prices = _extract_prices_from_cards(html)
         if driver_prices is not None and constructor_prices is not None:
             return driver_prices, constructor_prices
+        _debug_log("No price tables or cards could be parsed from page HTML.")
         raise ValueError("Could not identify price data in the page HTML.")
 
     by_type = {table_type: table for table_type, table in price_tables if table_type in {"driver", "constructor"}}

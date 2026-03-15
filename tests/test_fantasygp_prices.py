@@ -1,7 +1,10 @@
 import pandas as pd
 
 from src.data_prep.get_fantasygp_prices import (
+    _discover_ajax_actions,
+    _discover_ajax_context,
     _discover_login_form,
+    _extract_prices_from_json_payload,
     combine_prices_for_ranking,
     fetch_prices_via_ajax,
     fetch_authenticated_html,
@@ -220,7 +223,7 @@ def test_fetch_prices_via_ajax_extracts_prices_from_json_html_payload():
 
         def post(self, url, data=None, **kwargs):
             self.post_calls += 1
-            assert data["action"] == "getdriversandcars"
+            assert data["action"] in {"getdriversandcars", "driversandcars", "get_drivers_and_cars"}
             payload = {
                 "success": True,
                 "data": {
@@ -237,6 +240,90 @@ def test_fetch_prices_via_ajax_extracts_prices_from_json_html_payload():
 
     html = """
     <script id="alldriverscars-js-js-extra">var MyAjax = {"ajaxurl":"https://fantasygp.com/wp-admin/admin-ajax.php","security":"token123"};</script>
+    <script id="alldriverscars-js-js" src="https://fantasygp.com/wp-content/plugins/fantasy-gp/js/alldriverscars.js?ver=202602"></script>
+    """
+
+    driver_df, constructor_df = fetch_prices_via_ajax(
+        FakeSession(),
+        html,
+        "https://fantasygp.com/drivers-cars/",
+        {"User-Agent": "ua"},
+    )
+
+    assert set(driver_df["Name"]) == {"Verstappen", "Perez"}
+    assert list(constructor_df["Name"]) == ["Red Bull"]
+
+
+def test_discover_ajax_context_accepts_single_quotes_and_unquoted_keys():
+    html = """
+    <script>
+      const MyAjax = {ajaxurl:'https://fantasygp.com/wp-admin/admin-ajax.php',security:'token123'};
+    </script>
+    <script id="alldriverscars-js-js" src="/wp-content/plugins/fantasy-gp/js/alldriverscars.js"></script>
+    """
+
+    ajax_url, security, script_url = _discover_ajax_context(html, "https://fantasygp.com/drivers-cars/")
+
+    assert ajax_url == "https://fantasygp.com/wp-admin/admin-ajax.php"
+    assert security == "token123"
+    assert script_url == "https://fantasygp.com/wp-content/plugins/fantasy-gp/js/alldriverscars.js"
+
+
+def test_discover_ajax_actions_uses_regex_and_default_fallbacks():
+    js_text = """
+      $.post(MyAjax.ajaxurl,{action:'custom_action',security:MyAjax.security},function(){});
+      const url = '/wp-admin/admin-ajax.php?action=getdriversandcars';
+    """
+    actions = _discover_ajax_actions(js_text)
+
+    assert "custom_action" in actions
+    assert "getdriversandcars" in actions
+
+
+def test_extract_prices_from_json_payload_supports_data_wrapper_schema():
+    payload = {
+        "success": True,
+        "data": {
+            "drivers": [{"driver": "Verstappen", "price": "$30.5M"}],
+            "teams": [{"constructor": "Red Bull", "cost": "$32.0M"}],
+        },
+    }
+
+    driver_df, constructor_df = _extract_prices_from_json_payload(payload)
+
+    assert list(driver_df["Name"]) == ["Verstappen"]
+    assert list(constructor_df["Name"]) == ["Red Bull"]
+
+
+def test_fetch_prices_via_ajax_extracts_prices_from_structured_json_payload_without_html():
+    class FakeResponse:
+        def __init__(self, text):
+            self.text = text
+
+        def raise_for_status(self):
+            return None
+
+    class FakeSession:
+        def get(self, url, **kwargs):
+            return FakeResponse("$.post(MyAjax.ajaxurl,{action:'getdriversandcars',security:MyAjax.security},function(){});")
+
+        def post(self, url, data=None, **kwargs):
+            import json
+
+            payload = {
+                "success": True,
+                "data": {
+                    "drivers": [
+                        {"driver_name": "Verstappen", "price": "$30.5M"},
+                        {"driver_name": "Perez", "price": "$23.0M"},
+                    ],
+                    "constructors": [{"team": "Red Bull", "price": "$32.0M"}],
+                },
+            }
+            return FakeResponse(json.dumps(payload))
+
+    html = """
+    <script id="alldriverscars-js-js-extra">var MyAjax = {'ajaxurl':'https://fantasygp.com/wp-admin/admin-ajax.php','security':'token123'};</script>
     <script id="alldriverscars-js-js" src="https://fantasygp.com/wp-content/plugins/fantasy-gp/js/alldriverscars.js?ver=202602"></script>
     """
 
