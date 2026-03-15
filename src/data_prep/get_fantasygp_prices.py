@@ -5,6 +5,7 @@ from html.parser import HTMLParser
 
 import pandas as pd
 import requests
+from requests import exceptions as requests_exceptions
 
 TARGET_URL = os.environ.get("FANTASYGP_TARGET_URL", "https://fantasygp.com/drivers-cars/")
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "data")
@@ -68,13 +69,34 @@ def parse_price_value(value):
     if not text:
         return pd.NA
 
+    multiplier = 1.0
+    lowered = text.lower()
+    suffix_match = re.search(r"([kmb])\s*$", lowered)
+    if suffix_match:
+        suffix = suffix_match.group(1)
+        if suffix == "b":
+            multiplier = 1_000_000_000.0
+        elif suffix == "m":
+            multiplier = 1_000_000.0
+        elif suffix == "k":
+            multiplier = 1_000.0
+
     cleaned = re.sub(r"[^0-9.,-]", "", text)
     if not cleaned:
         return pd.NA
 
-    cleaned = cleaned.replace(",", "")
+    # Support common locale/currency formats like 30,5 (decimal comma) and
+    # 30,500,000 (thousands separators).
+    if "," in cleaned and "." not in cleaned:
+        if cleaned.count(",") == 1:
+            cleaned = cleaned.replace(",", ".")
+        else:
+            cleaned = cleaned.replace(",", "")
+    else:
+        cleaned = cleaned.replace(",", "")
+
     try:
-        return float(cleaned)
+        return float(cleaned) * multiplier
     except ValueError:
         return pd.NA
 
@@ -185,50 +207,68 @@ def _extract_attr(tag, attr_name):
 
 
 def _discover_login_form(html, base_url):
-    form_match = re.search(r"<form[^>]*>(.*?)</form>", html, flags=re.IGNORECASE | re.DOTALL)
-    if not form_match:
+    forms = list(re.finditer(r"<form[^>]*>(.*?)</form>", html, flags=re.IGNORECASE | re.DOTALL))
+    if not forms:
         return None
 
-    form_tag = form_match.group(0)
-    form_body = form_match.group(1)
+    for form_match in forms:
+        form_tag = form_match.group(0)
+        form_body = form_match.group(1)
 
-    action = _extract_attr(form_tag, "action") or base_url
-    action_url = requests.compat.urljoin(base_url, action)
+        action = _extract_attr(form_tag, "action") or base_url
+        action_url = requests.compat.urljoin(base_url, action)
 
-    payload = {}
-    username_key = None
-    password_key = None
+        payload = {}
+        username_key = None
+        password_key = None
 
-    for input_match in re.finditer(r"<input[^>]*>", form_body, flags=re.IGNORECASE):
-        input_tag = input_match.group(0)
-        field_name = _extract_attr(input_tag, "name")
-        if not field_name:
-            continue
+        for input_match in re.finditer(r"<input[^>]*>", form_body, flags=re.IGNORECASE):
+            input_tag = input_match.group(0)
+            field_name = _extract_attr(input_tag, "name")
+            if not field_name:
+                continue
 
-        field_type = (_extract_attr(input_tag, "type") or "text").lower()
-        field_val = _extract_attr(input_tag, "value") or ""
+            field_type = (_extract_attr(input_tag, "type") or "text").lower()
+            field_val = _extract_attr(input_tag, "value") or ""
 
-        if field_type == "password":
-            password_key = field_name
-            continue
+            if field_type == "password":
+                password_key = field_name
+                continue
 
-        lowered = field_name.lower()
-        if any(token in lowered for token in ["user", "email", "log", "login"]):
-            username_key = field_name
-            continue
+            lowered = field_name.lower()
+            if any(token in lowered for token in ["user", "email", "log", "login"]):
+                username_key = field_name
+                continue
 
-        if field_type in ["hidden", "submit"]:
-            payload[field_name] = field_val
+            if field_type in ["hidden", "submit"]:
+                payload[field_name] = field_val
 
-    return action_url, payload, username_key, password_key
+        if password_key:
+            return action_url, payload, username_key, password_key
+
+    return None
 
 
 def fetch_authenticated_html(url, username, password):
-    session = requests.Session()
     headers = {"User-Agent": "Mozilla/5.0 (compatible; f1-points-bot/1.0)"}
 
-    first_response = session.get(url, headers=headers, timeout=30)
-    first_response.raise_for_status()
+    session = requests.Session()
+    try:
+        first_response = session.get(url, headers=headers, timeout=30)
+        first_response.raise_for_status()
+    except requests_exceptions.ProxyError:
+        # Some environments inject an HTTPS proxy that blocks fantasygp.com.
+        # Retry once without proxy env vars.
+        session = requests.Session()
+        session.trust_env = False
+        try:
+            first_response = session.get(url, headers=headers, timeout=30)
+            first_response.raise_for_status()
+        except requests_exceptions.RequestException as exc:
+            raise RuntimeError(
+                "Unable to reach FantasyGP. Proxy tunnel was rejected and direct connection also failed. "
+                "Check network egress/proxy allowlist for fantasygp.com."
+            ) from exc
 
     login_info = _discover_login_form(first_response.text, first_response.url)
     if login_info is None:
