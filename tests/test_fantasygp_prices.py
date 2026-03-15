@@ -242,6 +242,42 @@ def test_fetch_authenticated_html_attempts_wordpress_login_when_password_field_p
     assert payload["pwd"] == "pass"
 
 
+def test_fetch_authenticated_html_handles_password_only_form(monkeypatch):
+    class PasswordOnlyFormSession:
+        def __init__(self):
+            self.trust_env = True
+            self.login_posts = []
+
+        def get(self, url, **kwargs):
+            if self.login_posts:
+                return _FakeResponse("<html><body>drivers prices content</body></html>", url)
+            return _FakeResponse(
+                """
+                <html><body>
+                  <form action=\"/password-protected\">
+                    <input type=\"hidden\" name=\"token\" value=\"abc\" />
+                    <input type=\"password\" name=\"post_password\" />
+                  </form>
+                </body></html>
+                """,
+                url,
+            )
+
+        def post(self, url, data=None, **kwargs):
+            self.login_posts.append((url, data))
+            return _FakeResponse("<html><body>ok</body></html>", url)
+
+    session = PasswordOnlyFormSession()
+    monkeypatch.setattr("src.data_prep.get_fantasygp_prices.requests.Session", lambda: session)
+
+    html = fetch_authenticated_html("https://fantasygp.com/drivers-cars/", "ignored", "secret")
+
+    assert "drivers prices content" in html
+    _, payload = session.login_posts[0]
+    assert payload["post_password"] == "secret"
+    assert payload["token"] == "abc"
+
+
 def test_fetch_prices_via_ajax_extracts_prices_from_json_html_payload():
     class FakeResponse:
         def __init__(self, text):

@@ -651,6 +651,30 @@ def _attempt_wordpress_login(session, page_url, target_url, username, password, 
     return final_response.text
 
 
+def _submit_discovered_login_form(
+    session,
+    action_url,
+    payload,
+    username_key,
+    password_key,
+    username,
+    password,
+    headers,
+    target_url,
+):
+    form_payload = payload.copy()
+    if username_key:
+        form_payload[username_key] = username
+    form_payload[password_key] = password
+
+    login_response = session.post(action_url, data=form_payload, headers=headers, timeout=30)
+    login_response.raise_for_status()
+
+    final_response = session.get(target_url, headers=headers, timeout=30)
+    final_response.raise_for_status()
+    return final_response.text
+
+
 def fetch_authenticated_html(url, username, password):
     html, _, _ = fetch_authenticated_page(url, username, password)
     return html
@@ -658,6 +682,7 @@ def fetch_authenticated_html(url, username, password):
 
 def fetch_authenticated_page(url, username, password):
     headers = {"User-Agent": "Mozilla/5.0 (compatible; f1-points-bot/1.0)"}
+    page_password = os.environ.get("FANTASYGP_PAGE_PASSWORD", password)
 
     session = requests.Session()
     try:
@@ -685,7 +710,7 @@ def fetch_authenticated_page(url, username, password):
                 first_response.url,
                 url,
                 username,
-                password,
+                page_password,
                 headers,
             )
             if wordpress_result:
@@ -694,18 +719,21 @@ def fetch_authenticated_page(url, username, password):
 
     action_url, payload, username_key, password_key = login_info
 
-    if username_key is None or password_key is None:
-        raise ValueError("Could not determine login form field names for username/password.")
+    if password_key is None:
+        raise ValueError("Could not determine a password field on the detected login form.")
 
-    payload[username_key] = username
-    payload[password_key] = password
-
-    login_response = session.post(action_url, data=payload, headers=headers, timeout=30)
-    login_response.raise_for_status()
-
-    final_response = session.get(url, headers=headers, timeout=30)
-    final_response.raise_for_status()
-    return final_response.text, session, headers
+    final_html = _submit_discovered_login_form(
+        session,
+        action_url,
+        payload,
+        username_key,
+        password_key,
+        username,
+        page_password,
+        headers,
+        url,
+    )
+    return final_html, session, headers
 
 
 def save_prices(driver_prices, constructor_prices):
