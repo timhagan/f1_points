@@ -29,12 +29,52 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Validate FantasyGP secrets
+        env:
+          FANTASYGP_USERNAME: ${{ secrets.FANTASYGP_USERNAME }}
+          FANTASYGP_PASSWORD: ${{ secrets.FANTASYGP_PASSWORD }}
+        run: |
+          if [ -z "$FANTASYGP_USERNAME" ] || [ -z "$FANTASYGP_PASSWORD" ]; then
+            echo "Missing required secrets: FANTASYGP_USERNAME and/or FANTASYGP_PASSWORD"
+            exit 1
+          fi
+
+      - name: Create debug directory
+        run: mkdir -p .artifacts
+
       - name: Scrape FantasyGP prices
         env:
           FANTASYGP_USERNAME: ${{ secrets.FANTASYGP_USERNAME }}
           FANTASYGP_PASSWORD: ${{ secrets.FANTASYGP_PASSWORD }}
+          FANTASYGP_PAGE_PASSWORD: ${{ secrets.FANTASYGP_PAGE_PASSWORD }}
           FANTASYGP_TARGET_URL: https://fantasygp.com/drivers-cars/
-        run: python -m src.data_prep.get_fantasygp_prices
+          FANTASYGP_AJAX_ACTIONS: getdriversandcars,allDriversAndCars,driversandcars
+          FANTASYGP_DEBUG_HTML_PATH: .artifacts/fantasygp_last_failed_page.html
+          FANTASYGP_READY_CHECK_ATTEMPTS: "8"
+          FANTASYGP_READY_CHECK_DELAY_SECONDS: "5"
+        run: |
+          set -e
+          for attempt in 1 2 3; do
+            echo "FantasyGP scrape attempt ${attempt}/3"
+            if python -m src.data_prep.get_fantasygp_prices; then
+              exit 0
+            fi
+
+            if [ "$attempt" -lt 3 ]; then
+              sleep 20
+            fi
+          done
+          echo "FantasyGP price scrape failed after 3 attempts"
+          exit 1
+
+      - name: Upload scrape debug artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fantasygp-scrape-debug
+          path: .artifacts/
+          include-hidden-files: true
+          if-no-files-found: ignore
 
       - name: Commit and push changes
         run: |
