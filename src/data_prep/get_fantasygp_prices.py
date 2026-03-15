@@ -15,6 +15,7 @@ from requests import exceptions as requests_exceptions
 TARGET_URL = os.environ.get("FANTASYGP_TARGET_URL", "https://fantasygp.com/drivers-cars/")
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "data")
 DEFAULT_AJAX_ACTIONS = ["getdriversandcars", "allDriversAndCars", "driversandcars"]
+DEFAULT_AJAX_NONCE_KEYS = ["security", "nonce", "_ajax_nonce"]
 
 logger = logging.getLogger(__name__)
 
@@ -557,6 +558,232 @@ def _extract_prices_from_json_payload(payload):
     )
 
 
+def _infer_entity_type_from_tokens(tokens):
+    lowered = [token.lower() for token in tokens if token]
+    if any("driver" in token for token in lowered):
+        return "driver"
+    if any(any(marker in token for marker in ["constructor", "team", "car"]) for token in lowered):
+        return "constructor"
+    return None
+
+
+def _walk_json_nodes(value, path=()):
+    if isinstance(value, dict):
+        yield value, path
+        for key, item in value.items():
+            yield from _walk_json_nodes(item, path + (str(key),))
+    elif isinstance(value, list):
+        for idx, item in enumerate(value):
+            yield from _walk_json_nodes(item, path + (str(idx),))
+
+
+def normalize_json_price_payload(payload):
+    name_keys = ["name", "title", "driver", "driver_name", "constructor", "team", "car"]
+    price_keys = ["price", "cost", "value", "salary"]
+    type_keys = ["entitytype", "entity_type", "type", "kind"]
+
+    rows = []
+    for node, path in _walk_json_nodes(payload):
+        normalized = {_normalize_name_key(k): v for k, v in node.items()}
+
+        name = None
+        for key in name_keys:
+            candidate = normalized.get(_normalize_name_key(key))
+            if candidate is not None and str(candidate).strip():
+                name = str(candidate).strip()
+                break
+
+        raw_price = None
+        for key in price_keys:
+            normalized_key = _normalize_name_key(key)
+            if normalized_key in normalized:
+                raw_price = normalized[normalized_key]
+                break
+
+        if not name or raw_price is None:
+            continue
+
+        parsed_price = parse_price_value(raw_price)
+        if pd.isna(parsed_price):
+            continue
+
+        entity_type = None
+        for key in type_keys:
+            type_val = normalized.get(_normalize_name_key(key))
+            if type_val is None:
+                continue
+            type_guess = _infer_entity_type_from_tokens([str(type_val)])
+            if type_guess:
+                entity_type = type_guess
+                break
+
+        if entity_type is None:
+            entity_type = _infer_entity_type_from_tokens(path)
+
+        if entity_type is None:
+            entity_type = _infer_entity_type_from_tokens(node.keys())
+
+        if entity_type is None:
+            continue
+
+        rows.append({"EntityType": entity_type, "Name": name, "Price": parsed_price})
+
+    if not rows:
+        return None, None
+
+    normalized_df = pd.DataFrame(rows).drop_duplicates(subset=["EntityType", "Name"])
+    driver_rows = normalized_df[normalized_df["EntityType"] == "driver"][ ["Name", "Price"] ]
+    constructor_rows = normalized_df[normalized_df["EntityType"] == "constructor"][ ["Name", "Price"] ]
+
+    if driver_rows.empty or constructor_rows.empty:
+        return None, None
+
+    return (
+        _prepare_price_dataframe(driver_rows.reset_index(drop=True), "driver"),
+        _prepare_price_dataframe(constructor_rows.reset_index(drop=True), "constructor"),
+    )
+
+
+def _validate_prices(driver_prices, constructor_prices, context):
+    min_drivers = int(os.environ.get("FANTASYGP_MIN_DRIVERS", "20"))
+    min_constructors = int(os.environ.get("FANTASYGP_MIN_CONSTRUCTORS", "10"))
+
+    checks = [
+        ("driver", driver_prices, min_drivers),
+        ("constructor", constructor_prices, min_constructors),
+    ]
+    for entity_type, frame, min_count in checks:
+        if frame is None or frame.empty:
+            raise ValueError(f"{context}: missing {entity_type} prices")
+        if len(frame) < min_count:
+            raise ValueError(
+                f"{context}: expected at least {min_count} {entity_type} rows, got {len(frame)}"
+            )
+        if frame["Price"].isna().any():
+            raise ValueError(f"{context}: found null parsed prices in {entity_type} rows")
+
+        normalized_names = frame["Name"].astype(str).str.strip()
+        if (normalized_names == "").any():
+            raise ValueError(f"{context}: found blank names in {entity_type} rows")
+        if normalized_names.duplicated().any():
+            dupes = sorted(normalized_names[normalized_names.duplicated()].unique())
+            raise ValueError(f"{context}: duplicate {entity_type} names: {', '.join(dupes[:5])}")
+
+
+def _discover_endpoint_requests(session, html, page_url, headers):
+    discovered = []
+
+    captured_request = os.environ.get("FANTASYGP_CAPTURED_REQUEST_JSON")
+    if captured_request:
+        try:
+            parsed_capture = json.loads(captured_request)
+            capture_items = parsed_capture if isinstance(parsed_capture, list) else [parsed_capture]
+            for item in capture_items:
+                if not isinstance(item, dict) or not item.get("url"):
+                    continue
+                discovered.append(
+                    {
+                        "source": "playwright_capture",
+                        "url": item["url"],
+                        "method": str(item.get("method", "POST")).upper(),
+                        "params": item.get("params") or item.get("data") or item.get("body") or {},
+                    }
+                )
+        except ValueError:
+            logger.warning("Ignoring invalid FANTASYGP_CAPTURED_REQUEST_JSON; expected valid JSON.")
+
+    ajax_url, security, script_url = _discover_ajax_context(html, page_url)
+    known_ajax_url = requests.compat.urljoin(page_url, "/wp-admin/admin-ajax.php")
+    ajax_url = ajax_url or known_ajax_url
+    actions = _load_default_ajax_actions()
+
+    if script_url:
+        try:
+            js_response = session.get(script_url, headers=headers, timeout=30)
+            js_response.raise_for_status()
+            actions = _candidate_ajax_actions(js_response.text)
+        except requests_exceptions.RequestException:
+            _debug_log(f"Unable to fetch AJAX script for endpoint discovery: {script_url}")
+
+    if ajax_url:
+        for action in actions:
+            if security:
+                for nonce_key in DEFAULT_AJAX_NONCE_KEYS:
+                    discovered.append(
+                        {
+                            "source": "wordpress_ajax",
+                            "url": ajax_url,
+                            "method": "POST",
+                            "params": {"action": action, nonce_key: security},
+                        }
+                    )
+            else:
+                discovered.append(
+                    {
+                        "source": "wordpress_ajax",
+                        "url": ajax_url,
+                        "method": "POST",
+                        "params": {"action": action},
+                    }
+                )
+
+    unique_requests = []
+    seen_keys = set()
+    for request_meta in discovered:
+        request_key = (
+            request_meta["method"],
+            request_meta["url"],
+            json.dumps(request_meta.get("params", {}), sort_keys=True),
+        )
+        if request_key in seen_keys:
+            continue
+        seen_keys.add(request_key)
+        unique_requests.append(request_meta)
+
+    return unique_requests
+
+
+def fetch_prices_from_endpoint(session, html, page_url, headers):
+    requests_to_try = _discover_endpoint_requests(session, html, page_url, headers)
+    if not requests_to_try:
+        return None, None
+
+    _debug_log(f"Discovered {len(requests_to_try)} endpoint request candidates.")
+    for request_meta in requests_to_try:
+        method = request_meta["method"]
+        url = request_meta["url"]
+        params = request_meta.get("params", {})
+        _debug_log(
+            f"Endpoint candidate source={request_meta['source']} method={method} url={url} "
+            f"params={sorted(params.keys())}"
+        )
+
+        try:
+            if method == "GET":
+                response = session.get(url, params=params, headers=headers, timeout=30)
+            else:
+                response = session.post(url, data=params, headers=headers, timeout=30)
+            response.raise_for_status()
+        except requests_exceptions.RequestException:
+            continue
+
+        try:
+            payload = response.json()
+        except ValueError:
+            payload = None
+
+        if payload is not None:
+            driver_prices, constructor_prices = normalize_json_price_payload(payload)
+            if driver_prices is not None and constructor_prices is not None:
+                return driver_prices, constructor_prices
+
+        driver_prices, constructor_prices = _extract_prices_from_ajax_payload(response.text)
+        if driver_prices is not None and constructor_prices is not None:
+            return driver_prices, constructor_prices
+
+    return None, None
+
+
 def _summarize_payload_text(payload_text, max_len=240):
     condensed = re.sub(r"\s+", " ", payload_text).strip()
     if len(condensed) <= max_len:
@@ -568,6 +795,9 @@ def _extract_prices_from_ajax_payload(payload_text):
     html_candidates = [payload_text]
     try:
         json_payload = json.loads(payload_text)
+        driver_prices, constructor_prices = normalize_json_price_payload(json_payload)
+        if driver_prices is not None and constructor_prices is not None:
+            return driver_prices, constructor_prices
         driver_prices, constructor_prices = _extract_prices_from_json_payload(json_payload)
         if driver_prices is not None and constructor_prices is not None:
             return driver_prices, constructor_prices
@@ -587,51 +817,8 @@ def _extract_prices_from_ajax_payload(payload_text):
 
 
 def fetch_prices_via_ajax(session, html, page_url, headers):
-    ajax_url, security, script_url = _discover_ajax_context(html, page_url)
-    if not ajax_url or not script_url or not security:
-        _debug_log("Missing AJAX context (ajax_url, security token, or script_url).")
-        return None, None
-
-    try:
-        js_response = session.get(script_url, headers=headers, timeout=30)
-        js_response.raise_for_status()
-    except requests_exceptions.RequestException:
-        _debug_log(f"Unable to fetch AJAX script: {script_url}")
-        return None, None
-
-    actions = _candidate_ajax_actions(js_response.text)
-    if not actions:
-        logger.warning("Could not discover ajax actions from script: %s", script_url)
-        return None, None
-
-    nonce_keys = ["security", "nonce", "_ajax_nonce"]
-    attempts = []
-    last_response_text = None
-    for action in actions:
-        for nonce_key in nonce_keys:
-            attempts.append((action, nonce_key))
-            payload = {"action": action, nonce_key: security}
-            try:
-                response = session.post(ajax_url, data=payload, headers=headers, timeout=30)
-                response.raise_for_status()
-                last_response_text = response.text
-            except requests_exceptions.RequestException:
-                _debug_log(f"AJAX request failed for action={action}, nonce_key={nonce_key}")
-                continue
-
-            driver_prices, constructor_prices = _extract_prices_from_ajax_payload(response.text)
-            if driver_prices is not None and constructor_prices is not None:
-                _debug_log(f"AJAX extraction succeeded for action={action}, nonce_key={nonce_key}")
-                return driver_prices, constructor_prices
-
-    logger.warning(
-        "FantasyGP AJAX extraction failed after %d attempts to %s. Last payload snippet: %s",
-        len(attempts),
-        ajax_url,
-        _summarize_payload_text(last_response_text) if last_response_text else "<no successful responses>",
-    )
-
-    return None, None
+    """Backward-compatible wrapper around endpoint extraction."""
+    return fetch_prices_from_endpoint(session, html, page_url, headers)
 
 
 def extract_driver_constructor_prices(html):
@@ -984,20 +1171,25 @@ def main():
 
     html, session, headers = fetch_authenticated_page(TARGET_URL, username, password)
 
-    try:
-        driver_prices, constructor_prices = extract_driver_constructor_prices(html)
-    except ValueError as extract_error:
-        logger.warning("Primary FantasyGP extraction failed: %s", extract_error)
-        driver_prices, constructor_prices = fetch_prices_via_ajax(session, html, TARGET_URL, headers)
-        if driver_prices is None or constructor_prices is None:
+    endpoint_error = None
+    driver_prices, constructor_prices = fetch_prices_from_endpoint(session, html, TARGET_URL, headers)
+    if driver_prices is None or constructor_prices is None:
+        endpoint_error = ValueError("Endpoint extraction did not return both driver and constructor prices.")
+        logger.warning("Primary FantasyGP endpoint extraction failed; falling back to HTML parsing.")
+        try:
+            driver_prices, constructor_prices = extract_driver_constructor_prices(html)
+        except ValueError as extract_error:
             _write_debug_html_snapshot(html, str(extract_error))
             if _looks_like_login_page(html):
                 raise RuntimeError(
                     "FantasyGP page still appears to require login after authentication. "
                     "Verify credentials and inspect debug HTML artifact."
                 ) from extract_error
+            if endpoint_error:
+                logger.warning("Endpoint extraction error: %s", endpoint_error)
             raise
 
+    _validate_prices(driver_prices, constructor_prices, "FantasyGP extraction")
     save_prices(driver_prices, constructor_prices)
 
 
