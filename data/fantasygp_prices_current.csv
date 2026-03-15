@@ -1,0 +1,34 @@
+EntityType,Name,NameKey,Price,ScrapedAtUtc
+constructor,Alpine,alpine,4.5,2026-03-15T22:44:30.517302+00:00
+constructor,Aston Martin,aston_martin,8.5,2026-03-15T22:44:30.517302+00:00
+constructor,Audi,audi,5.5,2026-03-15T22:44:30.517302+00:00
+constructor,Cadillac,cadillac,4.0,2026-03-15T22:44:30.517302+00:00
+constructor,Ferrari,ferrari,16.5,2026-03-15T22:44:30.517302+00:00
+constructor,Haas,haas,7.0,2026-03-15T22:44:30.517302+00:00
+constructor,McLaren,mclaren,22.0,2026-03-15T22:44:30.517302+00:00
+constructor,Mercedes,mercedes,20.5,2026-03-15T22:44:30.517302+00:00
+constructor,Racing Bulls,racing_bulls,7.5,2026-03-15T22:44:30.517302+00:00
+constructor,Red Bull,red_bull,19.0,2026-03-15T22:44:30.517302+00:00
+constructor,Williams,williams,9.5,2026-03-15T22:44:30.517302+00:00
+driver,Albon,albon,9.0,2026-03-15T22:44:30.515441+00:00
+driver,Alonso,alonso,9.0,2026-03-15T22:44:30.515441+00:00
+driver,Antonelli,antonelli,14.0,2026-03-15T22:44:30.515441+00:00
+driver,Bearman,bearman,9.0,2026-03-15T22:44:30.515441+00:00
+driver,Bortoleto,bortoleto,5.0,2026-03-15T22:44:30.515441+00:00
+driver,Bottas,bottas,8.0,2026-03-15T22:44:30.515441+00:00
+driver,Colapinto,colapinto,4.0,2026-03-15T22:44:30.515441+00:00
+driver,Gasly,gasly,6.0,2026-03-15T22:44:30.515441+00:00
+driver,Hadjar,hadjar,14.0,2026-03-15T22:44:30.515441+00:00
+driver,Hamilton,hamilton,15.5,2026-03-15T22:44:30.515441+00:00
+driver,Hulkenberg,hulkenberg,8.0,2026-03-15T22:44:30.515441+00:00
+driver,Lawson,lawson,6.0,2026-03-15T22:44:30.515441+00:00
+driver,Leclerc,leclerc,18.0,2026-03-15T22:44:30.515441+00:00
+driver,Lindblad,lindblad,3.5,2026-03-15T22:44:30.515441+00:00
+driver,Norris,norris,23.0,2026-03-15T22:44:30.515441+00:00
+driver,Ocon,ocon,7.5,2026-03-15T22:44:30.515441+00:00
+driver,Perez,perez,8.0,2026-03-15T22:44:30.515441+00:00
+driver,Piastri,piastri,22.0,2026-03-15T22:44:30.515441+00:00
+driver,Russell,russell,19.0,2026-03-15T22:44:30.515441+00:00
+driver,Sainz,sainz,9.0,2026-03-15T22:44:30.515441+00:00
+driver,Stroll,stroll,6.0,2026-03-15T22:44:30.515441+00:00
+driver,Verstappen,verstappen,22.0,2026-03-15T22:44:30.515441+00:00
