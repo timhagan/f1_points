@@ -1,4 +1,5 @@
 import datetime
+import json
 import os
 import re
 from html.parser import HTMLParser
@@ -50,6 +51,83 @@ class _SimpleTableParser(HTMLParser):
             if self._current_table:
                 self.tables.append(self._current_table)
             self._in_table = False
+
+
+class _DriversCarsParser(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.cards = []
+        self._depth = 0
+        self._current_card = None
+        self._card_depth = None
+        self._current_driver = None
+        self._driver_depth = None
+        self._collect_team = False
+        self._collect_car_price = False
+        self._collect_driver_name = False
+
+    def handle_starttag(self, tag, attrs):
+        self._depth += 1
+        attrs_dict = {k.lower(): v for k, v in attrs}
+        class_list = (attrs_dict.get("class") or "").split()
+        element_id = (attrs_dict.get("id") or "").strip()
+
+        if tag == "div" and re.fullmatch(r"car\d+", element_id):
+            self._current_card = {"team": [], "car_price": [], "drivers": []}
+            self._card_depth = self._depth
+            return
+
+        if self._current_card is None:
+            return
+
+        if tag == "div" and "driverlist" in class_list:
+            self._current_driver = {"name_parts": [], "text_parts": []}
+            self._driver_depth = self._depth
+            return
+
+        if tag == "h3" and self._current_driver is None:
+            self._collect_team = True
+        elif tag == "h6" and "carprice" in class_list and self._current_driver is None:
+            self._collect_car_price = True
+        elif tag in {"h6", "h5"} and self._current_driver is not None:
+            self._collect_driver_name = True
+
+    def handle_data(self, data):
+        text = data.strip()
+        if not text:
+            return
+
+        if self._current_card is not None and self._collect_team:
+            self._current_card["team"].append(text)
+
+        if self._current_card is not None and self._collect_car_price:
+            self._current_card["car_price"].append(text)
+
+        if self._current_driver is not None:
+            self._current_driver["text_parts"].append(text)
+            if self._collect_driver_name:
+                self._current_driver["name_parts"].append(text)
+
+    def handle_endtag(self, tag):
+        if tag == "h3":
+            self._collect_team = False
+        elif tag == "h6":
+            self._collect_car_price = False
+            self._collect_driver_name = False
+        elif tag == "h5":
+            self._collect_driver_name = False
+
+        if tag == "div" and self._current_driver is not None and self._driver_depth == self._depth:
+            self._current_card["drivers"].append(self._current_driver)
+            self._current_driver = None
+            self._driver_depth = None
+
+        if tag == "div" and self._current_card is not None and self._card_depth == self._depth:
+            self.cards.append(self._current_card)
+            self._current_card = None
+            self._card_depth = None
+
+        self._depth -= 1
 
 
 def _normalize_column_name(name):
@@ -170,12 +248,154 @@ def _prepare_price_dataframe(df, entity_type):
     return prepared[["EntityType", "Name", "NameKey", "Price", "ScrapedAtUtc"]]
 
 
+def _extract_price_from_text(text):
+    for token in re.findall(r"(?:[$€£]\s*)?\d[\d.,]*(?:\s*[kKmMbB])?", text):
+        value = parse_price_value(token)
+        if pd.notna(value):
+            return value
+    return pd.NA
+
+
+def _extract_prices_from_cards(html):
+    parser = _DriversCarsParser()
+    parser.feed(html)
+
+    driver_rows = []
+    constructor_rows = []
+
+    for card in parser.cards:
+        team_name = " ".join(card["team"]).strip()
+        car_price = _extract_price_from_text(" ".join(card["car_price"]))
+        if team_name and pd.notna(car_price):
+            constructor_rows.append({"Name": team_name, "Price": car_price})
+
+        for driver in card["drivers"]:
+            name_candidates = [part.strip() for part in driver["name_parts"] if part.strip()]
+            if not name_candidates:
+                continue
+            driver_name = max(name_candidates, key=len)
+            price = _extract_price_from_text(" ".join(driver["text_parts"]))
+            if pd.notna(price):
+                driver_rows.append({"Name": driver_name, "Price": price})
+
+    if not driver_rows or not constructor_rows:
+        return None, None
+
+    return (
+        _prepare_price_dataframe(pd.DataFrame(driver_rows), "driver"),
+        _prepare_price_dataframe(pd.DataFrame(constructor_rows), "constructor"),
+    )
+
+
+def _extract_js_object_value(html, object_name, key):
+    pattern = rf"var\s+{re.escape(object_name)}\s*=\s*\{{.*?\"{re.escape(key)}\"\s*:\s*\"([^\"]+)\""
+    match = re.search(pattern, html, flags=re.IGNORECASE | re.DOTALL)
+    return match.group(1) if match else None
+
+
+def _discover_ajax_context(html, base_url):
+    ajax_url = _extract_js_object_value(html, "MyAjax", "ajaxurl")
+    security = _extract_js_object_value(html, "MyAjax", "security")
+
+    script_match = re.search(
+        r"<script[^>]+id=[\"']alldriverscars-js-js[\"'][^>]+src=[\"']([^\"']+)[\"']",
+        html,
+        flags=re.IGNORECASE,
+    )
+    script_url = script_match.group(1) if script_match else None
+
+    if ajax_url:
+        ajax_url = requests.compat.urljoin(base_url, ajax_url)
+    if script_url:
+        script_url = requests.compat.urljoin(base_url, script_url)
+
+    return ajax_url, security, script_url
+
+
+def _discover_ajax_actions(js_text):
+    actions = []
+    for action in re.findall(r"action\s*:\s*['\"]([a-zA-Z0-9_-]+)['\"]", js_text):
+        if action not in actions:
+            actions.append(action)
+
+    # Prioritize likely matches for this page.
+    actions.sort(key=lambda x: ("driver" not in x.lower() and "car" not in x.lower(), x))
+    return actions
+
+
+def _extract_html_like_chunks(value):
+    chunks = []
+    if isinstance(value, str):
+        if "<" in value and ">" in value:
+            chunks.append(value)
+    elif isinstance(value, dict):
+        for v in value.values():
+            chunks.extend(_extract_html_like_chunks(v))
+    elif isinstance(value, list):
+        for item in value:
+            chunks.extend(_extract_html_like_chunks(item))
+    return chunks
+
+
+def _extract_prices_from_ajax_payload(payload_text):
+    html_candidates = [payload_text]
+    try:
+        json_payload = json.loads(payload_text)
+        html_candidates.extend(_extract_html_like_chunks(json_payload))
+    except ValueError:
+        pass
+
+    for chunk in html_candidates:
+        try:
+            driver_prices, constructor_prices = extract_driver_constructor_prices(chunk)
+            return driver_prices, constructor_prices
+        except ValueError:
+            continue
+
+    return None, None
+
+
+def fetch_prices_via_ajax(session, html, page_url, headers):
+    ajax_url, security, script_url = _discover_ajax_context(html, page_url)
+    if not ajax_url or not script_url or not security:
+        return None, None
+
+    try:
+        js_response = session.get(script_url, headers=headers, timeout=30)
+        js_response.raise_for_status()
+    except requests_exceptions.RequestException:
+        return None, None
+
+    actions = _discover_ajax_actions(js_response.text)
+    if not actions:
+        return None, None
+
+    nonce_keys = ["security", "nonce", "_ajax_nonce"]
+    for action in actions:
+        for nonce_key in nonce_keys:
+            payload = {"action": action, nonce_key: security}
+            try:
+                response = session.post(ajax_url, data=payload, headers=headers, timeout=30)
+                response.raise_for_status()
+            except requests_exceptions.RequestException:
+                continue
+
+            driver_prices, constructor_prices = _extract_prices_from_ajax_payload(response.text)
+            if driver_prices is not None and constructor_prices is not None:
+                return driver_prices, constructor_prices
+
+    return None, None
+
+
 def extract_driver_constructor_prices(html):
     tables = _html_to_tables(html)
     price_tables = _pick_price_tables(tables)
 
     if not price_tables:
-        raise ValueError("Could not identify any price tables in the page HTML.")
+        driver_prices, constructor_prices = _extract_prices_from_cards(html)
+        if driver_prices is not None and constructor_prices is not None:
+            return driver_prices, constructor_prices
+        raise ValueError("Could not identify price data in the page HTML.")
 
     by_type = {table_type: table for table_type, table in price_tables if table_type in {"driver", "constructor"}}
 
@@ -250,6 +470,11 @@ def _discover_login_form(html, base_url):
 
 
 def fetch_authenticated_html(url, username, password):
+    html, _, _ = fetch_authenticated_page(url, username, password)
+    return html
+
+
+def fetch_authenticated_page(url, username, password):
     headers = {"User-Agent": "Mozilla/5.0 (compatible; f1-points-bot/1.0)"}
 
     session = requests.Session()
@@ -272,7 +497,7 @@ def fetch_authenticated_html(url, username, password):
 
     login_info = _discover_login_form(first_response.text, first_response.url)
     if login_info is None:
-        return first_response.text
+        return first_response.text, session, headers
 
     action_url, payload, username_key, password_key = login_info
 
@@ -287,7 +512,7 @@ def fetch_authenticated_html(url, username, password):
 
     final_response = session.get(url, headers=headers, timeout=30)
     final_response.raise_for_status()
-    return final_response.text
+    return final_response.text, session, headers
 
 
 def save_prices(driver_prices, constructor_prices):
@@ -326,8 +551,15 @@ def main():
             "Missing FantasyGP credentials. Set FANTASYGP_USERNAME and FANTASYGP_PASSWORD environment variables."
         )
 
-    html = fetch_authenticated_html(TARGET_URL, username, password)
-    driver_prices, constructor_prices = extract_driver_constructor_prices(html)
+    html, session, headers = fetch_authenticated_page(TARGET_URL, username, password)
+
+    try:
+        driver_prices, constructor_prices = extract_driver_constructor_prices(html)
+    except ValueError:
+        driver_prices, constructor_prices = fetch_prices_via_ajax(session, html, TARGET_URL, headers)
+        if driver_prices is None or constructor_prices is None:
+            raise
+
     save_prices(driver_prices, constructor_prices)
 
 
