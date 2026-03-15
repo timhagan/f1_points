@@ -89,6 +89,7 @@ python src/data_prep/combine_event_points.py
 To enable the authenticated weekly FantasyGP scrape workflow, add these repository secrets:
 - `FANTASYGP_USERNAME`
 - `FANTASYGP_PASSWORD`
+- `FANTASYGP_PAGE_PASSWORD` (optional; use if the drivers/cars page is protected by a separate page password)
 
 The workflow runs every Monday and can also be triggered manually from GitHub Actions. It writes the latest files to:
 - `data/fantasygp_driver_prices_current.csv`

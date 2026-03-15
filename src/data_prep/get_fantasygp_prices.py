@@ -1,5 +1,7 @@
 import datetime
+import html
 import json
+import logging
 import os
 import re
 from html.parser import HTMLParser
@@ -10,6 +12,31 @@ from requests import exceptions as requests_exceptions
 
 TARGET_URL = os.environ.get("FANTASYGP_TARGET_URL", "https://fantasygp.com/drivers-cars/")
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "data")
+DEFAULT_AJAX_ACTIONS = ["getdriversandcars", "allDriversAndCars", "driversandcars"]
+
+logger = logging.getLogger(__name__)
+
+
+def _debug_log(message):
+    if os.environ.get("FANTASYGP_DEBUG", "").lower() in {"1", "true", "yes", "on"}:
+        logger.warning("[FantasyGP debug] %s", message)
+
+
+def _write_debug_html_snapshot(html_text, error_message):
+    debug_path = os.environ.get("FANTASYGP_DEBUG_HTML_PATH")
+    if not debug_path:
+        return
+
+    try:
+        parent_dir = os.path.dirname(debug_path)
+        if parent_dir:
+            os.makedirs(parent_dir, exist_ok=True)
+        with open(debug_path, "w", encoding="utf-8") as file:
+            file.write(f"<!-- extraction_error: {error_message} -->\n")
+            file.write(html_text)
+        logger.warning("Saved FantasyGP debug HTML snapshot to %s", debug_path)
+    except OSError as exc:
+        logger.warning("Failed to write FantasyGP debug HTML snapshot: %s", exc)
 
 
 class _SimpleTableParser(HTMLParser):
@@ -288,9 +315,15 @@ def _extract_prices_from_cards(html):
 
 
 def _extract_js_object_value(html, object_name, key):
-    pattern = rf"var\s+{re.escape(object_name)}\s*=\s*\{{.*?\"{re.escape(key)}\"\s*:\s*\"([^\"]+)\""
-    match = re.search(pattern, html, flags=re.IGNORECASE | re.DOTALL)
-    return match.group(1) if match else None
+    object_pattern = rf"(?:var|let|const)\s+{re.escape(object_name)}\s*=\s*\{{(.*?)\}}"
+    object_match = re.search(object_pattern, html, flags=re.IGNORECASE | re.DOTALL)
+    if not object_match:
+        return None
+
+    object_body = object_match.group(1)
+    value_pattern = rf"(?:['\"]?{re.escape(key)}['\"]?)\s*:\s*['\"]([^'\"]+)['\"]"
+    value_match = re.search(value_pattern, object_body, flags=re.IGNORECASE | re.DOTALL)
+    return value_match.group(1) if value_match else None
 
 
 def _discover_ajax_context(html, base_url):
@@ -323,11 +356,30 @@ def _discover_ajax_actions(js_text):
     return actions
 
 
+def _load_default_ajax_actions():
+    configured = os.environ.get("FANTASYGP_AJAX_ACTIONS")
+    if not configured:
+        return DEFAULT_AJAX_ACTIONS.copy()
+
+    actions = [token.strip() for token in configured.split(",") if token.strip()]
+    return actions if actions else DEFAULT_AJAX_ACTIONS.copy()
+
+
+def _candidate_ajax_actions(js_text):
+    discovered = _discover_ajax_actions(js_text)
+    combined = []
+    for action in discovered + _load_default_ajax_actions():
+        if action not in combined:
+            combined.append(action)
+    return combined
+
+
 def _extract_html_like_chunks(value):
     chunks = []
     if isinstance(value, str):
-        if "<" in value and ">" in value:
-            chunks.append(value)
+        unescaped = html.unescape(value)
+        if "<" in unescaped and ">" in unescaped:
+            chunks.append(unescaped)
     elif isinstance(value, dict):
         for v in value.values():
             chunks.extend(_extract_html_like_chunks(v))
@@ -337,10 +389,84 @@ def _extract_html_like_chunks(value):
     return chunks
 
 
+def _extract_prices_from_json_payload(payload):
+    def walk_dicts(value):
+        if isinstance(value, dict):
+            yield value
+            for item in value.values():
+                yield from walk_dicts(item)
+        elif isinstance(value, list):
+            for item in value:
+                yield from walk_dicts(item)
+
+    def extract_rows(entry, name_keys):
+        if not isinstance(entry, dict):
+            return None
+
+        name = None
+        for key in name_keys:
+            if key in entry and str(entry[key]).strip():
+                name = str(entry[key]).strip()
+                break
+
+        if not name:
+            return None
+
+        raw_price = None
+        for key in ["price", "cost", "value"]:
+            if key in entry:
+                raw_price = entry[key]
+                break
+
+        if raw_price is None:
+            return None
+
+        parsed_price = parse_price_value(raw_price)
+        if pd.isna(parsed_price):
+            return None
+
+        return {"Name": name, "Price": parsed_price}
+
+    driver_rows = []
+    constructor_rows = []
+
+    for node in walk_dicts(payload):
+        for key, value in node.items():
+            key_norm = str(key).lower()
+            if isinstance(value, list) and "driver" in key_norm:
+                for item in value:
+                    row = extract_rows(item, ["driver", "driver_name", "name", "title"])
+                    if row:
+                        driver_rows.append(row)
+            if isinstance(value, list) and any(token in key_norm for token in ["constructor", "team", "car"]):
+                for item in value:
+                    row = extract_rows(item, ["constructor", "team", "car", "name", "title"])
+                    if row:
+                        constructor_rows.append(row)
+
+    if not driver_rows or not constructor_rows:
+        return None, None
+
+    return (
+        _prepare_price_dataframe(pd.DataFrame(driver_rows).drop_duplicates(), "driver"),
+        _prepare_price_dataframe(pd.DataFrame(constructor_rows).drop_duplicates(), "constructor"),
+    )
+
+
+def _summarize_payload_text(payload_text, max_len=240):
+    condensed = re.sub(r"\s+", " ", payload_text).strip()
+    if len(condensed) <= max_len:
+        return condensed
+    return f"{condensed[:max_len]}..."
+
+
 def _extract_prices_from_ajax_payload(payload_text):
     html_candidates = [payload_text]
     try:
         json_payload = json.loads(payload_text)
+        driver_prices, constructor_prices = _extract_prices_from_json_payload(json_payload)
+        if driver_prices is not None and constructor_prices is not None:
+            return driver_prices, constructor_prices
         html_candidates.extend(_extract_html_like_chunks(json_payload))
     except ValueError:
         pass
@@ -366,23 +492,35 @@ def fetch_prices_via_ajax(session, html, page_url, headers):
     except requests_exceptions.RequestException:
         return None, None
 
-    actions = _discover_ajax_actions(js_response.text)
+    actions = _candidate_ajax_actions(js_response.text)
     if not actions:
+        logger.warning("Could not discover ajax actions from script: %s", script_url)
         return None, None
 
     nonce_keys = ["security", "nonce", "_ajax_nonce"]
+    attempts = []
+    last_response_text = None
     for action in actions:
         for nonce_key in nonce_keys:
+            attempts.append((action, nonce_key))
             payload = {"action": action, nonce_key: security}
             try:
                 response = session.post(ajax_url, data=payload, headers=headers, timeout=30)
                 response.raise_for_status()
+                last_response_text = response.text
             except requests_exceptions.RequestException:
                 continue
 
             driver_prices, constructor_prices = _extract_prices_from_ajax_payload(response.text)
             if driver_prices is not None and constructor_prices is not None:
                 return driver_prices, constructor_prices
+
+    logger.warning(
+        "FantasyGP AJAX extraction failed after %d attempts to %s. Last payload snippet: %s",
+        len(attempts),
+        ajax_url,
+        _summarize_payload_text(last_response_text) if last_response_text else "<no successful responses>",
+    )
 
     return None, None
 
@@ -469,6 +607,57 @@ def _discover_login_form(html, base_url):
     return None
 
 
+def _contains_password_field(html):
+    return bool(re.search(r"<input[^>]+type=[\"']password[\"']", html, flags=re.IGNORECASE))
+
+
+def _attempt_wordpress_login(session, page_url, target_url, username, password, headers):
+    login_url = requests.compat.urljoin(page_url, "/wp-login.php")
+    payload = {
+        "log": username,
+        "pwd": password,
+        "rememberme": "forever",
+        "redirect_to": target_url,
+        "testcookie": "1",
+        "wp-submit": "Log In",
+    }
+
+    try:
+        session.get(login_url, headers=headers, timeout=30)
+        login_response = session.post(login_url, data=payload, headers=headers, timeout=30)
+        login_response.raise_for_status()
+        final_response = session.get(target_url, headers=headers, timeout=30)
+        final_response.raise_for_status()
+    except requests_exceptions.RequestException:
+        return None
+
+    return final_response.text
+
+
+def _submit_discovered_login_form(
+    session,
+    action_url,
+    payload,
+    username_key,
+    password_key,
+    username,
+    password,
+    headers,
+    target_url,
+):
+    form_payload = payload.copy()
+    if username_key:
+        form_payload[username_key] = username
+    form_payload[password_key] = password
+
+    login_response = session.post(action_url, data=form_payload, headers=headers, timeout=30)
+    login_response.raise_for_status()
+
+    final_response = session.get(target_url, headers=headers, timeout=30)
+    final_response.raise_for_status()
+    return final_response.text
+
+
 def fetch_authenticated_html(url, username, password):
     html, _, _ = fetch_authenticated_page(url, username, password)
     return html
@@ -476,6 +665,7 @@ def fetch_authenticated_html(url, username, password):
 
 def fetch_authenticated_page(url, username, password):
     headers = {"User-Agent": "Mozilla/5.0 (compatible; f1-points-bot/1.0)"}
+    page_password = os.environ.get("FANTASYGP_PAGE_PASSWORD", password)
 
     session = requests.Session()
     try:
@@ -497,22 +687,36 @@ def fetch_authenticated_page(url, username, password):
 
     login_info = _discover_login_form(first_response.text, first_response.url)
     if login_info is None:
+        if _contains_password_field(first_response.text):
+            wordpress_result = _attempt_wordpress_login(
+                session,
+                first_response.url,
+                url,
+                username,
+                page_password,
+                headers,
+            )
+            if wordpress_result:
+                return wordpress_result, session, headers
         return first_response.text, session, headers
 
     action_url, payload, username_key, password_key = login_info
 
-    if username_key is None or password_key is None:
-        raise ValueError("Could not determine login form field names for username/password.")
+    if password_key is None:
+        raise ValueError("Could not determine a password field on the detected login form.")
 
-    payload[username_key] = username
-    payload[password_key] = password
-
-    login_response = session.post(action_url, data=payload, headers=headers, timeout=30)
-    login_response.raise_for_status()
-
-    final_response = session.get(url, headers=headers, timeout=30)
-    final_response.raise_for_status()
-    return final_response.text, session, headers
+    final_html = _submit_discovered_login_form(
+        session,
+        action_url,
+        payload,
+        username_key,
+        password_key,
+        username,
+        page_password,
+        headers,
+        url,
+    )
+    return final_html, session, headers
 
 
 def save_prices(driver_prices, constructor_prices):
@@ -555,9 +759,16 @@ def main():
 
     try:
         driver_prices, constructor_prices = extract_driver_constructor_prices(html)
-    except ValueError:
+    except ValueError as extract_error:
+        logger.warning("Primary FantasyGP extraction failed: %s", extract_error)
         driver_prices, constructor_prices = fetch_prices_via_ajax(session, html, TARGET_URL, headers)
         if driver_prices is None or constructor_prices is None:
+            _write_debug_html_snapshot(html, str(extract_error))
+            if _contains_password_field(html):
+                raise RuntimeError(
+                    "FantasyGP page still appears to require login after authentication. "
+                    "Verify credentials and inspect debug HTML artifact."
+                ) from extract_error
             raise
 
     save_prices(driver_prices, constructor_prices)
