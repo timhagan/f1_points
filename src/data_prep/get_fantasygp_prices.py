@@ -359,7 +359,7 @@ def _discover_ajax_actions(js_text):
             if action not in actions:
                 actions.append(action)
 
-    for action in _get_default_ajax_actions():
+    for action in _load_default_ajax_actions():
         if action not in actions:
             actions.append(action)
 
@@ -629,6 +629,33 @@ def _contains_password_field(html):
     return bool(re.search(r"<input[^>]+type=[\"']password[\"']", html, flags=re.IGNORECASE))
 
 
+def _looks_like_login_page(html):
+    lowered = html.lower()
+
+    login_markers = [
+        "wp-login.php",
+        "name=\"log\"",
+        "name='log'",
+        "name=\"pwd\"",
+        "name='pwd'",
+        "forgot your password",
+        "lost your password",
+    ]
+    if any(marker in lowered for marker in login_markers):
+        return True
+
+    if _contains_password_field(html):
+        username_like_field = re.search(
+            r"<input[^>]+(?:name|id)=[\"'][^\"']*(?:user|email|log|login)[^\"']*[\"']",
+            html,
+            flags=re.IGNORECASE,
+        )
+        if username_like_field:
+            return True
+
+    return False
+
+
 def _looks_like_loading_page(html_text):
     lowered = html_text.lower()
     if "loading" not in lowered:
@@ -822,7 +849,7 @@ def main():
         driver_prices, constructor_prices = fetch_prices_via_ajax(session, html, TARGET_URL, headers)
         if driver_prices is None or constructor_prices is None:
             _write_debug_html_snapshot(html, str(extract_error))
-            if _contains_password_field(html):
+            if _looks_like_login_page(html):
                 raise RuntimeError(
                     "FantasyGP page still appears to require login after authentication. "
                     "Verify credentials and inspect debug HTML artifact."

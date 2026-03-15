@@ -7,6 +7,7 @@ from src.data_prep.get_fantasygp_prices import (
     _discover_ajax_context,
     _discover_login_form,
     _looks_like_loading_page,
+    _looks_like_login_page,
     _summarize_payload_text,
     _wait_for_page_readiness,
     _write_debug_html_snapshot,
@@ -215,6 +216,34 @@ def test_contains_password_field_detects_password_input():
     assert not _contains_password_field('<input type="text" name="user" />')
 
 
+def test_looks_like_login_page_detects_wordpress_login_markers():
+    html = """
+    <html><body>
+      <form action="/wp-login.php">
+        <input type="text" name="log" />
+        <input type="password" name="pwd" />
+      </form>
+      <a href="/wp-login.php?action=lostpassword">Lost your password?</a>
+    </body></html>
+    """
+
+    assert _looks_like_login_page(html)
+
+
+def test_looks_like_login_page_does_not_flag_prices_page_with_password_column():
+    html = """
+    <html><body>
+      <table>
+        <tr><th>Driver</th><th>Price</th></tr>
+        <tr><td>Driver One</td><td>$30.0M</td></tr>
+      </table>
+      <div>Prices are now live, no login required.</div>
+    </body></html>
+    """
+
+    assert not _looks_like_login_page(html)
+
+
 def test_looks_like_loading_page_detects_loading_markers():
     assert _looks_like_loading_page("<html><body>Loading... please wait</body></html>")
     assert not _looks_like_loading_page("<html><body>drivers and cars</body></html>")
@@ -327,7 +356,7 @@ def test_fetch_prices_via_ajax_extracts_prices_from_json_html_payload():
 
         def post(self, url, data=None, **kwargs):
             self.post_calls += 1
-            assert data["action"] in {"getdriversandcars", "driversandcars", "get_drivers_and_cars"}
+            assert data["action"] in {"getdriversandcars", "driversandcars", "get_drivers_and_cars", "allDriversAndCars"}
             payload = {
                 "success": True,
                 "data": {
