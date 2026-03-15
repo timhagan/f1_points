@@ -491,8 +491,22 @@ def _discover_ajax_context(html, base_url):
     ajax_url = _extract_js_object_value(html, "MyAjax", "ajaxurl")
     security = _extract_js_object_value(html, "MyAjax", "security")
 
+    if not ajax_url:
+        ajax_match = re.search(r"[\"']([^\"']*?/wp-admin/admin-ajax\.php(?:\?[^\"']*)?)[\"']", html, flags=re.IGNORECASE)
+        if ajax_match:
+            ajax_url = ajax_match.group(1)
+
+    if not security:
+        security_match = re.search(
+            r"(?:[\"']security[\"']|\bsecurity\b)\s*[:=]\s*[\"']([A-Za-z0-9_-]{8,})[\"']",
+            html,
+            flags=re.IGNORECASE,
+        )
+        if security_match:
+            security = security_match.group(1)
+
     script_match = re.search(
-        r"<script[^>]+id=[\"']alldriverscars-js-js[\"'][^>]+src=[\"']([^\"']+)[\"']",
+        r"<script[^>]+src=[\"']([^\"']*(?:alldriverscars|drivers[-_]?cars)[^\"']*)[\"']",
         html,
         flags=re.IGNORECASE,
     )
@@ -935,8 +949,8 @@ def _extract_prices_from_ajax_payload(payload_text):
 
 def fetch_prices_via_ajax(session, html, page_url, headers, report=None):
     ajax_url, security, script_url = _discover_ajax_context(html, page_url)
-    if not ajax_url or not script_url or not security:
-        _debug_log("Missing AJAX context (ajax_url, security token, or script_url).")
+    if not ajax_url:
+        _debug_log("Missing AJAX context (ajax_url).")
         return None, None
 
     _log_event("price_endpoint_used", endpoint=ajax_url, source="ajax")
@@ -944,26 +958,26 @@ def fetch_prices_via_ajax(session, html, page_url, headers, report=None):
         report["price_endpoint"] = ajax_url
         report["price_source"] = "ajax"
 
-    try:
-        js_response = session.get(script_url, headers=headers, timeout=30)
-        js_response.raise_for_status()
-    except requests_exceptions.RequestException:
-        _debug_log(f"Unable to fetch AJAX script: {script_url}")
-        return None, None
-
-    actions = _candidate_ajax_actions(js_response.text)
-    if not actions:
-        logger.warning("Could not discover ajax actions from script: %s", script_url)
-        return None, None
+    actions = _load_default_ajax_actions()
+    if script_url:
+        try:
+            js_response = session.get(script_url, headers=headers, timeout=30)
+            js_response.raise_for_status()
+            actions = _candidate_ajax_actions(js_response.text)
+        except requests_exceptions.RequestException:
+            _debug_log(f"Unable to fetch AJAX script: {script_url}; using default action candidates")
 
     nonce_keys = ["security", "nonce", "_ajax_nonce"]
     attempts = []
     last_response_text = None
     last_content_type = None
     for action in actions:
-        for nonce_key in nonce_keys:
-            attempts.append((action, nonce_key))
-            payload = {"action": action, nonce_key: security}
+        nonce_variants = nonce_keys if security else [None]
+        for nonce_key in nonce_variants:
+            attempts.append((action, nonce_key or "none"))
+            payload = {"action": action}
+            if nonce_key and security:
+                payload[nonce_key] = security
             try:
                 response = session.post(ajax_url, data=payload, headers=headers, timeout=30)
                 response.raise_for_status()
