@@ -1,7 +1,12 @@
 import pandas as pd
 
 from src.data_prep.get_fantasygp_prices import (
+    _candidate_ajax_actions,
+    _debug_log,
+    _discover_ajax_context,
     _discover_login_form,
+    _summarize_payload_text,
+    _write_debug_html_snapshot,
     combine_prices_for_ranking,
     fetch_prices_via_ajax,
     fetch_authenticated_html,
@@ -249,3 +254,161 @@ def test_fetch_prices_via_ajax_extracts_prices_from_json_html_payload():
 
     assert set(driver_df["Name"]) == {"Verstappen", "Perez"}
     assert list(constructor_df["Name"]) == ["Red Bull"]
+
+
+def test_discover_ajax_context_accepts_single_quotes_and_unquoted_keys():
+    html = """
+    <script>
+      const MyAjax = {ajaxurl:'https://fantasygp.com/wp-admin/admin-ajax.php',security:'token123'};
+    </script>
+    <script id="alldriverscars-js-js" src="/wp-content/plugins/fantasy-gp/js/alldriverscars.js"></script>
+    """
+
+    ajax_url, security, script_url = _discover_ajax_context(html, "https://fantasygp.com/drivers-cars/")
+
+    assert ajax_url == "https://fantasygp.com/wp-admin/admin-ajax.php"
+    assert security == "token123"
+    assert script_url == "https://fantasygp.com/wp-content/plugins/fantasy-gp/js/alldriverscars.js"
+
+
+def test_fetch_prices_via_ajax_extracts_prices_from_structured_json_payload_without_html():
+    class FakeResponse:
+        def __init__(self, text):
+            self.text = text
+
+        def raise_for_status(self):
+            return None
+
+    class FakeSession:
+        def get(self, url, **kwargs):
+            return FakeResponse("$.post(MyAjax.ajaxurl,{action:'getdriversandcars',security:MyAjax.security},function(){});")
+
+        def post(self, url, data=None, **kwargs):
+            import json
+
+            payload = {
+                "success": True,
+                "data": {
+                    "drivers": [
+                        {"driver_name": "Verstappen", "price": "$30.5M"},
+                        {"driver_name": "Perez", "price": "$23.0M"},
+                    ],
+                    "constructors": [{"team": "Red Bull", "price": "$32.0M"}],
+                },
+            }
+            return FakeResponse(json.dumps(payload))
+
+    html = """
+    <script id="alldriverscars-js-js-extra">var MyAjax = {'ajaxurl':'https://fantasygp.com/wp-admin/admin-ajax.php','security':'token123'};</script>
+    <script id="alldriverscars-js-js" src="https://fantasygp.com/wp-content/plugins/fantasy-gp/js/alldriverscars.js?ver=202602"></script>
+    """
+
+    driver_df, constructor_df = fetch_prices_via_ajax(
+        FakeSession(),
+        html,
+        "https://fantasygp.com/drivers-cars/",
+        {"User-Agent": "ua"},
+    )
+
+    assert set(driver_df["Name"]) == {"Verstappen", "Perez"}
+    assert list(constructor_df["Name"]) == ["Red Bull"]
+
+
+def test_fetch_prices_via_ajax_uses_default_action_candidates_when_script_has_no_action_literal():
+    class FakeResponse:
+        def __init__(self, text):
+            self.text = text
+
+        def raise_for_status(self):
+            return None
+
+    class FakeSession:
+        def __init__(self):
+            self.actions = []
+
+        def get(self, url, **kwargs):
+            return FakeResponse("console.log('minified bundle without explicit action object');")
+
+        def post(self, url, data=None, **kwargs):
+            self.actions.append(data["action"])
+            if data["action"] != "getdriversandcars":
+                return FakeResponse('{"success":false}')
+
+            import json
+
+            payload = {
+                "success": True,
+                "data": {
+                    "drivers": [{"driver": "Verstappen", "price": "$30.5M"}],
+                    "constructors": [{"constructor": "Red Bull", "price": "$32.0M"}],
+                },
+            }
+            return FakeResponse(json.dumps(payload))
+
+    html = """
+    <script id="alldriverscars-js-js-extra">var MyAjax = {'ajaxurl':'https://fantasygp.com/wp-admin/admin-ajax.php','security':'token123'};</script>
+    <script id="alldriverscars-js-js" src="https://fantasygp.com/wp-content/plugins/fantasy-gp/js/alldriverscars.js?ver=202602"></script>
+    """
+
+    fake_session = FakeSession()
+    driver_df, constructor_df = fetch_prices_via_ajax(
+        fake_session,
+        html,
+        "https://fantasygp.com/drivers-cars/",
+        {"User-Agent": "ua"},
+    )
+
+    assert "getdriversandcars" in fake_session.actions
+    assert list(driver_df["Name"]) == ["Verstappen"]
+    assert list(constructor_df["Name"]) == ["Red Bull"]
+
+
+def test_candidate_ajax_actions_merges_discovered_and_default_actions_without_duplicates(monkeypatch):
+    monkeypatch.setenv("FANTASYGP_AJAX_ACTIONS", "customAction,getdriversandcars")
+
+    actions = _candidate_ajax_actions("$.post(MyAjax.ajaxurl,{action:'getdriversandcars'},function(){});")
+
+    assert actions[0] == "getdriversandcars"
+    assert "customAction" in actions
+    assert len(actions) == len(set(actions))
+
+
+def test_summarize_payload_text_condenses_whitespace_and_truncates():
+    long_payload = "{\n  \"x\": 1,\n  \"html\": \"" + ("a" * 400) + "\"\n}"
+    summary = _summarize_payload_text(long_payload, max_len=80)
+
+    assert "\n" not in summary
+    assert summary.endswith("...")
+    assert len(summary) == 83
+
+
+def test_write_debug_html_snapshot_writes_file(monkeypatch, tmp_path):
+    debug_file = tmp_path / "debug" / "page.html"
+    monkeypatch.setenv("FANTASYGP_DEBUG_HTML_PATH", str(debug_file))
+
+    _write_debug_html_snapshot("<html><body>blocked</body></html>", "Could not parse")
+
+    assert debug_file.exists()
+    text = debug_file.read_text(encoding="utf-8")
+    assert "extraction_error: Could not parse" in text
+    assert "<html><body>blocked</body></html>" in text
+
+
+def test_write_debug_html_snapshot_uses_current_dir_when_no_parent(monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("FANTASYGP_DEBUG_HTML_PATH", "snapshot.html")
+
+    _write_debug_html_snapshot("<html></html>", "error")
+
+    assert (tmp_path / "snapshot.html").exists()
+
+
+def test_debug_log_emits_only_when_enabled(monkeypatch, caplog):
+    monkeypatch.delenv("FANTASYGP_DEBUG", raising=False)
+    caplog.clear()
+    _debug_log("hidden")
+    assert not caplog.records
+
+    monkeypatch.setenv("FANTASYGP_DEBUG", "true")
+    _debug_log("visible")
+    assert any("visible" in record.message for record in caplog.records)
