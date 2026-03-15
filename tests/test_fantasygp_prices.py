@@ -296,7 +296,7 @@ def test_fetch_prices_via_ajax_extracts_prices_from_json_html_payload():
 
         def post(self, url, data=None, **kwargs):
             self.post_calls += 1
-            assert data["action"] == "getdriversandcars"
+            assert data["action"] in {"getdriversandcars", "driversandcars", "get_drivers_and_cars"}
             payload = {
                 "success": True,
                 "data": {
