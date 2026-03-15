@@ -1,6 +1,7 @@
 import datetime
 import html
 import json
+import logging
 import os
 import re
 from html.parser import HTMLParser
@@ -11,25 +12,26 @@ from requests import exceptions as requests_exceptions
 
 TARGET_URL = os.environ.get("FANTASYGP_TARGET_URL", "https://fantasygp.com/drivers-cars/")
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "data")
-DEFAULT_AJAX_ACTIONS = ["getdriversandcars", "get_drivers_and_cars", "driversandcars"]
+DEFAULT_AJAX_ACTIONS = ["getdriversandcars", "allDriversAndCars", "driversandcars"]
+
+logger = logging.getLogger(__name__)
 
 
-def _is_debug_enabled():
-    return os.environ.get("FANTASYGP_DEBUG", "").strip().lower() in {"1", "true", "yes", "on"}
+def _write_debug_html_snapshot(html_text, error_message):
+    debug_path = os.environ.get("FANTASYGP_DEBUG_HTML_PATH")
+    if not debug_path:
+        return
 
-
-def _debug_log(message):
-    if _is_debug_enabled():
-        print(f"[fantasygp_prices] {message}")
-
-
-def _get_default_ajax_actions():
-    configured = os.environ.get("FANTASYGP_AJAX_ACTIONS", "").strip()
-    if not configured:
-        return DEFAULT_AJAX_ACTIONS
-
-    actions = [action.strip() for action in configured.split(",") if action.strip()]
-    return actions or DEFAULT_AJAX_ACTIONS
+    try:
+        parent_dir = os.path.dirname(debug_path)
+        if parent_dir:
+            os.makedirs(parent_dir, exist_ok=True)
+        with open(debug_path, "w", encoding="utf-8") as file:
+            file.write(f"<!-- extraction_error: {error_message} -->\n")
+            file.write(html_text)
+        logger.warning("Saved FantasyGP debug HTML snapshot to %s", debug_path)
+    except OSError as exc:
+        logger.warning("Failed to write FantasyGP debug HTML snapshot: %s", exc)
 
 
 class _SimpleTableParser(HTMLParser):
@@ -360,6 +362,24 @@ def _discover_ajax_actions(js_text):
     return actions
 
 
+def _load_default_ajax_actions():
+    configured = os.environ.get("FANTASYGP_AJAX_ACTIONS")
+    if not configured:
+        return DEFAULT_AJAX_ACTIONS.copy()
+
+    actions = [token.strip() for token in configured.split(",") if token.strip()]
+    return actions if actions else DEFAULT_AJAX_ACTIONS.copy()
+
+
+def _candidate_ajax_actions(js_text):
+    discovered = _discover_ajax_actions(js_text)
+    combined = []
+    for action in discovered + _load_default_ajax_actions():
+        if action not in combined:
+            combined.append(action)
+    return combined
+
+
 def _extract_html_like_chunks(value):
     chunks = []
     if isinstance(value, str):
@@ -375,113 +395,60 @@ def _extract_html_like_chunks(value):
     return chunks
 
 
-def _build_price_rows(items, name_keys):
-    rows = []
-    for item in items:
-        if not isinstance(item, dict):
-            continue
+def _extract_prices_from_json_payload(payload):
+    def walk_dicts(value):
+        if isinstance(value, dict):
+            yield value
+            for item in value.values():
+                yield from walk_dicts(item)
+        elif isinstance(value, list):
+            for item in value:
+                yield from walk_dicts(item)
+
+    def extract_rows(entry, name_keys):
+        if not isinstance(entry, dict):
+            return None
 
         name = None
         for key in name_keys:
-            value = item.get(key)
-            if value is not None and str(value).strip():
-                name = str(value).strip()
+            if key in entry and str(entry[key]).strip():
+                name = str(entry[key]).strip()
                 break
 
         if not name:
-            continue
+            return None
 
         raw_price = None
         for key in ["price", "cost", "value"]:
-            if key in item:
-                raw_price = item[key]
+            if key in entry:
+                raw_price = entry[key]
                 break
 
         if raw_price is None:
-            continue
+            return None
 
         parsed_price = parse_price_value(raw_price)
-        if pd.notna(parsed_price):
-            rows.append({"Name": name, "Price": parsed_price})
+        if pd.isna(parsed_price):
+            return None
 
-    return rows
+        return {"Name": name, "Price": parsed_price}
 
+    driver_rows = []
+    constructor_rows = []
 
-def _extract_prices_from_schema(payload):
-    if not isinstance(payload, dict):
-        return None, None
-
-    candidate_containers = [payload]
-    data = payload.get("data")
-    if isinstance(data, dict):
-        candidate_containers.append(data)
-
-    for container in candidate_containers:
-        drivers = container.get("drivers")
-        constructors = container.get("constructors") or container.get("teams") or container.get("cars")
-        if isinstance(drivers, list) and isinstance(constructors, list):
-            driver_rows = _build_price_rows(drivers, ["driver_name", "driver", "name", "title"])
-            constructor_rows = _build_price_rows(constructors, ["team", "constructor", "car", "name", "title"])
-            if driver_rows and constructor_rows:
-                return (
-                    _prepare_price_dataframe(pd.DataFrame(driver_rows).drop_duplicates(), "driver"),
-                    _prepare_price_dataframe(pd.DataFrame(constructor_rows).drop_duplicates(), "constructor"),
-                )
-
-    return None, None
-
-
-def _extract_prices_from_json_payload(payload):
-    driver_prices, constructor_prices = _extract_prices_from_schema(payload)
-    if driver_prices is not None and constructor_prices is not None:
-        return driver_prices, constructor_prices
-
-    records = []
-
-    def walk(value, context=""):
-        if isinstance(value, dict):
-            local_context = context.lower()
-            name = None
-            raw_price = None
-
-            for key in ["name", "driver", "driver_name", "constructor", "team", "car", "title"]:
-                if key in value and str(value[key]).strip():
-                    name = str(value[key]).strip()
-                    break
-
-            for key in ["price", "cost", "value"]:
-                if key in value:
-                    raw_price = value[key]
-                    break
-
-            if name and raw_price is not None:
-                parsed_price = parse_price_value(raw_price)
-                if pd.notna(parsed_price):
-                    if "driver" in local_context:
-                        entity_type = "driver"
-                    elif any(token in local_context for token in ["constructor", "team", "car"]):
-                        entity_type = "constructor"
-                    else:
-                        entity_type = None
-                    records.append((entity_type, name, parsed_price))
-
-            for key, item in value.items():
-                walk(item, f"{local_context} {key}".strip())
-
-        elif isinstance(value, list):
-            for item in value:
-                walk(item, context)
-
-    walk(payload)
-
-    typed = [record for record in records if record[0] in {"driver", "constructor"}]
-    if not typed:
-        return None, None
-
-    driver_rows = [{"Name": name, "Price": price} for entity, name, price in typed if entity == "driver"]
-    constructor_rows = [
-        {"Name": name, "Price": price} for entity, name, price in typed if entity == "constructor"
-    ]
+    for node in walk_dicts(payload):
+        for key, value in node.items():
+            key_norm = str(key).lower()
+            if isinstance(value, list) and "driver" in key_norm:
+                for item in value:
+                    row = extract_rows(item, ["driver", "driver_name", "name", "title"])
+                    if row:
+                        driver_rows.append(row)
+            if isinstance(value, list) and any(token in key_norm for token in ["constructor", "team", "car"]):
+                for item in value:
+                    row = extract_rows(item, ["constructor", "team", "car", "name", "title"])
+                    if row:
+                        constructor_rows.append(row)
 
     if not driver_rows or not constructor_rows:
         return None, None
@@ -490,6 +457,13 @@ def _extract_prices_from_json_payload(payload):
         _prepare_price_dataframe(pd.DataFrame(driver_rows).drop_duplicates(), "driver"),
         _prepare_price_dataframe(pd.DataFrame(constructor_rows).drop_duplicates(), "constructor"),
     )
+
+
+def _summarize_payload_text(payload_text, max_len=240):
+    condensed = re.sub(r"\s+", " ", payload_text).strip()
+    if len(condensed) <= max_len:
+        return condensed
+    return f"{condensed[:max_len]}..."
 
 
 def _extract_prices_from_ajax_payload(payload_text):
@@ -527,18 +501,22 @@ def fetch_prices_via_ajax(session, html, page_url, headers):
         _debug_log(f"Unable to fetch AJAX script: {script_url}")
         return None, None
 
-    actions = _discover_ajax_actions(js_response.text)
+    actions = _candidate_ajax_actions(js_response.text)
     if not actions:
-        _debug_log("No AJAX action names discovered from script.")
+        logger.warning("Could not discover ajax actions from script: %s", script_url)
         return None, None
 
     nonce_keys = ["security", "nonce", "_ajax_nonce"]
+    attempts = []
+    last_response_text = None
     for action in actions:
         for nonce_key in nonce_keys:
+            attempts.append((action, nonce_key))
             payload = {"action": action, nonce_key: security}
             try:
                 response = session.post(ajax_url, data=payload, headers=headers, timeout=30)
                 response.raise_for_status()
+                last_response_text = response.text
             except requests_exceptions.RequestException:
                 _debug_log(f"AJAX request failed for action={action}, nonce_key={nonce_key}")
                 continue
@@ -548,7 +526,13 @@ def fetch_prices_via_ajax(session, html, page_url, headers):
                 _debug_log(f"AJAX extraction succeeded for action={action}, nonce_key={nonce_key}")
                 return driver_prices, constructor_prices
 
-    _debug_log("AJAX extraction exhausted all action/nonce combinations without success.")
+    logger.warning(
+        "FantasyGP AJAX extraction failed after %d attempts to %s. Last payload snippet: %s",
+        len(attempts),
+        ajax_url,
+        _summarize_payload_text(last_response_text) if last_response_text else "<no successful responses>",
+    )
+
     return None, None
 
 
@@ -721,9 +705,11 @@ def main():
 
     try:
         driver_prices, constructor_prices = extract_driver_constructor_prices(html)
-    except ValueError:
+    except ValueError as extract_error:
+        logger.warning("Primary FantasyGP extraction failed: %s", extract_error)
         driver_prices, constructor_prices = fetch_prices_via_ajax(session, html, TARGET_URL, headers)
         if driver_prices is None or constructor_prices is None:
+            _write_debug_html_snapshot(html, str(extract_error))
             raise
 
     save_prices(driver_prices, constructor_prices)
