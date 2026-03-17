@@ -455,15 +455,20 @@
       let priceSnapshots = [];
 
       const constructorAliases = {
-        racing_bulls: "rb",
-        red_bull_racing: "red_bull",
-        red_bull: "red_bull",
-        mercedes_amg_petronas: "mercedes",
-        mclaren_formula_1_team: "mclaren",
-        aston_martin_aramco: "aston_martin",
-        visa_cash_app_rb: "rb",
-        stake_f1_team_kick_sauber: "sauber",
-        alpine_renault: "alpine",
+        rb: ["racing_bulls", "visa_cash_app_rb"],
+        racing_bulls: ["rb", "visa_cash_app_rb"],
+        visa_cash_app_rb: ["rb", "racing_bulls"],
+        red_bull_racing: ["red_bull"],
+        mercedes_amg_petronas: ["mercedes"],
+        mclaren_formula_1_team: ["mclaren"],
+        aston_martin_aramco: ["aston_martin"],
+        stake_f1_team_kick_sauber: ["sauber", "audi"],
+        alpine_renault: ["alpine"],
+      };
+
+      const driverAliases = {
+        max_verstappen: ["verstappen"],
+        arvid_lindblad: ["lindblad", "arvid_lindlblad"],
       };
 
       function buildTable(csvPath, targetId) {
@@ -595,15 +600,31 @@
         return map;
       }
 
+      function getEntityLookupKeys(entityType, entityId) {
+        const normalizedId = normalizeNameKey(entityId);
+        const keySet = new Set([normalizedId]);
+
+        const aliasMap = entityType === "constructor" ? constructorAliases : driverAliases;
+        const aliases = aliasMap[normalizedId] || [];
+        aliases.forEach((alias) => keySet.add(alias));
+
+        if (entityType === "driver") {
+          const idParts = normalizedId.split("_").filter(Boolean);
+          if (idParts.length > 1) {
+            keySet.add(idParts[idParts.length - 1]);
+          }
+        }
+
+        return Array.from(keySet).filter(Boolean);
+      }
+
       function getAlignedPriceForRound(entityType, entityId, roundNumber) {
         const weekend = driverTrendRows.find((row) => row.RoundNumber === roundNumber);
         if (!weekend || !priceSnapshots.length) {
           return null;
         }
         const roundDate = normalizeDateOnly(weekend.EventDate);
-        const normalizedId = normalizeNameKey(entityId);
-        const aliasMatch = entityType === "constructor" ? constructorAliases[normalizedId] : null;
-        const possibleKeys = [normalizedId, aliasMatch].filter(Boolean);
+        const possibleKeys = getEntityLookupKeys(entityType, entityId);
 
         const eligibleSnapshots = priceSnapshots
           .filter((snapshot) => !roundDate || snapshot.snapshotDate <= roundDate)
@@ -1123,9 +1144,7 @@
 
         valueRankingRows = pointsRows
           .map((row) => {
-            const normalizedId = normalizeNameKey(row.entityId);
-            const aliasMatch = row.entityType === "constructor" ? constructorAliases[normalizedId] : null;
-            const possibleKeys = [normalizedId, aliasMatch].filter(Boolean);
+            const possibleKeys = getEntityLookupKeys(row.entityType, row.entityId);
 
             let matchedPrice = null;
             for (const key of possibleKeys) {
