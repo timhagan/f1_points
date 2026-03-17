@@ -1,34 +1,34 @@
 EntityType,Name,NameKey,Price,ScrapedAtUtc
-constructor,Alpine,alpine,6.0,2026-03-17T00:54:47.323251+00:00
-constructor,Aston Martin,aston_martin,6.5,2026-03-17T00:54:47.323251+00:00
-constructor,Audi,audi,5.0,2026-03-17T00:54:47.323251+00:00
-constructor,Cadillac,cadillac,4.5,2026-03-17T00:54:47.323251+00:00
-constructor,Ferrari,ferrari,18.0,2026-03-17T00:54:47.323251+00:00
-constructor,Haas,haas,8.0,2026-03-17T00:54:47.323251+00:00
-constructor,McLaren,mclaren,20.5,2026-03-17T00:54:47.323251+00:00
-constructor,Mercedes,mercedes,22.0,2026-03-17T00:54:47.323251+00:00
-constructor,Racing Bulls,racing_bulls,8.0,2026-03-17T00:54:47.323251+00:00
-constructor,Red Bull,red_bull,18.0,2026-03-17T00:54:47.323251+00:00
-constructor,Williams,williams,10.0,2026-03-17T00:54:47.323251+00:00
-driver,Albon,albon,8.0,2026-03-17T00:54:47.321457+00:00
-driver,Alonso,alonso,9.0,2026-03-17T00:54:47.321457+00:00
-driver,Antonelli,antonelli,16.0,2026-03-17T00:54:47.321457+00:00
-driver,Bearman,bearman,11.0,2026-03-17T00:54:47.321457+00:00
-driver,Bortoleto,bortoleto,5.5,2026-03-17T00:54:47.321457+00:00
-driver,Bottas,bottas,8.0,2026-03-17T00:54:47.321457+00:00
-driver,Colapinto,colapinto,4.0,2026-03-17T00:54:47.321457+00:00
-driver,Gasly,gasly,7.5,2026-03-17T00:54:47.321457+00:00
-driver,Hadjar,hadjar,13.5,2026-03-17T00:54:47.321457+00:00
-driver,Hamilton,hamilton,16.0,2026-03-17T00:54:47.321457+00:00
-driver,Hulkenberg,hulkenberg,7.5,2026-03-17T00:54:47.321457+00:00
-driver,Lawson,lawson,7.5,2026-03-17T00:54:47.321457+00:00
-driver,Leclerc,leclerc,18.5,2026-03-17T00:54:47.321457+00:00
-driver,Lindblad,lindblad,4.0,2026-03-17T00:54:47.321457+00:00
-driver,Norris,norris,21.5,2026-03-17T00:54:47.321457+00:00
-driver,Ocon,ocon,6.5,2026-03-17T00:54:47.321457+00:00
-driver,Perez,perez,8.5,2026-03-17T00:54:47.321457+00:00
-driver,Piastri,piastri,20.0,2026-03-17T00:54:47.321457+00:00
-driver,Russell,russell,20.5,2026-03-17T00:54:47.321457+00:00
-driver,Sainz,sainz,10.0,2026-03-17T00:54:47.321457+00:00
-driver,Stroll,stroll,4.0,2026-03-17T00:54:47.321457+00:00
-driver,Verstappen,verstappen,21.0,2026-03-17T00:54:47.321457+00:00
+constructor,Alpine,alpine,6.0,2026-03-17T01:04:00.943419+00:00
+constructor,Aston Martin,aston_martin,6.5,2026-03-17T01:04:00.943419+00:00
+constructor,Audi,audi,5.0,2026-03-17T01:04:00.943419+00:00
+constructor,Cadillac,cadillac,4.5,2026-03-17T01:04:00.943419+00:00
+constructor,Ferrari,ferrari,18.0,2026-03-17T01:04:00.943419+00:00
+constructor,Haas,haas,8.0,2026-03-17T01:04:00.943419+00:00
+constructor,McLaren,mclaren,20.5,2026-03-17T01:04:00.943419+00:00
+constructor,Mercedes,mercedes,22.0,2026-03-17T01:04:00.943419+00:00
+constructor,Racing Bulls,racing_bulls,8.0,2026-03-17T01:04:00.943419+00:00
+constructor,Red Bull,red_bull,18.0,2026-03-17T01:04:00.943419+00:00
+constructor,Williams,williams,10.0,2026-03-17T01:04:00.943419+00:00
+driver,Albon,albon,8.0,2026-03-17T01:04:00.941456+00:00
+driver,Alonso,alonso,9.0,2026-03-17T01:04:00.941456+00:00
+driver,Antonelli,antonelli,16.0,2026-03-17T01:04:00.941456+00:00
+driver,Bearman,bearman,11.0,2026-03-17T01:04:00.941456+00:00
+driver,Bortoleto,bortoleto,5.5,2026-03-17T01:04:00.941456+00:00
+driver,Bottas,bottas,8.0,2026-03-17T01:04:00.941456+00:00
+driver,Colapinto,colapinto,4.0,2026-03-17T01:04:00.941456+00:00
+driver,Gasly,gasly,7.5,2026-03-17T01:04:00.941456+00:00
+driver,Hadjar,hadjar,13.5,2026-03-17T01:04:00.941456+00:00
+driver,Hamilton,hamilton,16.0,2026-03-17T01:04:00.941456+00:00
+driver,Hulkenberg,hulkenberg,7.5,2026-03-17T01:04:00.941456+00:00
+driver,Lawson,lawson,7.5,2026-03-17T01:04:00.941456+00:00
+driver,Leclerc,leclerc,18.5,2026-03-17T01:04:00.941456+00:00
+driver,Lindblad,lindblad,4.0,2026-03-17T01:04:00.941456+00:00
+driver,Norris,norris,21.5,2026-03-17T01:04:00.941456+00:00
+driver,Ocon,ocon,6.5,2026-03-17T01:04:00.941456+00:00
+driver,Perez,perez,8.5,2026-03-17T01:04:00.941456+00:00
+driver,Piastri,piastri,20.0,2026-03-17T01:04:00.941456+00:00
+driver,Russell,russell,20.5,2026-03-17T01:04:00.941456+00:00
+driver,Sainz,sainz,10.0,2026-03-17T01:04:00.941456+00:00
+driver,Stroll,stroll,4.0,2026-03-17T01:04:00.941456+00:00
+driver,Verstappen,verstappen,21.0,2026-03-17T01:04:00.941456+00:00
