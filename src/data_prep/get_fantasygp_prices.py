@@ -1375,9 +1375,22 @@ def save_prices(driver_prices, constructor_prices):
     constructor_prices.to_csv(constructor_archive_path, index=False)
     combined_prices.to_csv(combined_archive_path, index=False)
 
+    history_files = sorted(
+        [
+            entry
+            for entry in os.listdir(OUTPUT_DIR)
+            if entry.startswith("fantasygp_prices_") and entry.endswith(".csv") and entry != "fantasygp_prices_current.csv"
+        ]
+    )
+    history_index_path = os.path.join(OUTPUT_DIR, "fantasygp_price_files.json")
+    with open(history_index_path, "w", encoding="utf-8") as file:
+        json.dump(history_files, file, indent=2)
+        file.write("\n")
+
     print(f"Saved driver prices to: {driver_current_path} and {driver_archive_path}")
     print(f"Saved constructor prices to: {constructor_current_path} and {constructor_archive_path}")
     print(f"Saved combined prices to: {combined_current_path} and {combined_archive_path}")
+    print(f"Saved price history manifest to: {history_index_path}")
 
 
 def main():

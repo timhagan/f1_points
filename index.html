@@ -253,6 +253,11 @@
             <input id="cumulative-toggle" type="checkbox" class="mr-2" checked>
             Show cumulative trend (recommended)
           </label>
+
+          <label class="mt-2 block text-sm font-medium">
+            <input id="driver-value-toggle" type="checkbox" class="mr-2">
+            Show points per $1M (uses race-aligned FantasyGP price snapshots)
+          </label>
         </div>
       </div>
 
@@ -306,6 +311,11 @@
           <label class="mt-2 block text-sm font-medium">
             <input id="constructor-cumulative-toggle" type="checkbox" class="mr-2" checked>
             Show cumulative trend (recommended)
+          </label>
+
+          <label class="mt-2 block text-sm font-medium">
+            <input id="constructor-value-toggle" type="checkbox" class="mr-2">
+            Show points per $1M (uses race-aligned FantasyGP price snapshots)
           </label>
         </div>
       </div>
@@ -442,6 +452,19 @@
       let pointsPerDollarChart = null;
       let driverSortByTotal = [];
       let constructorSortByTotal = [];
+      let priceSnapshots = [];
+
+      const constructorAliases = {
+        racing_bulls: "rb",
+        red_bull_racing: "red_bull",
+        red_bull: "red_bull",
+        mercedes_amg_petronas: "mercedes",
+        mclaren_formula_1_team: "mclaren",
+        aston_martin_aramco: "aston_martin",
+        visa_cash_app_rb: "rb",
+        stake_f1_team_kick_sauber: "sauber",
+        alpine_renault: "alpine",
+      };
 
       function buildTable(csvPath, targetId) {
         fetch(csvPath)
@@ -543,6 +566,63 @@
         return selectedKeys.reduce((sum, key) => sum + toNumber(row[key]), 0);
       }
 
+      function normalizeDateOnly(value) {
+        if (!value) {
+          return null;
+        }
+        return `${value}`.slice(0, 10);
+      }
+
+      function normalizePriceToDollars(value) {
+        const numeric = Number(value);
+        if (!Number.isFinite(numeric) || numeric <= 0) {
+          return null;
+        }
+        return numeric < 1000 ? numeric * 1000000 : numeric;
+      }
+
+      function buildPriceLookup(rows) {
+        const map = new Map();
+        rows.forEach((row) => {
+          const type = row.EntityType || "";
+          const normalizedName = normalizeNameKey(row.NameKey || row.Name);
+          const price = normalizePriceToDollars(row.Price);
+          if (!type || !normalizedName || !Number.isFinite(price)) {
+            return;
+          }
+          map.set(`${type}:${normalizedName}`, price);
+        });
+        return map;
+      }
+
+      function getAlignedPriceForRound(entityType, entityId, roundNumber) {
+        const weekend = driverTrendRows.find((row) => row.RoundNumber === roundNumber);
+        if (!weekend || !priceSnapshots.length) {
+          return null;
+        }
+        const roundDate = normalizeDateOnly(weekend.EventDate);
+        const normalizedId = normalizeNameKey(entityId);
+        const aliasMatch = entityType === "constructor" ? constructorAliases[normalizedId] : null;
+        const possibleKeys = [normalizedId, aliasMatch].filter(Boolean);
+
+        const eligibleSnapshots = priceSnapshots
+          .filter((snapshot) => !roundDate || snapshot.snapshotDate <= roundDate)
+          .sort((a, b) => (a.snapshotDate > b.snapshotDate ? -1 : 1));
+
+        const activeSnapshot = eligibleSnapshots[0] || priceSnapshots[0];
+        if (!activeSnapshot) {
+          return null;
+        }
+
+        for (const key of possibleKeys) {
+          const fullKey = `${entityType}:${key}`;
+          if (activeSnapshot.priceLookup.has(fullKey)) {
+            return activeSnapshot.priceLookup.get(fullKey);
+          }
+        }
+        return null;
+      }
+
       function getRoundLabel(row) {
         const shortName = row.EventName.replace("Grand Prix", "GP").trim();
         return `R${row.RoundNumber} • ${shortName}`;
@@ -552,6 +632,7 @@
         const selectedDrivers = getSelectedDrivers();
         const selectedKeys = getSelectedPointKeys();
         const cumulative = document.getElementById("cumulative-toggle").checked;
+        const useValueMode = document.getElementById("driver-value-toggle").checked;
         const statusEl = document.getElementById("trend-status");
 
         if (!selectedDrivers.length) {
@@ -569,11 +650,15 @@
           let running = 0;
           const data = driverRows.map((driverRow) => {
             const weekendPoints = calculateWeekendValue(driverRow, selectedKeys);
+            const alignedPrice = getAlignedPriceForRound("driver", driverId, toNumber(driverRow.RoundNumber));
+            const weekendMetric = useValueMode && Number.isFinite(alignedPrice)
+              ? weekendPoints / (alignedPrice / 1000000)
+              : weekendPoints;
             if (cumulative) {
-              running += weekendPoints;
+              running += weekendMetric;
               return running;
             }
-            return weekendPoints;
+            return weekendMetric;
           });
 
           return {
@@ -612,7 +697,7 @@
               tooltip: {
                 callbacks: {
                   label(context) {
-                    return `${context.dataset.label}: ${context.parsed.y.toFixed(1)} pts`;
+                    return `${context.dataset.label}: ${context.parsed.y.toFixed(2)} ${useValueMode ? "pts/$1M" : "pts"}`;
                   },
                 },
               },
@@ -632,7 +717,7 @@
                 beginAtZero: true,
                 title: {
                   display: true,
-                  text: "Points",
+                  text: useValueMode ? "Points per $1M" : "Points",
                 },
               },
             },
@@ -640,13 +725,15 @@
         });
 
         const mode = cumulative ? "Cumulative" : "Per-weekend";
-        statusEl.textContent = `${mode} view • ${selectedDrivers.length} driver(s) • ${selectedKeys.length} point component(s).`;
+        const metricMode = useValueMode ? "points per $1M" : "points";
+        statusEl.textContent = `${mode} ${metricMode} view • ${selectedDrivers.length} driver(s) • ${selectedKeys.length} point component(s).`;
       }
 
       function renderConstructorTrendChart() {
         const selectedConstructors = getSelectedConstructors();
         const selectedKeys = getSelectedConstructorPointKeys();
         const cumulative = document.getElementById("constructor-cumulative-toggle").checked;
+        const useValueMode = document.getElementById("constructor-value-toggle").checked;
         const statusEl = document.getElementById("constructor-trend-status");
 
         if (!selectedConstructors.length) {
@@ -664,11 +751,15 @@
           let running = 0;
           const data = constructorRows.map((constructorRow) => {
             const weekendPoints = calculateWeekendValue(constructorRow, selectedKeys);
+            const alignedPrice = getAlignedPriceForRound("constructor", teamId, toNumber(constructorRow.RoundNumber));
+            const weekendMetric = useValueMode && Number.isFinite(alignedPrice)
+              ? weekendPoints / (alignedPrice / 1000000)
+              : weekendPoints;
             if (cumulative) {
-              running += weekendPoints;
+              running += weekendMetric;
               return running;
             }
-            return weekendPoints;
+            return weekendMetric;
           });
 
           return {
@@ -707,7 +798,7 @@
               tooltip: {
                 callbacks: {
                   label(context) {
-                    return `${context.dataset.label}: ${context.parsed.y.toFixed(1)} pts`;
+                    return `${context.dataset.label}: ${context.parsed.y.toFixed(2)} ${useValueMode ? "pts/$1M" : "pts"}`;
                   },
                 },
               },
@@ -727,7 +818,7 @@
                 beginAtZero: true,
                 title: {
                   display: true,
-                  text: "Points",
+                  text: useValueMode ? "Points per $1M" : "Points",
                 },
               },
             },
@@ -735,7 +826,8 @@
         });
 
         const mode = cumulative ? "Cumulative" : "Per-weekend";
-        statusEl.textContent = `${mode} view • ${selectedConstructors.length} constructor(s) • ${selectedKeys.length} point component(s).`;
+        const metricMode = useValueMode ? "points per $1M" : "points";
+        statusEl.textContent = `${mode} ${metricMode} view • ${selectedConstructors.length} constructor(s) • ${selectedKeys.length} point component(s).`;
       }
 
       function setSelection(selectId, selectedIds) {
@@ -867,6 +959,33 @@
         statusEl.textContent = `Showing top ${filtered.length} ${entityFilter === "all" ? "entities" : `${entityFilter}s`} ranked by ${metricLabels[sortMetric].toLowerCase()}.`;
       }
 
+      async function loadPriceSnapshots() {
+        const indexResponse = await fetch("data/fantasygp_price_files.json");
+        if (!indexResponse.ok) {
+          return [];
+        }
+
+        const fileNames = await indexResponse.json();
+        const snapshotRows = await Promise.all(fileNames.map((name) => fetchCsvRows(`data/${name}`)));
+
+        return snapshotRows
+          .map((rows) => {
+            if (!rows.length) {
+              return null;
+            }
+            const snapshotDate = normalizeDateOnly(rows[0].ScrapedAtUtc) || normalizeDateOnly(rows[0].SnapshotDate);
+            if (!snapshotDate) {
+              return null;
+            }
+            return {
+              snapshotDate,
+              priceLookup: buildPriceLookup(rows),
+            };
+          })
+          .filter(Boolean)
+          .sort((a, b) => (a.snapshotDate > b.snapshotDate ? 1 : -1));
+      }
+
       async function buildTrendData() {
         const sessions = await fetchCsvRows(`data/sessions_${seasonYear}.csv`);
         const raceWeekends = sessions
@@ -874,6 +993,7 @@
           .map((row) => ({
             RoundNumber: Number(row.RoundNumber),
             EventName: row.EventName,
+            EventDate: row.EventDate,
           }))
           .sort((a, b) => a.RoundNumber - b.RoundNumber);
 
@@ -896,6 +1016,7 @@
                 byDriver[driverId][key] = toNumber(row[key]);
               });
               byDriver[driverId].TotalDriverPoints = toNumber(row.TotalDriverPoints);
+              byDriver[driverId].RoundNumber = weekend.RoundNumber;
             });
 
             constructorRows.forEach((row) => {
@@ -908,11 +1029,13 @@
                 byConstructor[teamId][key] = toNumber(row[key]);
               });
               byConstructor[teamId].TotalConstructorPoints = toNumber(row.TotalConstructorPoints);
+              byConstructor[teamId].RoundNumber = weekend.RoundNumber;
             });
 
             return {
               RoundNumber: weekend.RoundNumber,
               EventName: weekend.EventName,
+              EventDate: weekend.EventDate,
               DriverPoints: byDriver,
               ConstructorPoints: byConstructor,
               hasRows: driverRows.length > 0 || constructorRows.length > 0,
@@ -998,18 +1121,6 @@
           pricesByTypeAndKey[key] = toNumber(row.Price);
         });
 
-        const constructorAliases = {
-          racing_bulls: "rb",
-          red_bull_racing: "red_bull",
-          red_bull: "red_bull",
-          mercedes_amg_petronas: "mercedes",
-          mclaren_formula_1_team: "mclaren",
-          aston_martin_aramco: "aston_martin",
-          visa_cash_app_rb: "rb",
-          stake_f1_team_kick_sauber: "sauber",
-          alpine_renault: "alpine",
-        };
-
         valueRankingRows = pointsRows
           .map((row) => {
             const normalizedId = normalizeNameKey(row.entityId);
@@ -1079,11 +1190,13 @@
       });
       document.getElementById("driver-select").addEventListener("change", renderTrendChart);
       document.getElementById("cumulative-toggle").addEventListener("change", renderTrendChart);
+      document.getElementById("driver-value-toggle").addEventListener("change", renderTrendChart);
       document.querySelectorAll(".constructor-point-toggle").forEach((toggle) => {
         toggle.addEventListener("change", renderConstructorTrendChart);
       });
       document.getElementById("constructor-select").addEventListener("change", renderConstructorTrendChart);
       document.getElementById("constructor-cumulative-toggle").addEventListener("change", renderConstructorTrendChart);
+      document.getElementById("constructor-value-toggle").addEventListener("change", renderConstructorTrendChart);
 
       document.getElementById("select-top-5").addEventListener("click", () => {
         setSelection("driver-select", driverSortByTotal.slice(0, 5));
@@ -1123,6 +1236,8 @@
         document.getElementById("value-top-n-label").textContent = event.target.value;
         renderPointsPerDollarChart();
       });
+
+      priceSnapshots = await loadPriceSnapshots();
 
       buildTrendData().catch((error) => {
         document.getElementById("trend-status").textContent = `Could not load historical trend data: ${error.message}`;
