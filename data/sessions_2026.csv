@@ -24,7 +24,7 @@ RoundNumber,Country,Location,OfficialEventName,EventDate,EventName,EventFormat,F
 3,Japan,Suzuka,FORMULA 1 ARAMCO JAPANESE GRAND PRIX 2026,2026-03-29,Japanese Grand Prix,conventional,True,3,Practice 3,2026-03-28 11:30:00+09:00,2026-03-28 02:30:00
 3,Japan,Suzuka,FORMULA 1 ARAMCO JAPANESE GRAND PRIX 2026,2026-03-29,Japanese Grand Prix,conventional,True,4,Qualifying,2026-03-28 15:00:00+09:00,2026-03-28 06:00:00
 3,Japan,Suzuka,FORMULA 1 ARAMCO JAPANESE GRAND PRIX 2026,2026-03-29,Japanese Grand Prix,conventional,True,5,Race,2026-03-29 14:00:00+09:00,2026-03-29 05:00:00
-4,United States,Miami Gardens,FORMULA 1 CRYPTO.COM MIAMI GRAND PRIX 2026,2026-05-03,Miami Grand Prix,sprint_qualifying,True,1,Practice 1,2026-05-01 12:30:00-04:00,2026-05-01 16:30:00
+4,United States,Miami Gardens,FORMULA 1 CRYPTO.COM MIAMI GRAND PRIX 2026,2026-05-03,Miami Grand Prix,sprint_qualifying,True,1,Practice 1,2026-05-01 12:00:00-04:00,2026-05-01 16:00:00
 4,United States,Miami Gardens,FORMULA 1 CRYPTO.COM MIAMI GRAND PRIX 2026,2026-05-03,Miami Grand Prix,sprint_qualifying,True,2,Sprint Qualifying,2026-05-01 16:30:00-04:00,2026-05-01 20:30:00
 4,United States,Miami Gardens,FORMULA 1 CRYPTO.COM MIAMI GRAND PRIX 2026,2026-05-03,Miami Grand Prix,sprint_qualifying,True,3,Sprint,2026-05-02 12:00:00-04:00,2026-05-02 16:00:00
 4,United States,Miami Gardens,FORMULA 1 CRYPTO.COM MIAMI GRAND PRIX 2026,2026-05-03,Miami Grand Prix,sprint_qualifying,True,4,Qualifying,2026-05-02 16:00:00-04:00,2026-05-02 20:00:00
