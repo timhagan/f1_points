@@ -1,12 +1,12 @@
 EntityType,Name,NameKey,Price,ScrapedAtUtc
-constructor,Red Bull,red_bull,22.6,2026-10-05T17:58:00.688133+00:00
-constructor,Mercedes,mercedes,23.0,2026-10-05T17:58:00.688133+00:00
-constructor,Ferrari,ferrari,20.7,2026-10-05T17:58:00.688133+00:00
-constructor,Alpine,alpine,10.9,2026-10-05T17:58:00.688133+00:00
-constructor,McLaren,mclaren,19.5,2026-10-05T17:58:00.688133+00:00
-constructor,Aston Martin,aston_martin,6.5,2026-10-05T17:58:00.688133+00:00
-constructor,Audi,audi,7.1,2026-10-05T17:58:00.688133+00:00
-constructor,Racing Bulls,racing_bulls,13.3,2026-10-05T17:58:00.688133+00:00
-constructor,Williams,williams,5.3,2026-10-05T17:58:00.688133+00:00
-constructor,Haas,haas,7.0,2026-10-05T17:58:00.688133+00:00
-constructor,Cadillac,cadillac,5.0,2026-10-05T17:58:00.688133+00:00
+constructor,Red Bull,red_bull,23.9,2026-10-12T18:38:18.452006+00:00
+constructor,Mercedes,mercedes,23.3,2026-10-12T18:38:18.452006+00:00
+constructor,Ferrari,ferrari,22.5,2026-10-12T18:38:18.452006+00:00
+constructor,Alpine,alpine,9.9,2026-10-12T18:38:18.452006+00:00
+constructor,McLaren,mclaren,20.1,2026-10-12T18:38:18.452006+00:00
+constructor,Aston Martin,aston_martin,7.0,2026-10-12T18:38:18.452006+00:00
+constructor,Audi,audi,7.9,2026-10-12T18:38:18.452006+00:00
+constructor,Racing Bulls,racing_bulls,14.2,2026-10-12T18:38:18.452006+00:00
+constructor,Williams,williams,6.5,2026-10-12T18:38:18.452006+00:00
+constructor,Haas,haas,8.3,2026-10-12T18:38:18.452006+00:00
+constructor,Cadillac,cadillac,4.8,2026-10-12T18:38:18.452006+00:00
