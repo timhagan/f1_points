@@ -1,12 +1,12 @@
-TeamId,TotalConstructorPoints,TotalConstructorRacePoints,ConstructorRacePoints,TotalRacePoints,PlacesGainedRacePoints,ConstructorRaceFinishingPoints,EventName
-alpine,13.0,13.0,8.0,0.0,8.0,5,Bahrain Grand Prix
-aston_martin,15.0,15.0,10.0,4.0,6.0,5,Bahrain Grand Prix
-audi,9.0,9.0,4.0,0.0,4.0,5,Bahrain Grand Prix
-cadillac,3.0,3.0,1.0,0.0,1.0,2,Bahrain Grand Prix
-ferrari,32.0,32.0,27.0,27.0,0.0,5,Bahrain Grand Prix
-haas,9.0,9.0,4.0,0.0,4.0,5,Bahrain Grand Prix
-mclaren,15.0,15.0,10.0,10.0,0.0,5,Bahrain Grand Prix
-mercedes,21.0,21.0,19.0,18.0,1.0,2,Bahrain Grand Prix
-rb,28.0,28.0,23.0,7.0,16.0,5,Bahrain Grand Prix
-red_bull,43.0,43.0,38.0,35.0,3.0,5,Bahrain Grand Prix
-williams,2.0,2.0,0.0,0.0,0.0,2,Bahrain Grand Prix
+TeamId,TotalConstructorPoints,TotalConstructorSprintPoints,ConstructorSprintPoints,TotalSprintPoints,PlacesGainedSprintPoints,ConstructorSprintFinishingPoints,TotalConstructorRacePoints,ConstructorRacePoints,TotalRacePoints,PlacesGainedRacePoints,ConstructorRaceFinishingPoints,EventName
+alpine,5.0,3.0,1.0,0.0,1.0,2,2.0,0.0,0.0,0.0,2,Singapore Grand Prix
+aston_martin,13.0,6.0,4.0,0.0,4.0,2,7.0,5.0,0.0,5.0,2,Singapore Grand Prix
+audi,17.0,9.0,7.0,2.0,5.0,2,8.0,6.0,4.0,2.0,2,Singapore Grand Prix
+cadillac,9.0,4.0,4.0,0.0,4.0,0,5.0,0.0,0.0,0.0,5,Singapore Grand Prix
+ferrari,53.0,22.0,17.0,13.0,4.0,5,31.0,26.0,26.0,0.0,5,Singapore Grand Prix
+haas,26.0,21.0,16.0,3.0,13.0,5,5.0,0.0,0.0,0.0,5,Singapore Grand Prix
+mclaren,32.0,3.0,1.0,1.0,0.0,2,29.0,24.0,22.0,2.0,5,Singapore Grand Prix
+mercedes,43.0,10.0,8.0,5.0,3.0,2,33.0,28.0,17.0,11.0,5,Singapore Grand Prix
+rb,28.0,16.0,11.0,4.0,7.0,5,12.0,7.0,6.0,1.0,5,Singapore Grand Prix
+red_bull,53.0,10.0,8.0,8.0,0.0,2,43.0,38.0,26.0,12.0,5,Singapore Grand Prix
+williams,18.0,16.0,14.0,0.0,14.0,2,2.0,0.0,0.0,0.0,2,Singapore Grand Prix
