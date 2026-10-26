@@ -1,0 +1,34 @@
+EntityType,Name,NameKey,Price,ScrapedAtUtc
+constructor,Alpine,alpine,9.2,2026-10-26T15:53:59.387383+00:00
+constructor,Aston Martin,aston_martin,7.5,2026-10-26T15:53:59.387383+00:00
+constructor,Audi,audi,7.9,2026-10-26T15:53:59.387383+00:00
+constructor,Cadillac,cadillac,4.2,2026-10-26T15:53:59.387383+00:00
+constructor,Ferrari,ferrari,23.1,2026-10-26T15:53:59.387383+00:00
+constructor,Haas,haas,7.3,2026-10-26T15:53:59.387383+00:00
+constructor,McLaren,mclaren,20.1,2026-10-26T15:53:59.387383+00:00
+constructor,Mercedes,mercedes,23.2,2026-10-26T15:53:59.387383+00:00
+constructor,Racing Bulls,racing_bulls,14.0,2026-10-26T15:53:59.387383+00:00
+constructor,Red Bull,red_bull,23.4,2026-10-26T15:53:59.387383+00:00
+constructor,Williams,williams,6.1,2026-10-26T15:53:59.387383+00:00
+driver,Albon,albon,5.1,2026-10-26T15:53:59.385445+00:00
+driver,Alonso,alonso,11.5,2026-10-26T15:53:59.385445+00:00
+driver,Antonelli,antonelli,24.8,2026-10-26T15:53:59.385445+00:00
+driver,Bearman,bearman,10.4,2026-10-26T15:53:59.385445+00:00
+driver,Bortoleto,bortoleto,7.9,2026-10-26T15:53:59.385445+00:00
+driver,Bottas,bottas,4.7,2026-10-26T15:53:59.385445+00:00
+driver,Colapinto,colapinto,6.0,2026-10-26T15:53:59.385445+00:00
+driver,Gasly,gasly,10.8,2026-10-26T15:53:59.385445+00:00
+driver,Hadjar,hadjar,16.5,2026-10-26T15:53:59.385445+00:00
+driver,Hamilton,hamilton,18.8,2026-10-26T15:53:59.385445+00:00
+driver,Hulkenberg,hulkenberg,10.1,2026-10-26T15:53:59.385445+00:00
+driver,Lawson,lawson,12.9,2026-10-26T15:53:59.385445+00:00
+driver,Leclerc,leclerc,20.0,2026-10-26T15:53:59.385445+00:00
+driver,Lindblad,lindblad,8.3,2026-10-26T15:53:59.385445+00:00
+driver,Norris,norris,19.2,2026-10-26T15:53:59.385445+00:00
+driver,Ocon,ocon,7.3,2026-10-26T15:53:59.385445+00:00
+driver,Perez,perez,9.0,2026-10-26T15:53:59.385445+00:00
+driver,Piastri,piastri,15.7,2026-10-26T15:53:59.385445+00:00
+driver,Russell,russell,19.5,2026-10-26T15:53:59.385445+00:00
+driver,Sainz,sainz,10.7,2026-10-26T15:53:59.385445+00:00
+driver,Stroll,stroll,5.7,2026-10-26T15:53:59.385445+00:00
+driver,Verstappen,verstappen,24.4,2026-10-26T15:53:59.385445+00:00
